@@ -8,11 +8,9 @@ import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.identityscope.IdentityScopeType;
 import org.greenrobot.greendao.internal.DaoConfig;
 
-import com.example.ningyuwen.music.model.entity.test.TestDao;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicRecordInfo;
 
-import greendao.gen.TestDaoDao;
 import greendao.gen.MusicBasicInfoDao;
 import greendao.gen.MusicRecordInfoDao;
 
@@ -25,11 +23,9 @@ import greendao.gen.MusicRecordInfoDao;
  */
 public class DaoSession extends AbstractDaoSession {
 
-    private final DaoConfig testDaoDaoConfig;
     private final DaoConfig musicBasicInfoDaoConfig;
     private final DaoConfig musicRecordInfoDaoConfig;
 
-    private final TestDaoDao testDaoDao;
     private final MusicBasicInfoDao musicBasicInfoDao;
     private final MusicRecordInfoDao musicRecordInfoDao;
 
@@ -37,32 +33,22 @@ public class DaoSession extends AbstractDaoSession {
             daoConfigMap) {
         super(db);
 
-        testDaoDaoConfig = daoConfigMap.get(TestDaoDao.class).clone();
-        testDaoDaoConfig.initIdentityScope(type);
-
         musicBasicInfoDaoConfig = daoConfigMap.get(MusicBasicInfoDao.class).clone();
         musicBasicInfoDaoConfig.initIdentityScope(type);
 
         musicRecordInfoDaoConfig = daoConfigMap.get(MusicRecordInfoDao.class).clone();
         musicRecordInfoDaoConfig.initIdentityScope(type);
 
-        testDaoDao = new TestDaoDao(testDaoDaoConfig, this);
         musicBasicInfoDao = new MusicBasicInfoDao(musicBasicInfoDaoConfig, this);
         musicRecordInfoDao = new MusicRecordInfoDao(musicRecordInfoDaoConfig, this);
 
-        registerDao(TestDao.class, testDaoDao);
         registerDao(MusicBasicInfo.class, musicBasicInfoDao);
         registerDao(MusicRecordInfo.class, musicRecordInfoDao);
     }
     
     public void clear() {
-        testDaoDaoConfig.clearIdentityScope();
         musicBasicInfoDaoConfig.clearIdentityScope();
         musicRecordInfoDaoConfig.clearIdentityScope();
-    }
-
-    public TestDaoDao getTestDaoDao() {
-        return testDaoDao;
     }
 
     public MusicBasicInfoDao getMusicBasicInfoDao() {

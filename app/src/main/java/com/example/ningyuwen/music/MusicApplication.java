@@ -3,9 +3,13 @@ package com.example.ningyuwen.music;
 import android.app.Application;
 import android.util.Log;
 
+import java.io.File;
+
 import greendao.GreenDaoHelper;
 import greendao.gen.DaoMaster;
 import greendao.gen.DaoSession;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * application  app的入口
@@ -13,8 +17,6 @@ import greendao.gen.DaoSession;
  */
 
 public class MusicApplication extends Application {
-    private final static String dbName = "music.db";
-    private static DaoMaster daoMaster;
     private static DaoSession daoSession;
     private static MusicApplication application;
 
