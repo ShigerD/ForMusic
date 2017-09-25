@@ -1,4 +1,4 @@
-package com.example.ningyuwen.music.view.impl;
+package com.example.ningyuwen.music.view.activity.impl;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;

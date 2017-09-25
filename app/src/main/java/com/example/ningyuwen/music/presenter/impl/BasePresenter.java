@@ -1,10 +1,8 @@
 package com.example.ningyuwen.music.presenter.impl;
 
 import com.example.ningyuwen.music.MusicApplication;
-import com.example.ningyuwen.music.view.impl.BaseActivity;
+import com.example.ningyuwen.music.view.activity.impl.BaseActivity;
 
-import greendao.GreenDaoHelper;
-import greendao.gen.DaoMaster;
 import greendao.gen.DaoSession;
 
 /**

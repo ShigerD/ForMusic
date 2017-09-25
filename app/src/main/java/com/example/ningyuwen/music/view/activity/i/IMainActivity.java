@@ -1,4 +1,4 @@
-package com.example.ningyuwen.music.view.i;
+package com.example.ningyuwen.music.view.activity.i;
 
 /**
  * Created by ningyuwen on 17-9-25.

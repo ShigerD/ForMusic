@@ -3,10 +3,9 @@ package com.example.ningyuwen.music.presenter.impl;
 import android.util.Log;
 
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
-import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.model.entity.music.MusicRecordInfo;
 import com.example.ningyuwen.music.presenter.i.IMainActivityPresenter;
-import com.example.ningyuwen.music.view.impl.MainActivity;
+import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
 import java.util.List;
 

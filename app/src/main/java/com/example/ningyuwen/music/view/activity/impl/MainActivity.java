@@ -1,21 +1,20 @@
-package com.example.ningyuwen.music.view.impl;
+package com.example.ningyuwen.music.view.activity.impl;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.media.MediaMetadataRetriever;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
@@ -25,8 +24,6 @@ import com.example.ningyuwen.music.presenter.impl.MainActivityPresenter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.os.Environment.getExternalStorageDirectory;
-
 /**
  * 主页面，音乐播放，扫描音乐等
  * Created by ningyuwen on 17-9-22.
@@ -35,13 +32,20 @@ import static android.os.Environment.getExternalStorageDirectory;
 public class MainActivity extends BaseActivity<MainActivityPresenter> {
     private List<MusicData> mMusicDatas;
     private DrawerLayout mDrawerMenu;
+    private ViewPager mMainViewPager;
+    private ArrayList<Fragment> fragments;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        findView();
+        //绑定控件和设置监听
+        findViewAndSetListener();
+
+        initPage();
+
+        mMainViewPager.setCurrentItem(0);
 
         mMusicDatas = new ArrayList<>();
         //获取读写权限，此操作后续搬到启动页
@@ -50,14 +54,31 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> {
         setStatusBarTransparentForDrawerLayout(mDrawerMenu);
     }
 
-    private void findView() {
+    private void findViewAndSetListener() {
         mDrawerMenu = (DrawerLayout) findViewById(R.id.dr_main);              //侧滑菜单布局
+        mMainViewPager = (ViewPager) findViewById(R.id.vp_main_page);
         findViewById(R.id.iv__bar_slide).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mDrawerMenu.openDrawer(GravityCompat.START);
             }
         });
+    }
+
+    /**
+     * 初始化ViewPager的页面.
+     * ViewPager内部是Fragment
+     */
+    private void initPage() {
+//        fragments = new ArrayList<>();  //Fragment的List
+//        fragments.add(new TodayFragmentNew());                 //添加需要展示的Fragment
+//        fragments.add(new GroupFragmentNew());
+//        fragments.add(new CourseFragment());
+//        fragments.add(new CommunityFragmentNew());
+//        MainFragmentAdapter mainFragmentAdapter =           //ViewPager的适配器
+//                new MainFragmentAdapter(getSupportFragmentManager(), fragments);
+//        mVpMainPage.setAdapter(mainFragmentAdapter);        //设置ViewPager的适配器
+//        ((IAppBarStatus) fragments.get(0)).setFloatingActionButton(floatingActionButton, sheetLayout);
     }
 
     @Override
