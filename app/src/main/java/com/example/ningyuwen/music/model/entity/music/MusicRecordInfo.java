@@ -16,11 +16,11 @@ public class MusicRecordInfo {
     private long pId;   //id对应到MusicBasicInfo 中的音乐文件id
 
     @Property
-    private String musicPlayTimes;  //音乐播放次数
-    private boolean isLove;    //是否添加到我喜爱的
-    private String musicSongList;    //被添加到的歌单名,用户自定义歌单
-    @Generated(hash = 1223369054)
-    public MusicRecordInfo(long pId, String musicPlayTimes, boolean isLove,
+    private int musicPlayTimes = 0;  //音乐播放次数
+    private boolean isLove = false;    //是否添加到我喜爱的
+    private String musicSongList = "";    //被添加到的歌单名,用户自定义歌单
+    @Generated(hash = 702350359)
+    public MusicRecordInfo(long pId, int musicPlayTimes, boolean isLove,
             String musicSongList) {
         this.pId = pId;
         this.musicPlayTimes = musicPlayTimes;
@@ -36,10 +36,10 @@ public class MusicRecordInfo {
     public void setPId(long pId) {
         this.pId = pId;
     }
-    public String getMusicPlayTimes() {
+    public int getMusicPlayTimes() {
         return this.musicPlayTimes;
     }
-    public void setMusicPlayTimes(String musicPlayTimes) {
+    public void setMusicPlayTimes(int musicPlayTimes) {
         this.musicPlayTimes = musicPlayTimes;
     }
     public boolean getIsLove() {
@@ -54,5 +54,7 @@ public class MusicRecordInfo {
     public void setMusicSongList(String musicSongList) {
         this.musicSongList = musicSongList;
     }
+
+    
 
 }

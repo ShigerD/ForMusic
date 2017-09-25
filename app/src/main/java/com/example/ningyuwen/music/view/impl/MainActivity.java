@@ -11,6 +11,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -31,25 +33,31 @@ import static android.os.Environment.getExternalStorageDirectory;
  */
 
 public class MainActivity extends BaseActivity<MainActivityPresenter> {
-    List<MusicData> mMusicDatas;
+    private List<MusicData> mMusicDatas;
+    private DrawerLayout mDrawerMenu;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TextView textView = (TextView) findViewById(R.id.test);
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.i(TAG, "onClick: " + mPresenter.getSize());
-            }
-        });
+        findView();
 
         mMusicDatas = new ArrayList<>();
         //获取读写权限，此操作后续搬到启动页
         getReadPermission();
 
+        setStatusBarTransparentForDrawerLayout(mDrawerMenu);
+    }
+
+    private void findView() {
+        mDrawerMenu = (DrawerLayout) findViewById(R.id.dr_main);              //侧滑菜单布局
+        findViewById(R.id.iv__bar_slide).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mDrawerMenu.openDrawer(GravityCompat.START);
+            }
+        });
     }
 
     @Override

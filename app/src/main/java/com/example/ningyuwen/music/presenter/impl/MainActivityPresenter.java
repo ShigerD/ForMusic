@@ -4,12 +4,14 @@ import android.util.Log;
 
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
+import com.example.ningyuwen.music.model.entity.music.MusicRecordInfo;
 import com.example.ningyuwen.music.presenter.i.IMainActivityPresenter;
 import com.example.ningyuwen.music.view.impl.MainActivity;
 
 import java.util.List;
 
 import greendao.gen.MusicBasicInfoDao;
+import greendao.gen.MusicRecordInfoDao;
 
 /**
  * MainActivityPresenter对应MainActivity
@@ -35,6 +37,13 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
         MusicBasicInfoDao basicInfoDao = mDaoSession.getMusicBasicInfoDao();
         basicInfoDao.insertOrReplaceInTx(musicDatas);
 
+        MusicRecordInfoDao recordInfoDao = mDaoSession.getMusicRecordInfoDao();
+        //插入或替换记录数据
+        for (int i = 0;i < musicDatas.size();i++){
+            MusicRecordInfo info = new MusicRecordInfo();
+            info.setPId(musicDatas.get(i).getPId());
+            recordInfoDao.insertOrReplace(info);
+        }
     }
 
     public int getSize(){

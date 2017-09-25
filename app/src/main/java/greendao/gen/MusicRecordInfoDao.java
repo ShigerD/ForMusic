@@ -25,7 +25,7 @@ public class MusicRecordInfoDao extends AbstractDao<MusicRecordInfo, Long> {
      */
     public static class Properties {
         public final static Property PId = new Property(0, long.class, "pId", true, "_id");
-        public final static Property MusicPlayTimes = new Property(1, String.class, "musicPlayTimes", false, "MUSIC_PLAY_TIMES");
+        public final static Property MusicPlayTimes = new Property(1, int.class, "musicPlayTimes", false, "MUSIC_PLAY_TIMES");
         public final static Property IsLove = new Property(2, boolean.class, "isLove", false, "IS_LOVE");
         public final static Property MusicSongList = new Property(3, String.class, "musicSongList", false, "MUSIC_SONG_LIST");
     }
@@ -44,7 +44,7 @@ public class MusicRecordInfoDao extends AbstractDao<MusicRecordInfo, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"MUSIC_RECORD_INFO\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY NOT NULL ," + // 0: pId
-                "\"MUSIC_PLAY_TIMES\" TEXT," + // 1: musicPlayTimes
+                "\"MUSIC_PLAY_TIMES\" INTEGER NOT NULL ," + // 1: musicPlayTimes
                 "\"IS_LOVE\" INTEGER NOT NULL ," + // 2: isLove
                 "\"MUSIC_SONG_LIST\" TEXT);"); // 3: musicSongList
     }
@@ -59,11 +59,7 @@ public class MusicRecordInfoDao extends AbstractDao<MusicRecordInfo, Long> {
     protected final void bindValues(DatabaseStatement stmt, MusicRecordInfo entity) {
         stmt.clearBindings();
         stmt.bindLong(1, entity.getPId());
- 
-        String musicPlayTimes = entity.getMusicPlayTimes();
-        if (musicPlayTimes != null) {
-            stmt.bindString(2, musicPlayTimes);
-        }
+        stmt.bindLong(2, entity.getMusicPlayTimes());
         stmt.bindLong(3, entity.getIsLove() ? 1L: 0L);
  
         String musicSongList = entity.getMusicSongList();
@@ -76,11 +72,7 @@ public class MusicRecordInfoDao extends AbstractDao<MusicRecordInfo, Long> {
     protected final void bindValues(SQLiteStatement stmt, MusicRecordInfo entity) {
         stmt.clearBindings();
         stmt.bindLong(1, entity.getPId());
- 
-        String musicPlayTimes = entity.getMusicPlayTimes();
-        if (musicPlayTimes != null) {
-            stmt.bindString(2, musicPlayTimes);
-        }
+        stmt.bindLong(2, entity.getMusicPlayTimes());
         stmt.bindLong(3, entity.getIsLove() ? 1L: 0L);
  
         String musicSongList = entity.getMusicSongList();
@@ -98,7 +90,7 @@ public class MusicRecordInfoDao extends AbstractDao<MusicRecordInfo, Long> {
     public MusicRecordInfo readEntity(Cursor cursor, int offset) {
         MusicRecordInfo entity = new MusicRecordInfo( //
             cursor.getLong(offset + 0), // pId
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // musicPlayTimes
+            cursor.getInt(offset + 1), // musicPlayTimes
             cursor.getShort(offset + 2) != 0, // isLove
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3) // musicSongList
         );
@@ -108,7 +100,7 @@ public class MusicRecordInfoDao extends AbstractDao<MusicRecordInfo, Long> {
     @Override
     public void readEntity(Cursor cursor, MusicRecordInfo entity, int offset) {
         entity.setPId(cursor.getLong(offset + 0));
-        entity.setMusicPlayTimes(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
+        entity.setMusicPlayTimes(cursor.getInt(offset + 1));
         entity.setIsLove(cursor.getShort(offset + 2) != 0);
         entity.setMusicSongList(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
      }
