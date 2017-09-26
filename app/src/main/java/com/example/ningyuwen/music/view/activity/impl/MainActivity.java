@@ -22,12 +22,14 @@ import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.presenter.impl.MainActivityPresenter;
+import com.example.ningyuwen.music.service.PlayMusicService;
 import com.example.ningyuwen.music.view.adapter.MainFragmentAdapter;
 import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.ClassifyMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,10 +79,37 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                 }else {
                     //fragment更新数据
                     sendBroadcast(new Intent("AllMusicRefresh"));
+                    startPlayMusicService();
                 }
             }
         }).start();
 
+    }
+
+    /**
+     * 初始化activity时启动服务，服务可能因为内存回收而自动关闭
+     */
+    public void startPlayMusicService(){
+        Intent intent = new Intent(MainActivity.this, PlayMusicService.class);
+        if (mMusicDatas == null){
+            return;
+        }
+        ArrayList<String> musicPath = new ArrayList<>();
+        for (int i = 0; i < mMusicDatas.size();i++){
+            musicPath.add(i, mMusicDatas.get(i).getMusicFilePath());
+        }
+        intent.putStringArrayListExtra("musicInfoList", musicPath);
+        startService(intent);
+    }
+
+    /**
+     * 用户点击了音乐，需要在后台播放
+     * @param position 点击位置position
+     */
+    public void playMusicOnBackstage(int position){
+        Intent intent = new Intent("PlayMusic");
+        intent.putExtra("palyPosition", position);
+        sendBroadcast(intent);
     }
 
     private void findView() {
@@ -228,6 +257,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             //从musicBasicInfos 和 数据库读取数据到 mMusicDatas
             mMusicDatas = mPresenter.getMusicAllInfo(musicBasicInfos);
             sendBroadcast(new Intent("AllMusicRefresh"));
+            startPlayMusicService();
         }
     }
 

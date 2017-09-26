@@ -26,10 +26,11 @@ import java.util.List;
  * Created by ningyuwen on 17-9-26.
  */
 
-public class AllMusicFragment extends Fragment {
+public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.AddItemClickListener {
     private BroadcastReceiver receiver;
     private List<MusicData> mMusicDatas;
     private RecyclerView mRvAllMusicInfo;
+
 
     @Nullable
     @Override
@@ -81,8 +82,9 @@ public class AllMusicFragment extends Fragment {
     private void showMusicInfo() {
         Log.i("test", "showMusicInfo: " + mMusicDatas.size());
         mRvAllMusicInfo.setLayoutManager(new LinearLayoutManager(getContext()));
-        AllMusicInfoAdapter mAdapter = new AllMusicInfoAdapter(mMusicDatas);
+        AllMusicInfoAdapter mAdapter = new AllMusicInfoAdapter(getActivity(), mMusicDatas);
         mRvAllMusicInfo.setAdapter(mAdapter);
+        mAdapter.addItemClickListener(this);
     }
 
     @Override
@@ -91,5 +93,26 @@ public class AllMusicFragment extends Fragment {
         if (receiver != null) {
             getActivity().unregisterReceiver(receiver);
         }
+    }
+
+    /**
+     * 接口回调
+     * @param position position
+     */
+    @Override
+    public void playMusic(int position) {
+        ((MainActivity)getActivity()).showToast("音乐位置： " + position);
+//        sendB
+        ((MainActivity)getActivity()).playMusicOnBackstage(position);
+
+    }
+
+    /**
+     * 接口回调，设置是否是喜爱
+     * @param position position
+     */
+    @Override
+    public void setIsLove(int position) {
+        ((MainActivity)getActivity()).showToast("是否喜爱： " + mMusicDatas.get(position).isLove());
     }
 }

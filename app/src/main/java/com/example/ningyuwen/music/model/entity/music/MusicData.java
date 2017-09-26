@@ -1,9 +1,14 @@
 package com.example.ningyuwen.music.model.entity.music;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Property;
 import org.greenrobot.greendao.annotation.Generated;
+
+import java.io.Serializable;
 
 /**
  * MusicData,保存音乐文件信息,包括基本信息和记录信息，中间的纽带是pId
