@@ -20,6 +20,11 @@ import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.presenter.impl.MainActivityPresenter;
+import com.example.ningyuwen.music.view.adapter.MainFragmentAdapter;
+import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
+import com.example.ningyuwen.music.view.fragment.impl.ClassifyMusicFragment;
+import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
+import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +50,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> {
 
         initPage();
 
-        mMainViewPager.setCurrentItem(0);
+        mMainViewPager.setCurrentItem(1);
 
         mMusicDatas = new ArrayList<>();
         //获取读写权限，此操作后续搬到启动页
@@ -70,15 +75,14 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> {
      * ViewPager内部是Fragment
      */
     private void initPage() {
-//        fragments = new ArrayList<>();  //Fragment的List
-//        fragments.add(new TodayFragmentNew());                 //添加需要展示的Fragment
-//        fragments.add(new GroupFragmentNew());
-//        fragments.add(new CourseFragment());
-//        fragments.add(new CommunityFragmentNew());
-//        MainFragmentAdapter mainFragmentAdapter =           //ViewPager的适配器
-//                new MainFragmentAdapter(getSupportFragmentManager(), fragments);
-//        mVpMainPage.setAdapter(mainFragmentAdapter);        //设置ViewPager的适配器
-//        ((IAppBarStatus) fragments.get(0)).setFloatingActionButton(floatingActionButton, sheetLayout);
+        fragments = new ArrayList<>();  //Fragment的List
+        fragments.add(new AllMusicFragment());                 //添加需要展示的Fragment
+        fragments.add(new CustomizeMusicFragment());
+        fragments.add(new MyLoveMusicFragment());
+        fragments.add(new ClassifyMusicFragment());
+        MainFragmentAdapter mainFragmentAdapter =           //ViewPager的适配器
+                new MainFragmentAdapter(getSupportFragmentManager(), fragments);
+        mMainViewPager.setAdapter(mainFragmentAdapter);        //设置ViewPager的适配器
     }
 
     @Override
