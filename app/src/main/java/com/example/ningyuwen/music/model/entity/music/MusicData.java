@@ -18,7 +18,7 @@ public class MusicData {
     private String musicAlbum;      //音乐专辑名
     private String musicFilePath;   //音乐文件路径
     private long musicFileSize;     //音乐文件大小
-    private String musicPlayTimes;  //音乐播放次数
+    private int musicPlayTimes;  //音乐播放次数
     private boolean isLove;    //是否添加到我喜爱的
     private String musicSongList;    //被添加到的歌单名,用户自定义歌单
 
@@ -78,11 +78,11 @@ public class MusicData {
         this.musicFileSize = musicFileSize;
     }
 
-    public String getMusicPlayTimes() {
+    public int getMusicPlayTimes() {
         return musicPlayTimes;
     }
 
-    public void setMusicPlayTimes(String musicPlayTimes) {
+    public void setMusicPlayTimes(int musicPlayTimes) {
         this.musicPlayTimes = musicPlayTimes;
     }
 

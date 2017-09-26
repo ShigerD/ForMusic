@@ -94,6 +94,7 @@
         android:weightSum="4">
 
         <TextView
+            android:id="@+id/tv_tab_first"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -103,6 +104,7 @@
             android:text="所有歌曲" />
 
         <TextView
+            android:id="@+id/tv_tab_second"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -112,6 +114,7 @@
             android:text="自定歌单" />
 
         <TextView
+            android:id="@+id/tv_tab_third"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -121,6 +124,7 @@
             android:text="我喜爱的" />
 
         <TextView
+            android:id="@+id/tv_tab_last"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"

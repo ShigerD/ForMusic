@@ -1,6 +1,7 @@
 package com.example.ningyuwen.music.view.activity.impl;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
@@ -34,7 +35,7 @@ import java.util.List;
  * Created by ningyuwen on 17-9-22.
  */
 
-public class MainActivity extends BaseActivity<MainActivityPresenter> {
+public class MainActivity extends BaseActivity<MainActivityPresenter> implements View.OnClickListener {
     private List<MusicData> mMusicDatas;
     private DrawerLayout mDrawerMenu;
     private ViewPager mMainViewPager;
@@ -46,26 +47,61 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> {
         setContentView(R.layout.activity_main);
 
         //绑定控件和设置监听
-        findViewAndSetListener();
+        findView();
+        setListener();
 
+        //初始化fragment
         initPage();
 
-        mMainViewPager.setCurrentItem(1);
+        //默认第一页
+        mMainViewPager.setCurrentItem(0);
 
         mMusicDatas = new ArrayList<>();
-        //获取读写权限，此操作后续搬到启动页
-        getReadPermission();
+
+        //先检查数据库中是否有数据，若有则读取数据库中的数据
+        mMusicDatas = mPresenter.getMusicBasicInfoFromDB();
+
+        //如果返回数据为空，从SD卡读取数据
+        if (mMusicDatas.size() == 0){
+            //获取读写权限，并获取音乐数据，存储到数据库，和 存储到 mMusicDatas
+            getReadPermissionAndGetInfoFromSD();
+        }
 
         setStatusBarTransparentForDrawerLayout(mDrawerMenu);
     }
 
-    private void findViewAndSetListener() {
+    private void findView() {
         mDrawerMenu = (DrawerLayout) findViewById(R.id.dr_main);              //侧滑菜单布局
-        mMainViewPager = (ViewPager) findViewById(R.id.vp_main_page);
+        mMainViewPager = (ViewPager) findViewById(R.id.vp_main_page);         //主页面的viewpager
+
+    }
+
+    private void setListener() {
         findViewById(R.id.iv__bar_slide).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mDrawerMenu.openDrawer(GravityCompat.START);
+            }
+        });
+        findViewById(R.id.tv_tab_first).setOnClickListener(this);
+        findViewById(R.id.tv_tab_second).setOnClickListener(this);
+        findViewById(R.id.tv_tab_third).setOnClickListener(this);
+        findViewById(R.id.tv_tab_last).setOnClickListener(this);
+        //viewpager页码变化监听
+        mMainViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                showToast(String.valueOf(position));
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
             }
         });
     }
@@ -90,7 +126,10 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> {
         return new MainActivityPresenter(this);
     }
 
-    private void getReadPermission() {
+    /**
+     * 获取权限
+     */
+    private void getReadPermissionAndGetInfoFromSD() {
         String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // 检查该权限是否已经获取
@@ -100,7 +139,11 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> {
                 // 如果没有授予该权限，就去提示用户请求
                 ActivityCompat.requestPermissions(this, permissions, 321);
                 shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS);
+                //没有该权限，返回
+                return;
             }
+            //有权限，直接读取SD卡中的数据
+            getMusicInfoFromSD();
         }
     }
 
@@ -166,8 +209,32 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> {
                 }
                 cursor.moveToNext();
             }
-
+            cursor.close();
+            //存储数据到数据库，两张表
             mPresenter.saveMusicInfoFromSD(musicBasicInfos);
+            //从musicBasicInfos 和 数据库读取数据到 mMusicDatas
+            mMusicDatas = mPresenter.getMusicAllInfo(musicBasicInfos);
+            sendBroadcast(new Intent("AllMusicRefresh"));
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.tv_tab_first:
+                mMainViewPager.setCurrentItem(0);
+                break;
+            case R.id.tv_tab_second:
+                mMainViewPager.setCurrentItem(1);
+                break;
+            case R.id.tv_tab_third:
+                mMainViewPager.setCurrentItem(2);
+                break;
+            case R.id.tv_tab_last:
+                mMainViewPager.setCurrentItem(3);
+                break;
+            default:
+                break;
         }
     }
 }
