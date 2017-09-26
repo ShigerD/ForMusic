@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.View;
 
 import com.example.ningyuwen.music.R;
@@ -37,6 +38,7 @@ import java.util.List;
 
 public class MainActivity extends BaseActivity<MainActivityPresenter> implements View.OnClickListener {
     private List<MusicData> mMusicDatas;
+//    public static List<MusicData> mMusicDatas;
     private DrawerLayout mDrawerMenu;
     private ViewPager mMainViewPager;
     private ArrayList<Fragment> fragments;
@@ -49,25 +51,36 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         //绑定控件和设置监听
         findView();
         setListener();
-
+        setStatusBarTransparentForDrawerLayout(mDrawerMenu);
         //初始化fragment
         initPage();
-
         //默认第一页
         mMainViewPager.setCurrentItem(0);
 
-        mMusicDatas = new ArrayList<>();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-        //先检查数据库中是否有数据，若有则读取数据库中的数据
-        mMusicDatas = mPresenter.getMusicBasicInfoFromDB();
+                mMusicDatas = new ArrayList<>();
+                //先检查数据库中是否有数据，若有则读取数据库中的数据
+                mMusicDatas = mPresenter.getMusicBasicInfoFromDB();
 
-        //如果返回数据为空，从SD卡读取数据
-        if (mMusicDatas.size() == 0){
-            //获取读写权限，并获取音乐数据，存储到数据库，和 存储到 mMusicDatas
-            getReadPermissionAndGetInfoFromSD();
-        }
+                //如果返回数据为空，从SD卡读取数据
+                if (mMusicDatas.size() == 0){
+                    //获取读写权限，并获取音乐数据，存储到数据库，和 存储到 mMusicDatas
+                    getReadPermissionAndGetInfoFromSD();
+                }else {
+                    //fragment更新数据
+                    sendBroadcast(new Intent("AllMusicRefresh"));
+                }
+            }
+        }).start();
 
-        setStatusBarTransparentForDrawerLayout(mDrawerMenu);
     }
 
     private void findView() {
@@ -165,7 +178,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         }
     }
 
-    private String TAG = "ningyuwen";
+    private String TAG = "test";
 
     /**
      * 从SD卡扫描音乐文件并存储到数据库
@@ -236,5 +249,19 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             default:
                 break;
         }
+    }
+
+    /**
+     * fragment获取activity的音乐数据
+     */
+    public List<MusicData> getMusicDatas(){
+        return mMusicDatas;
+    }
+
+    /**
+     * 为了节省内存，在全部歌曲页面接收到数据后，回收这里的资源
+     */
+    public void clearMusicData(){
+        mMusicDatas.clear();
     }
 }
