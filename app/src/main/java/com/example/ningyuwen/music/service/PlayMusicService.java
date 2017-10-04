@@ -27,7 +27,8 @@ public class PlayMusicService extends Service {
     private ArrayList<String> mMusicPaths;
     private byte mPlayStatus = 0;   // 0:列表循环  1:列表播放一次  2：随即播放  3：单曲循环
     private BroadcastReceiver mReceiver;
-    private int currentTime;        //当前播放进度
+    private int mCurrentTime;        //当前播放进度
+    private int mPosition;
 
     @Override
     public void onCreate() {
@@ -58,12 +59,17 @@ public class PlayMusicService extends Service {
                 switch (action){
                     case "PlayMusic":
                         int i = intent.getIntExtra("palyPosition", 0);
+                        mPosition = i;
                         Log.i(TAG, "onReceive: ttttt  " + i);
                         //播放音乐
                         playMusic(i, 0);
                         break;
                     case "ChangePlayStatus":
 
+                        break;
+                    case "PlayOrPause":
+                        //点击主页面的播放暂停按钮，判断当前播放状态，为播放就暂停
+                        playOrPause();
                         break;
                     default:
                         break;
@@ -74,6 +80,7 @@ public class PlayMusicService extends Service {
         IntentFilter filter = new IntentFilter();
         filter.addAction("PlayMusic");
         filter.addAction("ChangePlayStatus");
+        filter.addAction("PlayOrPause");
         registerReceiver(mReceiver, filter);
     }
 
@@ -82,15 +89,16 @@ public class PlayMusicService extends Service {
      */
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
+            // 1 为每一秒发送过来更新播放时间等数据
             if (msg.what == 1) {
                 if(mMediaPlayer != null) {
-                    currentTime = mMediaPlayer.getCurrentPosition(); // 获取当前音乐播放的位置
+                    mCurrentTime = mMediaPlayer.getCurrentPosition(); // 获取当前音乐播放的位置
 
 //                    Intent intent = new Intent();
 //                    intent.setAction(MUSIC_CURRENT);
 //                    intent.putExtra("currentTime", currentTime);
 //                    sendBroadcast(intent); // 给PlayerActivity发送广播
-//                    handler.sendEmptyMessageDelayed(1, 1000);
+                    handler.sendEmptyMessageDelayed(1, 1000);
                 }
 
             }
@@ -116,9 +124,15 @@ public class PlayMusicService extends Service {
             mMediaPlayer.setDataSource(mMusicPaths.get(i));
             mMediaPlayer.prepare(); // 进行缓冲
             mMediaPlayer.setOnPreparedListener(new PreparedListener(currentTime));// 注册一个监听器
+            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    mPosition = (mPosition + 1) % mMusicPaths.size();
+                    playMusic(mPosition, 0);
+                }
+            });
 
-
-//            handler.sendEmptyMessage(1);
+            handler.sendEmptyMessage(1);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -151,12 +165,14 @@ public class PlayMusicService extends Service {
     }
 
     /**
-     * 暂停音乐
+     * 暂停音乐或者播放音乐，主页面的按钮
      */
-    private void pause() {
+    private void playOrPause() {
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
 //            isPause = true;
+        }else {
+            playMusic(mPosition, mCurrentTime);
         }
     }
 

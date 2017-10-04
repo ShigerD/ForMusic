@@ -70,7 +70,6 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
 //                    ((MainActivity)getActivity()).clearMusicData();
                     showMusicInfo();
                 }
-
             }
         };
 
@@ -96,7 +95,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     }
 
     /**
-     * 接口回调
+     * 接口回调, 播放音乐
      * @param position position
      */
     @Override

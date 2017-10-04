@@ -129,6 +129,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         findViewById(R.id.tv_tab_second).setOnClickListener(this);
         findViewById(R.id.tv_tab_third).setOnClickListener(this);
         findViewById(R.id.tv_tab_last).setOnClickListener(this);
+        findViewById(R.id.iv_music_pic).setOnClickListener(this);
         //viewpager页码变化监听
         mMainViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -275,6 +276,10 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                 break;
             case R.id.tv_tab_last:
                 mMainViewPager.setCurrentItem(3);
+                break;
+            case R.id.iv_music_pic:
+                //点击播放暂停按钮
+                sendBroadcast(new Intent("PlayOrPause"));
                 break;
             default:
                 break;
