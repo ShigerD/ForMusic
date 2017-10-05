@@ -16,6 +16,7 @@ import com.example.ningyuwen.music.model.entity.music.MusicData;
 import java.util.List;
 
 /**
+ * 所有音乐fragment的adapter
  * Created by ningyuwen on 17-9-26.
  */
 

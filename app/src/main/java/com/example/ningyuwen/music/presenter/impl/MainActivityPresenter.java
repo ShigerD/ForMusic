@@ -2,6 +2,7 @@ package com.example.ningyuwen.music.presenter.impl;
 
 import android.util.Log;
 
+import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.model.entity.music.MusicRecordInfo;
@@ -86,6 +87,19 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
             return new ArrayList<>();
         }
         return getMusicAllInfo(musicBasicInfoList);
+    }
+
+    /**
+     * 获取歌单信息
+     * @return
+     */
+    @Override
+    public List<SongListInfo> getSongListInfoFromDB() {
+        List<SongListInfo> songListInfoList = mDaoSession.getSongListInfoDao().loadAll();
+        if (songListInfoList == null || songListInfoList.size() == 0){
+            return new ArrayList<>();
+        }
+        return songListInfoList;
     }
 
 

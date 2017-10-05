@@ -19,10 +19,12 @@ import android.util.Log;
 import android.view.View;
 
 import com.example.ningyuwen.music.R;
+import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.presenter.impl.MainActivityPresenter;
 import com.example.ningyuwen.music.service.PlayMusicService;
+import com.example.ningyuwen.music.view.activity.i.IMainActivity;
 import com.example.ningyuwen.music.view.adapter.MainFragmentAdapter;
 import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.ClassifyMusicFragment;
@@ -38,7 +40,8 @@ import java.util.List;
  * Created by ningyuwen on 17-9-22.
  */
 
-public class MainActivity extends BaseActivity<MainActivityPresenter> implements View.OnClickListener {
+public class MainActivity extends BaseActivity<MainActivityPresenter> implements
+        View.OnClickListener , IMainActivity{
     private List<MusicData> mMusicDatas;
 //    public static List<MusicData> mMusicDatas;
     private DrawerLayout mDrawerMenu;
@@ -298,5 +301,13 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
      */
     public void clearMusicData(){
         mMusicDatas.clear();
+    }
+
+    /**
+     * 获取歌单信息
+     */
+    @Override
+    public List<SongListInfo> getSongListInfo() {
+        return mPresenter.getSongListInfoFromDB();
     }
 }
