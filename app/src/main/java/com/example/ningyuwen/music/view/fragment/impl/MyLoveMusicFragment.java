@@ -28,7 +28,7 @@ import java.util.List;
  * Created by ningyuwen on 17-9-26.
  */
 
-public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragment {
+public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragment, MyLoveMusicAdapter.AddItemClickListener {
     private BroadcastReceiver receiver;
     private RecyclerView mRvMyLoveMusic;
     private List<MusicData> mMyLoveMusicDatas;
@@ -122,6 +122,22 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
         mMyLoveMusicDatas.addAll(((MainActivity)getActivity()).getMyLoveMusicData());
         mAdapter = new MyLoveMusicAdapter(getActivity(), mMyLoveMusicDatas);
         mRvMyLoveMusic.setAdapter(mAdapter);
-//        mAdapter.addItemClickListener(this);
+        mAdapter.addItemClickListener(this);
+    }
+
+    /**
+     * 我喜爱的音乐列表属于 所有音乐列表，但是此处的position不同于所有音乐列表的poisition
+     * 暂时不写这个，后面确定：播放我喜爱的音乐时，后台播放列表的音乐数据
+     * @param position position
+     */
+    @Override
+    public void playMusic(int position) {
+        ((MainActivity)getActivity()).showToast("音乐位置： " + position);
+        ((MainActivity)getActivity()).playMusicOnBackstage(position);
+    }
+
+    @Override
+    public void setIsLove(int position) {
+
     }
 }
