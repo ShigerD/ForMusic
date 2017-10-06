@@ -142,7 +142,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 
             @Override
             public void onPageSelected(int position) {
-                showToast(String.valueOf(position));
+//                showToast(String.valueOf(position));
             }
 
             @Override
