@@ -107,5 +107,17 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
         mDaoSession.getSongListInfoDao().insertOrReplace(info);
     }
 
+    /**
+     * 設置是否喜愛，在所有歌曲頁面和我喜愛的音樂頁面都有用到
+     * @param pid pid
+     * @param isLove true,false
+     */
+    @Override
+    public void setIsLoveToDB(long pid, boolean isLove) {
+        MusicRecordInfo info = mDaoSession.getMusicRecordInfoDao().load(pid);
+        info.setIsLove(isLove);
+        mDaoSession.getMusicRecordInfoDao().insertOrReplace(info);
+    }
+
 
 }

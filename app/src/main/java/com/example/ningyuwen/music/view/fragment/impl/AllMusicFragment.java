@@ -112,6 +112,21 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
      */
     @Override
     public void setIsLove(int position) {
-        ((MainActivity)getActivity()).showToast("是否喜爱： " + mMusicDatas.get(position).isLove());
+        Intent intent = new Intent("SetMyLove");
+        if (mMusicDatas.get(position).isLove()){
+            //之前是喜愛，在我喜愛的頁面刪除
+            ((MainActivity)getActivity()).setIsLoveToDB(
+                    mMusicDatas.get(position).getpId(), false);
+            intent.putExtra("status", "delete");
+            intent.putExtra("pid", mMusicDatas.get(position).getpId());
+            getActivity().sendBroadcast(intent);
+        }else {
+            //之前不喜愛，在我喜愛的頁面添加
+            ((MainActivity)getActivity()).setIsLoveToDB(
+                    mMusicDatas.get(position).getpId(), true);
+            intent.putExtra("status", "add");
+            intent.putExtra("pid", mMusicDatas.get(position).getpId());
+            getActivity().sendBroadcast(intent);
+        }
     }
 }

@@ -18,4 +18,5 @@ public interface IMainActivityPresenter {
     List<MusicData> getMusicBasicInfoFromDB();
     List<SongListInfo> getSongListInfoFromDB();
     void addSongListToDB(SongListInfo info);  //添加歌单
+    void setIsLoveToDB(long pid, boolean isLove);  //是否喜愛
 }

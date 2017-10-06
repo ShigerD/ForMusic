@@ -319,4 +319,45 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     public void addSongListToDB(SongListInfo info) {
         mPresenter.addSongListToDB(info);
     }
+
+    @Override
+    public List<MusicData> getMyLoveMusicData() {
+        List<MusicData> myLoveData = new ArrayList<>();
+        for (int i = 0;i < mMusicDatas.size();i++){
+            if (mMusicDatas.get(i).isLove()){
+                myLoveData.add(mMusicDatas.get(i));
+            }
+        }
+        return myLoveData;
+    }
+
+    /**
+     * 設置是否喜愛，在所有歌曲頁面和我喜愛的音樂頁面都有用到
+     * @param pid pid
+     * @param isLove true,false
+     */
+    @Override
+    public void setIsLoveToDB(long pid, boolean isLove) {
+        MusicData data = getDataFromPid(pid);
+        if (data == null){
+            return;
+        }
+        data.setLove(isLove);
+        mPresenter.setIsLoveToDB(pid, isLove);
+    }
+
+    /**
+     * 添加我喜愛的音乐，需要从一个pid得到音乐数据
+     * @param pid pid
+     * @return musicdata
+     */
+    @Override
+    public MusicData getDataFromPid(long pid) {
+        for (int i = 0;i < mMusicDatas.size();i++){
+            if (mMusicDatas.get(i).getpId() == pid){
+                return mMusicDatas.get(i);
+            }
+        }
+        return null;
+    }
 }
