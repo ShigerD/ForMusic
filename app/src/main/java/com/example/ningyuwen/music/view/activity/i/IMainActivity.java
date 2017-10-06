@@ -10,5 +10,6 @@ import java.util.List;
  */
 
 public interface IMainActivity {
-    List<SongListInfo> getSongListInfo();
+    List<SongListInfo> getSongListInfo();  //获取歌单列表数据
+    void addSongListToDB(SongListInfo info);  //添加歌单
 }

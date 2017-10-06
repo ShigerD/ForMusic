@@ -102,5 +102,10 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
         return songListInfoList;
     }
 
+    @Override
+    public void addSongListToDB(SongListInfo info) {
+        mDaoSession.getSongListInfoDao().insertOrReplace(info);
+    }
+
 
 }

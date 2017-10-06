@@ -13,27 +13,29 @@ import org.greenrobot.greendao.annotation.Generated;
 @Entity
 public class MusicRecordInfo {
     @Id
-    private long pId;   //id对应到MusicBasicInfo 中的音乐文件id
+    private Long pId;   //id对应到MusicBasicInfo 中的音乐文件id
 
     @Property
     private int musicPlayTimes = 0;  //音乐播放次数
     private boolean isLove = false;    //是否添加到我喜爱的
     private String musicSongList = "";    //被添加到的歌单名,用户自定义歌单
-    @Generated(hash = 702350359)
-    public MusicRecordInfo(long pId, int musicPlayTimes, boolean isLove,
-            String musicSongList) {
+    private long musicSongListId;
+    @Generated(hash = 179489123)
+    public MusicRecordInfo(Long pId, int musicPlayTimes, boolean isLove,
+            String musicSongList, long musicSongListId) {
         this.pId = pId;
         this.musicPlayTimes = musicPlayTimes;
         this.isLove = isLove;
         this.musicSongList = musicSongList;
+        this.musicSongListId = musicSongListId;
     }
     @Generated(hash = 1587270878)
     public MusicRecordInfo() {
     }
-    public long getPId() {
+    public Long getPId() {
         return this.pId;
     }
-    public void setPId(long pId) {
+    public void setPId(Long pId) {
         this.pId = pId;
     }
     public int getMusicPlayTimes() {
@@ -53,6 +55,12 @@ public class MusicRecordInfo {
     }
     public void setMusicSongList(String musicSongList) {
         this.musicSongList = musicSongList;
+    }
+    public long getMusicSongListId() {
+        return this.musicSongListId;
+    }
+    public void setMusicSongListId(long musicSongListId) {
+        this.musicSongListId = musicSongListId;
     }
 
     

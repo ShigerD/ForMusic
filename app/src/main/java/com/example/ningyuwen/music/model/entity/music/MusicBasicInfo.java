@@ -15,7 +15,7 @@ import org.greenrobot.greendao.annotation.Generated;
 @Entity
 public class MusicBasicInfo {
     @Id
-    private long pId;
+    private Long pId;
 
     @Property
     private String musicName;
@@ -24,8 +24,8 @@ public class MusicBasicInfo {
     private String musicAlbum;      //音乐专辑名
     private String musicFilePath;   //音乐文件路径
     private long musicFileSize;     //音乐文件大小
-    @Generated(hash = 737083344)
-    public MusicBasicInfo(long pId, String musicName, String musicPlayer,
+    @Generated(hash = 990824296)
+    public MusicBasicInfo(Long pId, String musicName, String musicPlayer,
             int musicTime, String musicAlbum, String musicFilePath,
             long musicFileSize) {
         this.pId = pId;
@@ -39,10 +39,10 @@ public class MusicBasicInfo {
     @Generated(hash = 1276167751)
     public MusicBasicInfo() {
     }
-    public long getPId() {
+    public Long getPId() {
         return this.pId;
     }
-    public void setPId(long pId) {
+    public void setPId(Long pId) {
         this.pId = pId;
     }
     public String getMusicName() {
@@ -81,7 +81,6 @@ public class MusicBasicInfo {
     public void setMusicFileSize(long musicFileSize) {
         this.musicFileSize = musicFileSize;
     }
-
-
+    
 
 }

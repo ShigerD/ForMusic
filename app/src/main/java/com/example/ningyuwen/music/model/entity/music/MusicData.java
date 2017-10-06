@@ -16,7 +16,7 @@ import java.io.Serializable;
  */
 
 public class MusicData {
-    private long pId;
+    private Long pId;
     private String musicName;
     private String musicPlayer;
     private int musicTime;       //歌曲长度
@@ -27,11 +27,11 @@ public class MusicData {
     private boolean isLove;    //是否添加到我喜爱的
     private String musicSongList;    //被添加到的歌单名,用户自定义歌单
 
-    public long getpId() {
+    public Long getpId() {
         return pId;
     }
 
-    public void setpId(long pId) {
+    public void setpId(Long pId) {
         this.pId = pId;
     }
 

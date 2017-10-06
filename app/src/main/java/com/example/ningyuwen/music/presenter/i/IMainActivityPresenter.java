@@ -17,4 +17,5 @@ public interface IMainActivityPresenter {
     List<MusicData> getMusicAllInfo(List<MusicBasicInfo> basicInfoList); //基本信息和记录信息
     List<MusicData> getMusicBasicInfoFromDB();
     List<SongListInfo> getSongListInfoFromDB();
+    void addSongListToDB(SongListInfo info);  //添加歌单
 }

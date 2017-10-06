@@ -310,4 +310,13 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     public List<SongListInfo> getSongListInfo() {
         return mPresenter.getSongListInfoFromDB();
     }
+
+    /**
+     * 添加歌单
+     * @param info info
+     */
+    @Override
+    public void addSongListToDB(SongListInfo info) {
+        mPresenter.addSongListToDB(info);
+    }
 }

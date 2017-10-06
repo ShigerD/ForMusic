@@ -1,13 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="100dp">
 
-    <TextView
-        android:id="@+id/test"
+    <RelativeLayout
+        android:id="@+id/rl_song_list"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="ning"
-        android:textSize="25sp"/>
+        android:layout_height="match_parent">
 
-</LinearLayout>
+        <ImageView
+            android:id="@+id/iv_custom_music_pic"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:src="@mipmap/ic_launcher"
+            android:foregroundGravity="center"
+            android:background="@color/colorAccent"/>
+
+        <ImageView
+            android:id="@+id/iv_status_play"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:src="@mipmap/ic_launcher" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:weightSum="2"
+            android:orientation="vertical"
+            android:layout_toStartOf="@id/iv_status_play"
+            android:layout_toEndOf="@id/iv_custom_music_pic">
+
+            <TextView
+                android:id="@+id/tv_custom_music_name"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:gravity="center_vertical"
+                android:layout_weight="1"/>
+
+            <TextView
+                android:id="@+id/tv_custom_music_number"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:gravity="center_vertical"
+                android:layout_weight="1"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_add_song_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="+"
+            android:textColor="#ffffff"
+            android:textSize="40sp"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>

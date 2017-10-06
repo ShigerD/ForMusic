@@ -6,7 +6,9 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_customize_music"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="20dp">
 
     </android.support.v7.widget.RecyclerView>
 
