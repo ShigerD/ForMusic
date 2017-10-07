@@ -16,4 +16,5 @@ public interface IMainActivity {
     List<MusicData> getMyLoveMusicData();
     void setIsLoveToDB(long pid, boolean isLove);
     MusicData getDataFromPid(long pid);
+    List<List<MusicData>> getClassifyMusicInfo();
 }

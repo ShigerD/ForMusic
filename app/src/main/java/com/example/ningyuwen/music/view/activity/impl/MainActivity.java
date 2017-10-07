@@ -360,4 +360,15 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         }
         return null;
     }
+
+    /**
+     * 按歌手分类页面需要的数据
+     * @return list<list<MusicData>>
+     */
+    @Override
+    public List<List<MusicData>> getClassifyMusicInfo() {
+        List<List<MusicData>> data = new ArrayList<>();
+
+        return data;
+    }
 }
