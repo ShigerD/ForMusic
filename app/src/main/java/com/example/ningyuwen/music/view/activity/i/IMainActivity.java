@@ -1,5 +1,6 @@
 package com.example.ningyuwen.music.view.activity.i;
 
+import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 
@@ -16,5 +17,6 @@ public interface IMainActivity {
     List<MusicData> getMyLoveMusicData();
     void setIsLoveToDB(long pid, boolean isLove);
     MusicData getDataFromPid(long pid);
-    List<List<MusicData>> getClassifyMusicInfo();
+    List<List<MusicData>> getClassifyMusicInfo(List<ClassifyMusicPlayer> musicPlayers);
+    List<ClassifyMusicPlayer> getClassifyMusicPlayerInfo();
 }

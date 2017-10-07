@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.example.ningyuwen.music.R;
+import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
@@ -366,9 +368,59 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
      * @return list<list<MusicData>>
      */
     @Override
-    public List<List<MusicData>> getClassifyMusicInfo() {
+    public List<List<MusicData>> getClassifyMusicInfo(List<ClassifyMusicPlayer> musicPlayers) {
         List<List<MusicData>> data = new ArrayList<>();
 
+        for (int i = 0;i < musicPlayers.size();i++){
+            List<MusicData> musicData = new ArrayList<>();
+            for (int j = 0;j < mMusicDatas.size();j++){
+                if (musicPlayers.get(i).getMusicPlayerName().equals(mMusicDatas.get(j).getMusicPlayer())){
+                    //名字相同，添加进入musicData
+                    musicData.add(mMusicDatas.get(j));
+                }
+            }
+            data.add(musicData);
+        }
         return data;
+    }
+
+    @Override
+    public List<ClassifyMusicPlayer> getClassifyMusicPlayerInfo() {
+        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(
+                "/data/data/com.example.ningyuwen.music/databases/music.db",null);
+//        String sql = "select DISTINCT MUSIC_PLAYER from MUSIC_BASIC_INFO ;";
+        Cursor cursor = db.query(true, "MUSIC_BASIC_INFO", new String[]{"MUSIC_PLAYER"},
+                null, null, null, null, null, null);
+
+        List<ClassifyMusicPlayer> data = new ArrayList<>();
+        while(cursor.moveToNext()){
+            String name = cursor.getString(cursor.getColumnIndex("MUSIC_PLAYER"));
+            //通过姓名查询数量
+            Cursor cursorName = db.query(false, "MUSIC_BASIC_INFO", new String[]{"_id"},
+                    "MUSIC_PLAYER=?", new String[]{name }, null, null, null, null);
+            ClassifyMusicPlayer player = new ClassifyMusicPlayer();
+            player.setMusicPlayerName(name);
+            player.setMusicNumber(cursorName.getCount());  //歌手对应的歌曲数量
+            data.add(player);
+            cursorName.close();
+        }
+        cursor.close();
+        db.close();
+        return data;
+    }
+
+    /**
+     * 传入音乐人姓名，获取音乐人有多少音乐
+     * @param musicPlayer musicPlayer
+     * @return int
+     */
+    private int getNumberOfMusicPlayerFromData(String musicPlayer){
+        int number = 0;
+        for (int i = 0;i < mMusicDatas.size();i++){
+            if (musicPlayer.equals(mMusicDatas.get(i).getMusicPlayer())){
+                number++;
+            }
+        }
+        return number;
     }
 }

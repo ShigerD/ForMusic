@@ -1,6 +1,7 @@
 package com.example.ningyuwen.music.view.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,9 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.ningyuwen.music.R;
+import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 
 import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * 歌手分类的adapter
@@ -22,10 +25,10 @@ public class ClassifyMusicAdapter extends BaseExpandableListAdapter {
 
     private Context mContext;
     private LayoutInflater mInflater = null;
-    private List<String> mGroupStrings = null;
+    private List<ClassifyMusicPlayer> mGroupStrings = null;
     private List<List<MusicData>> mData = null;
 
-    public ClassifyMusicAdapter(Context context, List<String> groupStrings,
+    public ClassifyMusicAdapter(Context context, List<ClassifyMusicPlayer> groupStrings,
                                 List<List<MusicData>>list) {
         super();
         mContext = context;
@@ -34,6 +37,8 @@ public class ClassifyMusicAdapter extends BaseExpandableListAdapter {
         mInflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+        Log.i("test", "ClassifyMusicAdapter: " + groupStrings.size());
+        Log.i("test", "ClassifyMusicAdapter: " + groupStrings.get(0).getMusicNumber());
     }
 
     @Override
@@ -80,10 +85,10 @@ public class ClassifyMusicAdapter extends BaseExpandableListAdapter {
         GroupViewHolder holder = new GroupViewHolder();
         holder.mGroupName = (TextView) convertView
                 .findViewById(R.id.group_name);
-        holder.mGroupName.setText(mGroupStrings.get(groupPosition));
+        holder.mGroupName.setText(mGroupStrings.get(groupPosition).getMusicPlayerName());
         holder.mGroupCount = (TextView) convertView
                 .findViewById(R.id.group_count);
-        holder.mGroupCount.setText("[" + mData.get(groupPosition).size() + "]");
+        holder.mGroupCount.setText(String.valueOf(mGroupStrings.get(groupPosition).getMusicNumber()) + "首");
         return convertView;
     }
 
@@ -94,15 +99,15 @@ public class ClassifyMusicAdapter extends BaseExpandableListAdapter {
             convertView = mInflater.inflate(R.layout.layout_classify_child_item, null);
         }
         ChildViewHolder holder = new ChildViewHolder();
-//        holder.mIcon = (ImageView) convertView.findViewById(R.id.img);
-//        holder.mIcon.setBackgroundResource(getChild(groupPosition,
+        holder.mIvPlayStatus = (ImageView) convertView.findViewById(R.id.item_play_status);
+//        holder.mIvPlayStatus.setBackgroundResource(getChild(groupPosition,
 //                childPosition).getImageId());
-        holder.mChildName = (TextView) convertView.findViewById(R.id.item_name);
-        holder.mChildName.setText(getChild(groupPosition, childPosition)
+        holder.mChildMusicName = (TextView) convertView.findViewById(R.id.item_music_name);
+        holder.mChildMusicName.setText(getChild(groupPosition, childPosition)
                 .getMusicName());
-        holder.mDetail = (TextView) convertView.findViewById(R.id.item_detail);
-        holder.mDetail.setText(getChild(groupPosition, childPosition)
-                .getMusicPlayer());
+        holder.mIvIsLove = (ImageView) convertView.findViewById(R.id.item_is_love);
+//        holder.mIvIsLove.setText(getChild(groupPosition, childPosition)
+//                .getMusicPlayer());
         return convertView;
     }
 
@@ -114,12 +119,11 @@ public class ClassifyMusicAdapter extends BaseExpandableListAdapter {
     private class GroupViewHolder {
         TextView mGroupName;
         TextView mGroupCount;
-
     }
 
     private class ChildViewHolder {
-        ImageView mIcon;
-        TextView mChildName;
-        TextView mDetail;
+        ImageView mIvPlayStatus;
+        TextView mChildMusicName;
+        ImageView mIvIsLove;
     }
 }

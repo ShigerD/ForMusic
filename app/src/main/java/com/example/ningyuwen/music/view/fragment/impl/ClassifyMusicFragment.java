@@ -1,14 +1,18 @@
 package com.example.ningyuwen.music.view.fragment.impl;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
 import com.example.ningyuwen.music.R;
+import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.example.ningyuwen.music.view.adapter.ClassifyMusicAdapter;
@@ -42,8 +46,9 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
      */
     @Override
     public void showClassifyMusicInfo() {
-        mDatas = ((MainActivity)getActivity()).getClassifyMusicInfo();
-        mAdapter = new ClassifyMusicAdapter(getContext(), new ArrayList<String>(), mDatas);
+        List<ClassifyMusicPlayer> musicPlayers = ((MainActivity)getActivity()).getClassifyMusicPlayerInfo();
+        mDatas = ((MainActivity)getActivity()).getClassifyMusicInfo(musicPlayers);
+        mAdapter = new ClassifyMusicAdapter(getContext(), musicPlayers, mDatas);
         mElClassifyMusic.setAdapter(mAdapter);
     }
 }

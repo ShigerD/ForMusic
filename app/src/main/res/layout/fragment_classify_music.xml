@@ -6,7 +6,11 @@
     <ExpandableListView
         android:id="@+id/el_classify_music"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="5dp">
 
     </ExpandableListView>
 
