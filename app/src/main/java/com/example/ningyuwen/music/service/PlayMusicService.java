@@ -60,7 +60,6 @@ public class PlayMusicService extends Service {
                     case "PlayMusic":
                         int i = intent.getIntExtra("palyPosition", 0);
                         mPosition = i;
-                        Log.i(TAG, "onReceive: ttttt  " + i);
                         //播放音乐
                         playMusic(i, 0);
                         break;
@@ -70,6 +69,16 @@ public class PlayMusicService extends Service {
                     case "PlayOrPause":
                         //点击主页面的播放暂停按钮，判断当前播放状态，为播放就暂停
                         playOrPause();
+                        break;
+                    case "ReplaceMusicList":
+                        if (mMusicPaths == null){
+                            mMusicPaths = new ArrayList<>();
+                        }
+                        mMusicPaths.clear();
+                        //添加到播放列表
+                        mMusicPaths = intent.getStringArrayListExtra("musicInfoList");
+                        mPosition = intent.getIntExtra("position", 0);
+                        playMusic(intent.getIntExtra("position", 0), 0);
                         break;
                     default:
                         break;
@@ -81,6 +90,7 @@ public class PlayMusicService extends Service {
         filter.addAction("PlayMusic");
         filter.addAction("ChangePlayStatus");
         filter.addAction("PlayOrPause");
+        filter.addAction("ReplaceMusicList");  //替换音乐列表数据，可能在歌手分类，我喜爱的，自定歌单这些页面用到
         registerReceiver(mReceiver, filter);
     }
 

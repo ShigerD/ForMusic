@@ -6,15 +6,15 @@
     
     <ImageView
         android:id="@+id/item_play_status"
-        android:layout_width="50dp"
-        android:layout_height="40dp"
+        android:layout_width="40dp"
+        android:layout_height="35dp"
         android:layout_marginStart="30dp"
         android:src="@color/colorAccent"/>
 
     <ImageView
         android:id="@+id/item_is_love"
-        android:layout_width="50dp"
-        android:layout_height="40dp"
+        android:layout_width="40dp"
+        android:layout_height="35dp"
         android:layout_marginEnd="20dp"
         android:src="@color/colorPrimary"
         android:layout_alignParentEnd="true"/>
@@ -22,7 +22,7 @@
     <TextView
         android:id="@+id/item_music_name"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="35dp"
         android:gravity="center_vertical"
         android:textSize="18sp"
         android:layout_marginStart="5dp"

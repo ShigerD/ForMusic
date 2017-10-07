@@ -8,14 +8,14 @@
     <TextView
         android:id="@+id/group_count"
         android:layout_width="50dp"
-        android:layout_height="45dp"
+        android:layout_height="40dp"
         android:gravity="center"
         android:layout_alignParentEnd="true"/>
 
     <TextView
         android:id="@+id/group_name"
         android:layout_marginStart="30dp"
-        android:layout_height="45dp"
+        android:layout_height="40dp"
         android:textSize="26sp"
         android:layout_width="match_parent"
         android:layout_toStartOf="@id/group_count"

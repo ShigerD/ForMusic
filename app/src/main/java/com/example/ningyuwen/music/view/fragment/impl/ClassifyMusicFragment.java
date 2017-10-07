@@ -1,5 +1,6 @@
 package com.example.ningyuwen.music.view.fragment.impl;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.Fragment;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 歌手分类页面
  * Created by ningyuwen on 17-9-26.
  */
 
@@ -30,6 +32,7 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
     private ExpandableListView mElClassifyMusic;
     private ClassifyMusicAdapter mAdapter;
     private List<List<MusicData>> mDatas;
+    private int mGroupPosition = -1;  //记录当前播放的音乐人
 
     @Nullable
     @Override
@@ -50,5 +53,37 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
         mDatas = ((MainActivity)getActivity()).getClassifyMusicInfo(musicPlayers);
         mAdapter = new ClassifyMusicAdapter(getContext(), musicPlayers, mDatas);
         mElClassifyMusic.setAdapter(mAdapter);
+        setChildItemClickListener();
+    }
+
+    /**
+     * 音乐条目设置监听
+     */
+    private void setChildItemClickListener() {
+        mElClassifyMusic.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                //点击了其中一条，则将对应的音乐人的所有音乐替换后台播放列表
+                if (groupPosition != mGroupPosition) {
+                    mGroupPosition = groupPosition;
+                    //如果不等，则说明换了音乐人，发送广播，替换音乐列表
+                    Intent intent = new Intent("ReplaceMusicList");
+                    ArrayList<String> paths = new ArrayList<String>();
+                    for (int i = 0;i < mDatas.get(groupPosition).size();i++){
+                        paths.add(mDatas.get(groupPosition).get(i).getMusicFilePath());
+                    }
+                    intent.putStringArrayListExtra("musicInfoList", paths);
+                    intent.putExtra("position", childPosition);
+                    getActivity().sendBroadcast(intent);
+                    return true;
+                }else {
+                    //相等，重新播放这首歌曲，提高效率，不替换播放列表
+                    Intent intent = new Intent("PlayMusic");
+                    intent.putExtra("palyPosition", childPosition);
+                    getActivity().sendBroadcast(intent);
+                }
+                return false;
+            }
+        });
     }
 }
