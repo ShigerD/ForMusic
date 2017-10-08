@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,7 +17,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -30,7 +28,7 @@ import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.presenter.impl.MainActivityPresenter;
 import com.example.ningyuwen.music.service.PlayMusicService;
-import com.example.ningyuwen.music.util.BlurBitmapUtil;
+import com.example.ningyuwen.music.util.FastBlurUtil;
 import com.example.ningyuwen.music.view.activity.i.IMainActivity;
 import com.example.ningyuwen.music.view.adapter.MainFragmentAdapter;
 import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
@@ -38,7 +36,6 @@ import com.example.ningyuwen.music.view.fragment.impl.ClassifyMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,10 +131,18 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
      */
     private void setMainActivityBg() {
         //拿到初始图
-        Bitmap initBitmap = BlurBitmapUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_main_bg));
+        Bitmap initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_main_bg));
         //处理得到模糊效果的图
-//        initBitmap = BlurBitmapUtil.blurBitmap(this, initBitmap, 25f);
+        int scaleRatio = 5;
+        int blurRadius = 8;
+        initBitmap = Bitmap.createScaledBitmap(initBitmap,
+                initBitmap.getWidth() / scaleRatio,
+                initBitmap.getHeight() / scaleRatio,
+                false);
+        initBitmap = FastBlurUtil.doBlur(initBitmap, blurRadius, false);
+        mIvBg.setScaleType(ImageView.ScaleType.CENTER_CROP);
         mIvBg.setImageBitmap(initBitmap);
+
 
 //        if (initBitmap != null){
 //            initBitmap.recycle();
