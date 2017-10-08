@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,7 +20,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 
+import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
@@ -26,6 +30,7 @@ import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.presenter.impl.MainActivityPresenter;
 import com.example.ningyuwen.music.service.PlayMusicService;
+import com.example.ningyuwen.music.util.BlurBitmapUtil;
 import com.example.ningyuwen.music.view.activity.i.IMainActivity;
 import com.example.ningyuwen.music.view.adapter.MainFragmentAdapter;
 import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
@@ -49,6 +54,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private DrawerLayout mDrawerMenu;
     private ViewPager mMainViewPager;
     private ArrayList<Fragment> fragments;
+    private ImageView mIvBg;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,6 +63,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 
         //绑定控件和设置监听
         findView();
+        setMainActivityBg();
         setListener();
         setStatusBarTransparentForDrawerLayout(mDrawerMenu);
         //初始化fragment
@@ -64,31 +71,79 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         //默认第一页
         mMainViewPager.setCurrentItem(0);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        //线程池，添加一个任务
+        MusicApplication.cachedThreadPool.execute(runnable);
 
-                mMusicDatas = new ArrayList<>();
-                //先检查数据库中是否有数据，若有则读取数据库中的数据
-                mMusicDatas = mPresenter.getMusicBasicInfoFromDB();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Thread.sleep(500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                mMusicDatas = new ArrayList<>();
+//                //先检查数据库中是否有数据，若有则读取数据库中的数据
+//                mMusicDatas = mPresenter.getMusicBasicInfoFromDB();
+//
+//                //如果返回数据为空，从SD卡读取数据
+//                if (mMusicDatas.size() == 0){
+//                    //获取读写权限，并获取音乐数据，存储到数据库，和 存储到 mMusicDatas
+//                    getReadPermissionAndGetInfoFromSD();
+//                }else {
+//                    //fragment更新数据
+//                    sendBroadcast(new Intent("AllMusicRefresh"));
+//                    startPlayMusicService();
+//                }
+//            }
+//        }).start();
 
-                //如果返回数据为空，从SD卡读取数据
-                if (mMusicDatas.size() == 0){
-                    //获取读写权限，并获取音乐数据，存储到数据库，和 存储到 mMusicDatas
-                    getReadPermissionAndGetInfoFromSD();
-                }else {
-                    //fragment更新数据
-                    sendBroadcast(new Intent("AllMusicRefresh"));
-                    startPlayMusicService();
-                }
+    }
+
+    /**
+     * 获取去音乐数据，数据库有则获取数据库中的数据，数据库没有则扫描SD卡中的数据，再启动服务 startPlayMusicService
+     */
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        }).start();
 
+            mMusicDatas = new ArrayList<>();
+            //先检查数据库中是否有数据，若有则读取数据库中的数据
+            mMusicDatas = mPresenter.getMusicBasicInfoFromDB();
+
+            //如果返回数据为空，从SD卡读取数据
+            if (mMusicDatas.size() == 0){
+                //获取读写权限，并获取音乐数据，存储到数据库，和 存储到 mMusicDatas
+                getReadPermissionAndGetInfoFromSD();
+            }else {
+                //fragment更新数据
+                sendBroadcast(new Intent("AllMusicRefresh"));
+                startPlayMusicService();
+            }
+        }
+    };
+
+    /**
+     * 设置背景
+     */
+    private void setMainActivityBg() {
+        //拿到初始图
+        Bitmap initBitmap = BlurBitmapUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_main_bg));
+        //处理得到模糊效果的图
+//        initBitmap = BlurBitmapUtil.blurBitmap(this, initBitmap, 25f);
+        mIvBg.setImageBitmap(initBitmap);
+
+//        if (initBitmap != null){
+//            initBitmap.recycle();
+//            initBitmap = null;
+//            System.gc();
+//        }
     }
 
     /**
@@ -120,7 +175,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private void findView() {
         mDrawerMenu = (DrawerLayout) findViewById(R.id.dr_main);              //侧滑菜单布局
         mMainViewPager = (ViewPager) findViewById(R.id.vp_main_page);         //主页面的viewpager
-
+        mIvBg = (ImageView) findViewById(R.id.iv_main_activity_bg);
     }
 
     private void setListener() {

@@ -1,143 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/pic_main_bg">
+    android:layout_height="match_parent">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginRight="10dp">
-
-        <ImageView
-            android:id="@+id/iv__bar_slide"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@mipmap/ic_menu_open"
-            android:layout_centerVertical="true"/>
-
-        <TextView
-            android:id="@+id/tv_bar_prompt"
-            android:layout_width="wrap_content"
-            android:layout_height="28dp"
-            android:layout_marginLeft="20dp"
-            android:text="My Music"
-            android:textColor="#FFF"
-            android:textSize="18sp"
-            android:gravity="center_vertical"
-            android:layout_toRightOf="@id/iv__bar_slide"
-            android:layout_centerVertical="true"
-            tools:ignore="RtlHardcoded" />
-
-        <ImageView
-            android:id="@+id/iv_bar_search"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@mipmap/ic_menu_open"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true"/>
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="100dp">
-
-        <ImageView
-            android:id="@+id/iv_music_pic"
-            android:layout_width="80dp"
-            android:src="@mipmap/ic_menu_open"
-            android:layout_height="match_parent"
-            android:layout_margin="10dp"/>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="20dp"
-            android:layout_toRightOf="@id/iv_music_pic">
-
-            <TextView
-                android:id="@+id/tv_music_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cabin in the woods"
-                android:textSize="18sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cabin in the woods"
-                android:layout_marginTop="30dp"
-                android:textSize="16sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cabin in the woods"
-                android:layout_alignParentBottom="true"
-                android:textSize="16sp" />
-
-        </RelativeLayout>
-
-    </RelativeLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:weightSum="4">
-
-        <TextView
-            android:id="@+id/tv_tab_first"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textSize="16sp"
-            android:textColor="#FFF"
-            android:text="所有歌曲" />
-
-        <TextView
-            android:id="@+id/tv_tab_second"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textSize="16sp"
-            android:textColor="#FFF"
-            android:text="自定歌单" />
-
-        <TextView
-            android:id="@+id/tv_tab_third"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textColor="#FFF"
-            android:textSize="16sp"
-            android:text="我喜爱的" />
-
-        <TextView
-            android:id="@+id/tv_tab_last"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textColor="#FFF"
-            android:textSize="16sp"
-            android:text="歌手分类" />
-
-    </LinearLayout>
-
-    <android.support.v4.view.ViewPager
-        android:id="@+id/vp_main_page"
+    <ImageView
+        android:id="@+id/iv_main_activity_bg"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</LinearLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="10dp">
+
+            <ImageView
+                android:id="@+id/iv__bar_slide"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@mipmap/ic_menu_open"
+                android:layout_centerVertical="true"/>
+
+            <TextView
+                android:id="@+id/tv_bar_prompt"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:layout_marginLeft="20dp"
+                android:text="My Music"
+                android:textColor="#FFF"
+                android:textSize="18sp"
+                android:gravity="center_vertical"
+                android:layout_toRightOf="@id/iv__bar_slide"
+                android:layout_centerVertical="true"
+                tools:ignore="RtlHardcoded" />
+
+            <ImageView
+                android:id="@+id/iv_bar_search"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@mipmap/ic_menu_open"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp">
+
+            <ImageView
+                android:id="@+id/iv_music_pic"
+                android:layout_width="80dp"
+                android:src="@mipmap/ic_menu_open"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="20dp"
+                android:layout_toRightOf="@id/iv_music_pic">
+
+                <TextView
+                    android:id="@+id/tv_music_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cabin in the woods"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cabin in the woods"
+                    android:layout_marginTop="30dp"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cabin in the woods"
+                    android:layout_alignParentBottom="true"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:weightSum="4">
+
+            <TextView
+                android:id="@+id/tv_tab_first"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:textColor="#FFF"
+                android:text="所有歌曲" />
+
+            <TextView
+                android:id="@+id/tv_tab_second"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:textColor="#FFF"
+                android:text="自定歌单" />
+
+            <TextView
+                android:id="@+id/tv_tab_third"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="#FFF"
+                android:textSize="16sp"
+                android:text="我喜爱的" />
+
+            <TextView
+                android:id="@+id/tv_tab_last"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="#FFF"
+                android:textSize="16sp"
+                android:text="歌手分类" />
+
+        </LinearLayout>
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/vp_main_page"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+</RelativeLayout>

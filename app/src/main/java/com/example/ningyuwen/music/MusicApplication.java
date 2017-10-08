@@ -4,6 +4,8 @@ import android.app.Application;
 import android.util.Log;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import greendao.GreenDaoHelper;
 import greendao.gen.DaoMaster;
@@ -19,6 +21,7 @@ import static android.content.ContentValues.TAG;
 public class MusicApplication extends Application {
     private static DaoSession daoSession;
     private static MusicApplication application;
+    public static final ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
     @Override
     public void onCreate() {
