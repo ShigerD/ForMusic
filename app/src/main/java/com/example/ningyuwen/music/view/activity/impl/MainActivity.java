@@ -11,6 +11,9 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -18,8 +21,10 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toolbar;
 
 import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.R;
@@ -53,11 +58,13 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private ViewPager mMainViewPager;
     private ArrayList<Fragment> fragments;
     private ImageView mIvBg;
+    private TabLayout mTabLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         //绑定控件和设置监听
         findView();
@@ -180,21 +187,26 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 
     private void findView() {
         mDrawerMenu = (DrawerLayout) findViewById(R.id.dr_main);              //侧滑菜单布局
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+
+
         mMainViewPager = (ViewPager) findViewById(R.id.vp_main_page);         //主页面的viewpager
         mIvBg = (ImageView) findViewById(R.id.iv_main_activity_bg);
+        mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
     }
 
     private void setListener() {
-        findViewById(R.id.iv__bar_slide).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.iv_bar_slide).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mDrawerMenu.openDrawer(GravityCompat.START);
             }
         });
-        findViewById(R.id.tv_tab_first).setOnClickListener(this);
-        findViewById(R.id.tv_tab_second).setOnClickListener(this);
-        findViewById(R.id.tv_tab_third).setOnClickListener(this);
-        findViewById(R.id.tv_tab_last).setOnClickListener(this);
+//        findViewById(R.id.tv_tab_first).setOnClickListener(this);
+//        findViewById(R.id.tv_tab_second).setOnClickListener(this);
+//        findViewById(R.id.tv_tab_third).setOnClickListener(this);
+//        findViewById(R.id.tv_tab_last).setOnClickListener(this);
         findViewById(R.id.iv_music_pic).setOnClickListener(this);
         //viewpager页码变化监听
         mMainViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -228,6 +240,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         MainFragmentAdapter mainFragmentAdapter =           //ViewPager的适配器
                 new MainFragmentAdapter(getSupportFragmentManager(), fragments);
         mMainViewPager.setAdapter(mainFragmentAdapter);        //设置ViewPager的适配器
+        mTabLayout.setupWithViewPager(mMainViewPager);
     }
 
     @Override
@@ -263,10 +276,10 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     //获取权限失败
-                    showToast("权限获取失败,可到设置中打开存储权限");
+                    showToast(mIvBg, "权限获取失败,可到设置中打开存储权限");
                 } else {
                     //获取到了权限
-                    showToast("获取权限成功");
+                    showToast(mIvBg, "获取权限成功");
                     //从SD卡扫描音乐文件
                     getMusicInfoFromSD();
                 }
@@ -331,18 +344,18 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.tv_tab_first:
-                mMainViewPager.setCurrentItem(0);
-                break;
-            case R.id.tv_tab_second:
-                mMainViewPager.setCurrentItem(1);
-                break;
-            case R.id.tv_tab_third:
-                mMainViewPager.setCurrentItem(2);
-                break;
-            case R.id.tv_tab_last:
-                mMainViewPager.setCurrentItem(3);
-                break;
+//            case R.id.tv_tab_first:
+//                mMainViewPager.setCurrentItem(0);
+//                break;
+//            case R.id.tv_tab_second:
+//                mMainViewPager.setCurrentItem(1);
+//                break;
+//            case R.id.tv_tab_third:
+//                mMainViewPager.setCurrentItem(2);
+//                break;
+//            case R.id.tv_tab_last:
+//                mMainViewPager.setCurrentItem(3);
+//                break;
             case R.id.iv_music_pic:
                 //点击播放暂停按钮
                 sendBroadcast(new Intent("PlayOrPause"));

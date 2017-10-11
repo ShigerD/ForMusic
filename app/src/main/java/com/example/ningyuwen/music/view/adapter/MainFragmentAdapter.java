@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 public class MainFragmentAdapter extends FragmentPagerAdapter {
 
+    private String tabTitles[] = new String[]{"所有歌曲","自定歌单","我喜爱的","歌手分类"};
     private ArrayList<Fragment> mFragments;
 
     public MainFragmentAdapter(FragmentManager fm, ArrayList<Fragment> fragments) {
@@ -33,5 +34,10 @@ public class MainFragmentAdapter extends FragmentPagerAdapter {
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
 //        super.destroyItem(container, position, object);
+    }
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+        return tabTitles[position];
     }
 }

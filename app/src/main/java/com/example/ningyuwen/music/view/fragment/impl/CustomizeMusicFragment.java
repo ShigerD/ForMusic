@@ -133,7 +133,7 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
                 //判断数据库中是否存在名字相同的歌单，存在则不能添加
 
 
-                ((MainActivity)getActivity()).showToast("添加成功");
+                ((MainActivity)getActivity()).showToast(mRvCustomizeMusic, "添加成功");
                 SongListInfo info = new SongListInfo();
                 info.setName(et.getText().toString());
                 info.setNumber(0);

@@ -21,7 +21,7 @@ public class BasePresenter<V extends BaseActivity> {
 
     /**
      * 获取daosession
-     * @return
+     * @return mDaoSession
      */
     private DaoSession getDaoSession() {
         if (mDaoSession == null) {

@@ -132,7 +132,7 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
      */
     @Override
     public void playMusic(int position) {
-        ((MainActivity)getActivity()).showToast("音乐位置： " + position);
+        ((MainActivity)getActivity()).showToast(mRvMyLoveMusic, "音乐位置： " + position);
         ((MainActivity)getActivity()).playMusicOnBackstage(position);
     }
 

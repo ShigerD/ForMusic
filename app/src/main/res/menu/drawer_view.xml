@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@color/colorAccent"
+            android:title="home"/>
+
+        <item
+            android:id="@+id/nav_messages"
+            android:icon="@color/colorAccent"
+            android:title="messages"/>
+
+        <item
+            android:id="@+id/nav_friends"
+            android:icon="@color/colorAccent"
+            android:title="friends"/>
+
+        <item
+            android:id="@+id/nav_discussion"
+            android:icon="@color/colorAccent"
+            android:title="disscussion"/>
+
+    </group>
+
+    <item android:title="Su items">
+
+        <menu>
+
+            <item
+                android:icon="@color/colorAccent"
+                android:title="sub item1"/>
+
+            <item
+                android:icon="@color/colorAccent"
+                android:title="sub item2"/>
+
+        </menu>
+
+    </item>
+
+</menu>

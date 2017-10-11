@@ -100,7 +100,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
      */
     @Override
     public void playMusic(int position) {
-        ((MainActivity)getActivity()).showToast("音乐位置： " + position);
+        ((MainActivity)getActivity()).showToast(mRvAllMusicInfo, "音乐位置： " + position);
 //        sendB
         ((MainActivity)getActivity()).playMusicOnBackstage(position);
 

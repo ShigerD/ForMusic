@@ -6,8 +6,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -21,7 +23,7 @@ import com.example.ningyuwen.music.presenter.impl.BasePresenter;
 
 public abstract class BaseActivity<P extends BasePresenter> extends AppCompatActivity {
     protected P mPresenter;     //presenter对象，处理逻辑运算和数据存储
-    private Toast mToast;       //toast对象
+    private Snackbar mSnacker;       //toast对象
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,12 +47,13 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
      * @param message 要显示的信息
      */
 
-    public void showToast(@NonNull String message) {
-        if (mToast != null){
-            mToast.cancel();
+    public void showToast(@NonNull View view, @NonNull String message) {
+        if (mSnacker != null){
+            mSnacker.dismiss();
         }
-        mToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
-        mToast.show();
+//        mToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        mSnacker = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
+        mSnacker.show();
     }
 
     /**
