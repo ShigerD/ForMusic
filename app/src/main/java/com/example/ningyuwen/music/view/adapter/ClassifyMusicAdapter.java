@@ -36,9 +36,6 @@ public class ClassifyMusicAdapter extends BaseExpandableListAdapter {
         mData = list;
         mInflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        Log.i("test", "ClassifyMusicAdapter: " + groupStrings.size());
-        Log.i("test", "ClassifyMusicAdapter: " + groupStrings.get(0).getMusicNumber());
     }
 
     @Override

@@ -1,7 +1,12 @@
 package com.example.ningyuwen.music;
 
 import android.app.Application;
+import android.app.Notification;
 import android.util.Log;
+
+import com.example.ningyuwen.music.view.activity.impl.MainActivity;
+import com.tencent.bugly.Bugly;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.File;
 import java.util.concurrent.ExecutorService;
@@ -26,9 +31,9 @@ public class MusicApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Bugly.init(getApplicationContext(), "1c9b07d4ed", true);
         application = this;
         daoSession = getDaoSession();
-
     }
 
     public static MusicApplication getApplication(){

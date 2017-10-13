@@ -1,25 +1,34 @@
 package com.example.ningyuwen.music.view.activity.impl;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +44,7 @@ import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.presenter.impl.MainActivityPresenter;
 import com.example.ningyuwen.music.service.PlayMusicService;
 import com.example.ningyuwen.music.util.FastBlurUtil;
+import com.example.ningyuwen.music.util.NotificationsUtils;
 import com.example.ningyuwen.music.view.activity.i.IMainActivity;
 import com.example.ningyuwen.music.view.adapter.MainFragmentAdapter;
 import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
@@ -59,12 +69,15 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private ArrayList<Fragment> fragments;
     private ImageView mIvBg;
     private TabLayout mTabLayout;
+    public static final String NOTIFICATION_CHANNEL_ID = "4655";
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+//        getNotification();
 
         //绑定控件和设置监听
         findView();
@@ -103,6 +116,44 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 //                }
 //            }
 //        }).start();
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void getNotification() {
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // The id of the channel.
+        String id = "my_channel_01";
+        // The user-visible name of the channel.
+        CharSequence name = getString(R.string.channel_name);
+        // The user-visible description of the channel.
+        String description = getString(R.string.channel_description);
+        int importance = NotificationManager.IMPORTANCE_LOW;
+        NotificationChannel mChannel = new NotificationChannel(id, name,importance);
+        // Configure the notification channel.
+        mChannel.setDescription(description);
+        mChannel.enableLights(true);
+        // Sets the notification light color for notifications posted to this
+        // channel, if the device supports this feature.
+        mChannel.setLightColor(Color.RED);
+        mChannel.enableVibration(true);
+        mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+        mNotificationManager.createNotificationChannel(mChannel);
+
+        mNotificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        // Sets an ID for the notification, so it can be updated.
+        int notifyID = 1;
+        // The id of the channel.
+        String CHANNEL_ID = "my_channel_01";
+        // Create a notification and set the notification channel.
+        Notification notification = new Notification.Builder(MainActivity.this)
+                .setContentTitle("New Message")
+                .setContentText("You've received new messages.")
+                .setSmallIcon(R.mipmap.ic_account_circle_white_24dp)
+                .setChannelId(CHANNEL_ID)
+                .build();
+// Issue the notification.
+        mNotificationManager.notify(notifyID, notification);
 
     }
 

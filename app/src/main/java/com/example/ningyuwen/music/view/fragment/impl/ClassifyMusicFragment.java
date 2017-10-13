@@ -51,6 +51,10 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
     public void showClassifyMusicInfo() {
         List<ClassifyMusicPlayer> musicPlayers = ((MainActivity)getActivity()).getClassifyMusicPlayerInfo();
         mDatas = ((MainActivity)getActivity()).getClassifyMusicInfo(musicPlayers);
+        if (musicPlayers == null || mDatas == null){
+            ((MainActivity)getActivity()).showToast(mElClassifyMusic, "没有音乐文件");
+            return;
+        }
         mAdapter = new ClassifyMusicAdapter(getContext(), musicPlayers, mDatas);
         mElClassifyMusic.setAdapter(mAdapter);
         setChildItemClickListener();
