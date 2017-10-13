@@ -24,6 +24,7 @@
         </activity>
 
         <activity android:name=".view.activity.impl.MainActivity"/>
+        <activity android:name=".view.activity.impl.MusicSongListActivity"/>
 
         <service android:enabled="true"
             android:exported="true"

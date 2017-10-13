@@ -43,11 +43,9 @@ public class PlayMusicService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand: ");
-        if (mMusicPaths == null){
+        if (intent != null && mMusicPaths == null){
             mMusicPaths = intent.getStringArrayListExtra("musicInfoList");
         }
-        Log.i(TAG, "onStartCommand: " + mMusicPaths.size());
-
         return super.onStartCommand(intent, flags, startId);
     }
 

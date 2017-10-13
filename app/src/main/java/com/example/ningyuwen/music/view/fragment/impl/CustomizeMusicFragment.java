@@ -2,6 +2,7 @@ package com.example.ningyuwen.music.view.fragment.impl;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
+import com.example.ningyuwen.music.view.activity.impl.MusicSongListActivity;
 import com.example.ningyuwen.music.view.adapter.CustomizeMusicAdapter;
 import com.example.ningyuwen.music.view.fragment.i.ICustomizeMusicFragment;
 
@@ -85,9 +87,10 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
      */
     @Override
     public void jumpSongList(int position) {
-        Dialog dialog = new Dialog(getActivity());
-        dialog.setTitle("歌曲列表");
-        dialog.show();
+//        Dialog dialog = new Dialog(getActivity());
+//        dialog.setTitle("歌曲列表");
+//        dialog.show();
+        startActivity(new Intent(getActivity(), MusicSongListActivity.class));
     }
 
     /**
