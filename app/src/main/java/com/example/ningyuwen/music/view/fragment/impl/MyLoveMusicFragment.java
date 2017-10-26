@@ -29,6 +29,7 @@ import java.util.List;
  */
 
 public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragment, MyLoveMusicAdapter.AddItemClickListener {
+    private static final String TAG = "test22";
     private BroadcastReceiver receiver;
     private RecyclerView mRvMyLoveMusic;
     private List<MusicData> mMyLoveMusicDatas;
@@ -91,12 +92,19 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
                         }
                         mMyLoveMusicDatas.add(0, musicData);
                     }
+                }else if ("AllMusicRefresh".equals(action)){
+                    Log.i(TAG, "onReceive: mylove");
+                    //重新导入音乐数据时，刷新列表
+                    mMyLoveMusicDatas.clear();
+                    mMyLoveMusicDatas.addAll(((MainActivity)getActivity()).getMyLoveMusicData());
+                    mAdapter.notifyDataSetChanged();
                 }
             }
         };
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetMyLove");
+        filter.addAction("AllMusicRefresh");  //重新导入音乐数据时，刷新列表
         getActivity().registerReceiver(receiver, filter);
     }
 

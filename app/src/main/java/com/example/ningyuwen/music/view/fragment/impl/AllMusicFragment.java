@@ -27,10 +27,11 @@ import java.util.List;
  */
 
 public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.AddItemClickListener {
+    private static final String TAG = "test22";
     private BroadcastReceiver receiver;
     private List<MusicData> mMusicDatas;
     private RecyclerView mRvAllMusicInfo;
-
+    private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
 
     @Nullable
     @Override
@@ -65,7 +66,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
                 Log.i("test", "onReceive: " + action);
                 if ("AllMusicRefresh".equals(action)){
 //                    mMusicDatas = MainActivity.mMusicDatas;
-
+                    Log.i(TAG, "onReceive: allmusic");
                     mMusicDatas = ((MainActivity)getActivity()).getMusicDatas();
 //                    ((MainActivity)getActivity()).clearMusicData();
                     showMusicInfo();

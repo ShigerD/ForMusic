@@ -1,8 +1,11 @@
 package com.example.ningyuwen.music.view.fragment.impl;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -30,6 +33,7 @@ import com.example.ningyuwen.music.view.fragment.i.ICustomizeMusicFragment;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.Call;
@@ -47,9 +51,12 @@ import static android.view.LayoutInflater.from;
 
 public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicFragment, CustomizeMusicAdapter.AddItemClickListener {
 
+    private static final String TAG = "test22";
+    private BroadcastReceiver receiver;
     private RecyclerView mRvCustomizeMusic;   //RecyclerView 用于显示自定义歌单
     private CustomizeMusicAdapter mAdapter;   //adapter,歌单列表
     private List<SongListInfo> mSongListInfos; //歌单List
+    private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
 
     @Nullable
     @Override
@@ -58,14 +65,47 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
         View customizeMusicFragment = inflater.inflate(R.layout.fragment_customize_music, container, false);
         mRvCustomizeMusic = customizeMusicFragment.findViewById(R.id.rv_customize_music);
 
+        mSongListInfos = new ArrayList<>();
         showCustomizeMusicInfo();
-
         return customizeMusicFragment;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        createBroadcastReceiver();
+    }
+
+    /**
+     * 广播接收
+     */
+    private void createBroadcastReceiver() {
+        Log.i("test", "createBroadcastReceiver: ");
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                Log.i("test", "onReceive: " + action);
+                if ("AllMusicRefresh".equals(action)){
+                    Log.i(TAG, "onReceive: custom");
+                    mSongListInfos.clear();
+                    mSongListInfos = ((MainActivity)getActivity()).getSongListInfo();
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("AllMusicRefresh");   //重新导入音乐数据时，刷新列表
+        getActivity().registerReceiver(receiver, filter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (receiver != null) {
+            getActivity().unregisterReceiver(receiver);
+        }
     }
 
 

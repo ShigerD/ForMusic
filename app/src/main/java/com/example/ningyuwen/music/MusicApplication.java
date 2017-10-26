@@ -11,6 +11,7 @@ import com.tencent.bugly.crashreport.CrashReport;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import greendao.GreenDaoHelper;
 import greendao.gen.DaoMaster;
@@ -26,7 +27,10 @@ import static android.content.ContentValues.TAG;
 public class MusicApplication extends Application {
     private static DaoSession daoSession;
     private static MusicApplication application;
-    public static final ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+//    public static final ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+
+    //现在使用newFixedThreadPool类型的线程池，线程一直存在，线程数为3,当线程池中没有空闲线程时，进入线程队列等待
+    public static final ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);
 
     @Override
     public void onCreate() {

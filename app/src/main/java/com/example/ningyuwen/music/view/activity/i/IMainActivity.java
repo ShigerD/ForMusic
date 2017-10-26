@@ -19,4 +19,5 @@ public interface IMainActivity {
     MusicData getDataFromPid(long pid);
     List<List<MusicData>> getClassifyMusicInfo(List<ClassifyMusicPlayer> musicPlayers);
     List<ClassifyMusicPlayer> getClassifyMusicPlayerInfo();
+    void sendBroadCastForString(String string);
 }

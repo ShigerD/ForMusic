@@ -1,6 +1,9 @@
 package com.example.ningyuwen.music.view.fragment.impl;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.Fragment;
@@ -29,10 +32,13 @@ import java.util.List;
 
 public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFragment {
 
+    private static final String TAG = "test22";
+    private BroadcastReceiver receiver;
     private ExpandableListView mElClassifyMusic;
     private ClassifyMusicAdapter mAdapter;
     private List<List<MusicData>> mDatas;
     private int mGroupPosition = -1;  //记录当前播放的音乐人
+    private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
 
     @Nullable
     @Override
@@ -40,8 +46,47 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
         super.onCreateView(inflater, container, savedInstanceState);
         View classifyMusicFragmentView = inflater.inflate(R.layout.fragment_classify_music, container, false);
         mElClassifyMusic = (ExpandableListView) classifyMusicFragmentView.findViewById(R.id.el_classify_music);
+
+        mDatas = new ArrayList<>();
         showClassifyMusicInfo();
         return classifyMusicFragmentView;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        createBroadcastReceiver();
+    }
+
+    /**
+     * 广播接收
+     */
+    private void createBroadcastReceiver() {
+        Log.i("test", "createBroadcastReceiver: ");
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                Log.i("test", "onReceive: " + action);
+                if ("AllMusicRefresh".equals(action)){
+                    Log.i(TAG, "onReceive: classify");
+                    mDatas.clear();
+                    showClassifyMusicInfo();
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("AllMusicRefresh");  //重新导入音乐数据时，刷新列表
+        getActivity().registerReceiver(receiver, filter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (receiver != null) {
+            getActivity().unregisterReceiver(receiver);
+        }
     }
 
     /**

@@ -90,7 +90,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         mMainViewPager.setCurrentItem(0);
 
         //线程池，添加一个任务
-        MusicApplication.cachedThreadPool.execute(runnable);
+        MusicApplication.fixedThreadPool.execute(runnable);
 
 //        new Thread(new Runnable() {
 //            @Override
@@ -179,7 +179,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                 getReadPermissionAndGetInfoFromSD();
             }else {
                 //fragment更新数据
-                sendBroadcast(new Intent("AllMusicRefresh"));
+                sendBroadCastForString("AllMusicRefresh");
                 startPlayMusicService();
             }
         }
@@ -245,6 +245,20 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         mMainViewPager = (ViewPager) findViewById(R.id.vp_main_page);         //主页面的viewpager
         mIvBg = (ImageView) findViewById(R.id.iv_main_activity_bg);
         mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        findViewById(R.id.iv_bar_search).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MusicApplication.fixedThreadPool.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        //重新导入音乐数据，查看权限并扫描SD卡
+                        getReadPermissionAndGetInfoFromSD();
+                        //发广播，更新四个fragment里面的数据
+//                        sendBroadcast(new Intent("RefreshMusicData"));
+                    }
+                });
+            }
+        });
     }
 
     private void setListener() {
@@ -352,7 +366,6 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         if (cursor != null && cursor.moveToFirst()) {
             List<MusicBasicInfo> musicBasicInfos = new ArrayList<>();
             while (!cursor.isAfterLast()) {
-
                 //歌曲编号
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
                 //歌曲标题
@@ -387,7 +400,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             mPresenter.saveMusicInfoFromSD(musicBasicInfos);
             //从musicBasicInfos 和 数据库读取数据到 mMusicDatas
             mMusicDatas = mPresenter.getMusicAllInfo(musicBasicInfos);
-            sendBroadcast(new Intent("AllMusicRefresh"));
+            sendBroadCastForString("AllMusicRefresh");
             startPlayMusicService();
         }
     }
@@ -409,7 +422,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 //                break;
             case R.id.iv_music_pic:
                 //点击播放暂停按钮
-                sendBroadcast(new Intent("PlayOrPause"));
+                sendBroadCastForString("PlayOrPause");
                 break;
             default:
                 break;
@@ -550,6 +563,15 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         cursor.close();
         db.close();
         return data;
+    }
+
+    /**
+     * 发送广播
+     * @param string string
+     */
+    @Override
+    public void sendBroadCastForString(String string) {
+        sendBroadcast(new Intent(string));
     }
 
     /**
