@@ -35,6 +35,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toolbar;
 
+import com.bumptech.glide.Glide;
 import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
@@ -203,11 +204,10 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         mIvBg.setImageBitmap(initBitmap);
 
 
-//        if (initBitmap != null){
-//            initBitmap.recycle();
-//            initBitmap = null;
-//            System.gc();
-//        }
+//        Glide.with(this)
+//                .load(R.drawable.pic_main_bg)
+//                .into(mIvBg);
+
     }
 
     /**
@@ -239,8 +239,6 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private void findView() {
         mDrawerMenu = (DrawerLayout) findViewById(R.id.dr_main);              //侧滑菜单布局
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-
-
 
         mMainViewPager = (ViewPager) findViewById(R.id.vp_main_page);         //主页面的viewpager
         mIvBg = (ImageView) findViewById(R.id.iv_main_activity_bg);
