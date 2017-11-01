@@ -21,6 +21,7 @@ import static android.content.ContentValues.TAG;
 
 /**
  * application  app的入口
+ * 线程池在此处调用
  * Created by ningyuwen on 17-9-22.
  */
 
@@ -30,7 +31,8 @@ public class MusicApplication extends Application {
 //    public static final ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
     //现在使用newFixedThreadPool类型的线程池，线程一直存在，线程数为3,当线程池中没有空闲线程时，进入线程队列等待
-    public static final ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);
+    //MusicApplication.getFixedThreadPool().execute(Runnable);
+    private static ExecutorService fixedThreadPool;
 
     @Override
     public void onCreate() {
@@ -57,6 +59,13 @@ public class MusicApplication extends Application {
             Log.i("ning", "getDaoSession: 0");
         }
         return daoSession;
+    }
+
+    public static ExecutorService getFixedThreadPool(){
+        if (fixedThreadPool == null || fixedThreadPool.isShutdown()){
+            fixedThreadPool = Executors.newFixedThreadPool(3);
+        }
+        return fixedThreadPool;
     }
 
 //    public DaoMaster getDaoMaster()
