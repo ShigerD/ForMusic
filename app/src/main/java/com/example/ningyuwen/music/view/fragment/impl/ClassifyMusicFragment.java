@@ -115,15 +115,15 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
                 //点击了其中一条，则将对应的音乐人的所有音乐替换后台播放列表
                 if (groupPosition != mGroupPosition) {
                     mGroupPosition = groupPosition;
+
                     //如果不等，则说明换了音乐人，发送广播，替换音乐列表
-                    Intent intent = new Intent("ReplaceMusicList");
-                    ArrayList<String> paths = new ArrayList<String>();
+                    //如果不等，则说明换了音乐人，不再使用广播发送，使用接口回调
+                    ArrayList<Long> musicId = new ArrayList<>();
                     for (int i = 0;i < mDatas.get(groupPosition).size();i++){
-                        paths.add(mDatas.get(groupPosition).get(i).getMusicFilePath());
+                        musicId.add(mDatas.get(groupPosition).get(i).getpId());
                     }
-                    intent.putStringArrayListExtra("musicInfoList", paths);
-                    intent.putExtra("position", childPosition);
-                    getActivity().sendBroadcast(intent);
+                    ((MainActivity)getActivity()).replaceMusicList(musicId, childPosition);
+
                     return true;
                 }else {
                     //相等，重新播放这首歌曲，提高效率，不替换播放列表

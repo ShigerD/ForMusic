@@ -219,6 +219,16 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
     }
 
     /**
+     * 用pid查询音乐数据基本信息
+     * @param pid pid
+     * @return MusicBasicInfo
+     */
+    @Override
+    public MusicBasicInfo getMusicDataUsePid(long pid) throws NullPointerException{
+        return mDaoSession.getMusicBasicInfoDao().load(pid);
+    }
+
+    /**
      * 传入歌词string，文本文件路径，用于解析歌词文件
      * @param lyricStr string
      * @param filePath string:文件路径

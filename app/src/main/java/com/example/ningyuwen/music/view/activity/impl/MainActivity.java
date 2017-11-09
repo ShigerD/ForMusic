@@ -4,8 +4,10 @@ import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,43 +15,33 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toolbar;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.bumptech.glide.Glide;
 import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
-import com.example.ningyuwen.music.model.entity.lyric.Lyric;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.presenter.impl.MainActivityPresenter;
 import com.example.ningyuwen.music.service.PlayMusicService;
 import com.example.ningyuwen.music.util.FastBlurUtil;
-import com.example.ningyuwen.music.util.NotificationsUtils;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.i.IMainActivity;
 import com.example.ningyuwen.music.view.adapter.MainFragmentAdapter;
@@ -77,6 +69,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private ImageView mIvBg;
     private TabLayout mTabLayout;
     public static final String NOTIFICATION_CHANNEL_ID = "4655";
+    private IServiceDataTrans mServiceDataTrans;  //Activity和Service交互的接口
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -196,25 +189,87 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
      */
     public void startPlayMusicService(){
         Intent intent = new Intent(MainActivity.this, PlayMusicService.class);
+        bindService(intent, mServiceConnection,  Context.BIND_AUTO_CREATE);
+
+    }
+
+    /**
+     * 初始化Service的数据，使用接口回调
+     */
+    private void initServiceData() throws NullPointerException{
         if (mMusicDatas == null){
             return;
         }
-        ArrayList<String> musicPath = new ArrayList<>();
+        ArrayList<Long> musicId = new ArrayList<>();
         for (int i = 0; i < mMusicDatas.size();i++){
-            musicPath.add(i, mMusicDatas.get(i).getMusicFilePath());
+            musicId.add(i, mMusicDatas.get(i).getpId());
         }
-        intent.putStringArrayListExtra("musicInfoList", musicPath);
-        startService(intent);
+
+        //传输初始化数据，音乐路径List
+        mServiceDataTrans.initServiceData(musicId);
     }
+
+
+    /**
+     * 后台播放音乐Service，使用bindService启动，方便传输数据，startService不方便传输数据
+     * 当Service
+     */
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            //使用MyBinder类获取PlayMusicService对象，
+            PlayMusicService.MyBinder myBinder = (PlayMusicService.MyBinder)service;
+            mServiceDataTrans = myBinder.getService();
+            //设置Service对Activity的监听回调
+            myBinder.setIServiceDataToActivity(mServiceDataToActivity);
+
+            Log.i(TAG, "onServiceConnected: initServiceData");
+            //初始化Service的数据，使用接口回调
+            try {
+                initServiceData();
+            }catch (NullPointerException e){
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG, "onServiceConnected: transData33");
+        }
+    };
+
+    /**
+     * Activity和Service传递数据
+     */
+    public interface IServiceDataTrans{
+        void initServiceData(ArrayList<Long> musicPath);  //初始化Service的数据，音乐路径
+        void playMusicFromClick(int position);              //用户点击播放，传入position
+        void playOrPause();                                 //播放或暂停
+        void replaceBackStageMusicList(ArrayList<Long> musicInfoList, int position);//修改后台播放列表，传入musicId,当前播放顺序
+    }
+
+    /**
+     * 将Service的数据传给Activity
+     */
+    private PlayMusicService.IServiceDataToActivity mServiceDataToActivity = new PlayMusicService.IServiceDataToActivity() {
+        @Override
+        public String getMusicFilePath(long pid) {
+            try {
+                return mPresenter.getMusicDataUsePid(pid).getMusicFilePath();
+            }catch (NullPointerException e){
+                e.printStackTrace();
+                return "";
+            }
+        }
+    };
 
     /**
      * 用户点击了音乐，需要在后台播放
      * @param position 点击位置position
      */
     public void playMusicOnBackstage(int position){
-        Intent intent = new Intent("PlayMusic");
-        intent.putExtra("palyPosition", position);
-        sendBroadcast(intent);
+        //不使用广播，使用接口回调
+        mServiceDataTrans.playMusicFromClick(position);
     }
 
     private void findView() {
@@ -230,18 +285,10 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                 MusicApplication.getFixedThreadPool().execute(new Runnable() {
                     @Override
                     public void run() {
-//                        //重新导入音乐数据，查看权限并扫描SD卡
-//                        getReadPermissionAndGetInfoFromSD();
-//                        //发广播，更新四个fragment里面的数据
-////                        sendBroadcast(new Intent("RefreshMusicData"));
-
-
-                        try {
-                            mPresenter.scanLyricFileFromSD();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Log.i(TAG, "run: 异常2");
-                        }
+                        //重新导入音乐数据，查看权限并扫描SD卡
+                        getReadPermissionAndGetInfoFromSD();
+                        //发广播，更新四个fragment里面的数据
+//                        sendBroadcast(new Intent("RefreshMusicData"));
 
                     }
                 });
@@ -256,10 +303,6 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                 mDrawerMenu.openDrawer(GravityCompat.START);
             }
         });
-//        findViewById(R.id.tv_tab_first).setOnClickListener(this);
-//        findViewById(R.id.tv_tab_second).setOnClickListener(this);
-//        findViewById(R.id.tv_tab_third).setOnClickListener(this);
-//        findViewById(R.id.tv_tab_last).setOnClickListener(this);
         findViewById(R.id.iv_music_pic).setOnClickListener(this);
         //viewpager页码变化监听
         mMainViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -387,6 +430,15 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             cursor.close();
             //存储数据到数据库，两张表
             mPresenter.saveMusicInfoFromSD(musicBasicInfos);
+
+            //保存基本信息之后,匹配歌词文件路径
+            try {
+                mPresenter.scanLyricFileFromSD();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.i(TAG, "run: 异常2");
+            }
+
             //从musicBasicInfos 和 数据库读取数据到 mMusicDatas
             mMusicDatas = mPresenter.getMusicAllInfo(musicBasicInfos);
             sendBroadCastForString("AllMusicRefresh");
@@ -411,7 +463,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 //                break;
             case R.id.iv_music_pic:
                 //点击播放暂停按钮
-                sendBroadCastForString("PlayOrPause");
+                mServiceDataTrans.playOrPause();
                 break;
             default:
                 break;
@@ -564,6 +616,15 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     }
 
     /**
+     * 替换歌单列表，某些播放状态下会使用到,position为点击的位置
+     * @param musicInfoList musicInfoList  存储的是音乐文件的ID，方便查询，另外节省空间
+     */
+    @Override
+    public void replaceMusicList(ArrayList<Long> musicInfoList, int position) {
+        mServiceDataTrans.replaceBackStageMusicList(musicInfoList, position);
+    }
+
+    /**
      * 传入音乐人姓名，获取音乐人有多少音乐
      * @param musicPlayer musicPlayer
      * @return int
@@ -576,5 +637,11 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             }
         }
         return number;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mServiceConnection);
     }
 }

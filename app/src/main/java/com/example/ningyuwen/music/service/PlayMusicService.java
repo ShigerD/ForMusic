@@ -1,34 +1,37 @@
 package com.example.ningyuwen.music.service;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.example.ningyuwen.music.model.entity.music.MusicData;
+import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 后台服务，用于播放音乐
  * Created by ningyuwen on 17-9-26.
  */
 
-public class PlayMusicService extends Service {
+public class PlayMusicService extends Service implements MainActivity.IServiceDataTrans {
     private String TAG = "testni";
     private MediaPlayer mMediaPlayer; // 媒体播放器对象
-    private ArrayList<String> mMusicPaths;
+    private ArrayList<Long> musicIds;
     private byte mPlayStatus = 0;   // 0:列表循环  1:列表播放一次  2：随即播放  3：单曲循环
     private BroadcastReceiver mReceiver;
     private int mCurrentTime;        //当前播放进度
     private int mPosition;
+    private MyBinder myBinder = new MyBinder();             //
+    private IServiceDataToActivity mServiceDataToActivity;  //接口，负责将数据传给Activity
 
     @Override
     public void onCreate() {
@@ -43,9 +46,9 @@ public class PlayMusicService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand: ");
-        if (intent != null && mMusicPaths == null){
-            mMusicPaths = intent.getStringArrayListExtra("musicInfoList");
-        }
+//        if (intent != null && mMusicPaths == null){
+//            mMusicPaths = intent.getStringArrayListExtra("musicInfoList");
+//        }
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -55,39 +58,12 @@ public class PlayMusicService extends Service {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 switch (action){
-                    case "PlayMusic":
-                        int i = intent.getIntExtra("palyPosition", 0);
-                        mPosition = i;
-                        //播放音乐
-                        playMusic(i, 0);
-                        break;
-                    case "ChangePlayStatus":
-
-                        break;
-                    case "PlayOrPause":
-                        //点击主页面的播放暂停按钮，判断当前播放状态，为播放就暂停
-                        playOrPause();
-                        break;
-                    case "ReplaceMusicList":
-                        if (mMusicPaths == null){
-                            mMusicPaths = new ArrayList<>();
-                        }
-                        mMusicPaths.clear();
-                        //添加到播放列表
-                        mMusicPaths = intent.getStringArrayListExtra("musicInfoList");
-                        mPosition = intent.getIntExtra("position", 0);
-                        playMusic(intent.getIntExtra("position", 0), 0);
-                        break;
                     default:
                         break;
                 }
-
             }
         };
         IntentFilter filter = new IntentFilter();
-        filter.addAction("PlayMusic");
-        filter.addAction("ChangePlayStatus");
-        filter.addAction("PlayOrPause");
         filter.addAction("ReplaceMusicList");  //替换音乐列表数据，可能在歌手分类，我喜爱的，自定歌单这些页面用到
         registerReceiver(mReceiver, filter);
     }
@@ -95,6 +71,7 @@ public class PlayMusicService extends Service {
     /**
      * handler用来接收消息，来发送广播更新播放时间
      */
+    @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             // 1 为每一秒发送过来更新播放时间等数据
@@ -123,19 +100,26 @@ public class PlayMusicService extends Service {
     }
 
     /**
+     * 将Service的数据传给Activity
+     */
+    public interface IServiceDataToActivity {
+        String getMusicFilePath(long pid);
+    }
+
+    /**
      * 播放音乐
      * @param currentTime 当前时间
      */
     private void playMusic(int i, int currentTime) {
         try {
             mMediaPlayer.reset();// 把各项参数恢复到初始状态
-            mMediaPlayer.setDataSource(mMusicPaths.get(i));
+            mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(musicIds.get(i)));
             mMediaPlayer.prepare(); // 进行缓冲
             mMediaPlayer.setOnPreparedListener(new PreparedListener(currentTime));// 注册一个监听器
             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
-                    mPosition = (mPosition + 1) % mMusicPaths.size();
+                    mPosition = (mPosition + 1) % musicIds.size();
                     playMusic(mPosition, 0);
                 }
             });
@@ -144,6 +128,28 @@ public class PlayMusicService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Activity和Service传递数据
+     */
+    @Override
+    public void initServiceData(ArrayList<Long> musicPath) {
+        Log.i(TAG, "transData: service接收到数据");
+        musicIds = new ArrayList<>();
+        musicIds = musicPath;
+        Log.i(TAG, "initServiceData: " + musicIds.size());
+    }
+
+    /**
+     * 用户点击播放，传入position
+     * @param position i
+     */
+    @Override
+    public void playMusicFromClick(int position) {
+        mPosition = position;
+        //播放音乐
+        playMusic(mPosition, 0);
     }
 
     /**
@@ -175,7 +181,8 @@ public class PlayMusicService extends Service {
     /**
      * 暂停音乐或者播放音乐，主页面的按钮
      */
-    private void playOrPause() {
+    @Override
+    public void playOrPause() {
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
 //            isPause = true;
@@ -184,15 +191,37 @@ public class PlayMusicService extends Service {
         }
     }
 
+    /**
+     * 修改后台播放列表，传入musicId,当前播放顺序
+     * @param musicInfoList musicInfoList 存储musicId
+     * @param position 播放第几个
+     */
+    @Override
+    public void replaceBackStageMusicList(ArrayList<Long> musicInfoList, int position) {
+        if (musicIds == null){
+            musicIds = new ArrayList<>();
+        }
+        musicIds.clear();
+        musicIds = musicInfoList;   //pid
+        mPosition = position;       //position
+        playMusic(mPosition, 0);
+    }
+
+    /**
+     * 返回MyBinder对象，在MainActivity中使用bindService之后监听连接成功可以获取IBinder对象，转为MyBinder类型，
+     * 再获取PlayMusicService实例，赋值给 ServiceDataTrans
+     * @param intent intent
+     * @return 返回MyBinder对象
+     */
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.i(TAG, "onBind: ");
-        return null;
+        return myBinder;
     }
 
     @Override
     public void onDestroy() {
+        stopSelf();
         super.onDestroy();
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
@@ -202,4 +231,26 @@ public class PlayMusicService extends Service {
         }
         Log.i(TAG, "onDestroy: ");
     }
+
+    // IBinder是远程对象的基本接口，是为高性能而设计的轻量级远程调用机制的核心部分。但它不仅用于远程
+    // 调用，也用于进程内调用。这个接口定义了与远程对象交互的协议。
+    // 不要直接实现这个接口，而应该从Binder派生。
+    // Binder类已实现了IBinder接口
+    public class MyBinder extends Binder {
+        /** * 获取Service的方法 * @return 返回PlayerService */
+        public PlayMusicService getService(){
+            return PlayMusicService.this;
+        }
+
+        /**
+         * 传递Activity的context,绑定监听对象
+         * @param serviceDataToActivity serviceDataToActivity
+         */
+        public void setIServiceDataToActivity(IServiceDataToActivity serviceDataToActivity){
+            mServiceDataToActivity = serviceDataToActivity;
+        }
+    }
+
+
+
 }
