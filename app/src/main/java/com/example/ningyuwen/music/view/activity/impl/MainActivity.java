@@ -274,7 +274,12 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             mTvMusicName.setText(musicBasicInfo.getMusicName());   // 显示音乐名
             String lyric = mPresenter.getLyricFromDBUsePid(musicBasicInfo);   //获取歌词
             Log.i(TAG, "showLyricAtActivity: " + lyric);
-//            if ()
+            if ("".equals(lyric)){
+                mTvMusicLyric.setText("暂无歌词");
+                return;
+            }
+            //歌词不为空
+            mPresenter.analysisLyric(lyric);
         }
     };
 

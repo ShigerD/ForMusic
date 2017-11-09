@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import greendao.gen.MusicBasicInfoDao;
 import greendao.gen.MusicRecordInfoDao;
@@ -257,6 +259,27 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
             e.printStackTrace();
         }
         return "";
+    }
+
+    /**
+     * 解析歌词
+     * @param lyric lyric
+     */
+    @Override
+    public void analysisLyric(String lyric) {
+        String[] strings = lyric.split("\n");
+        Log.i(TAG, "analysisLyric: " + strings.length);
+
+        String regx1="\\[\\d{2}:\\d{2}.\\d{3}\\]*";
+        String regx2="\\[\\d{2}:\\d{2}\\]";
+        Pattern p = Pattern.compile(regx1);
+        String str = "[24:00.00]";
+        Matcher m = p.matcher(strings[2]);
+        if(!m.matches()){
+            Log.i(TAG, "analysisLyric: 输入格式不符合要求" );
+        }else{
+            Log.i(TAG, "analysisLyric: 输入格式正确!　匹配格式为:" + "[00:00.00]");
+        }
     }
 
     /**

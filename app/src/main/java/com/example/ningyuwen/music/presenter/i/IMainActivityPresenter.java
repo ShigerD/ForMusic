@@ -24,4 +24,5 @@ public interface IMainActivityPresenter {
     void scanLyricFileFromSD() throws IOException;  //网易云音乐、QQ音乐、虾米音乐等几款音乐播放器歌词路径
     MusicBasicInfo getMusicDataUsePid(long pid);  //用pid查询音乐数据基本信息
     String getLyricFromDBUsePid(MusicBasicInfo musicBasicInfo);        //获取歌词数据
+    void analysisLyric(String lyric);               //解析歌词
 }
