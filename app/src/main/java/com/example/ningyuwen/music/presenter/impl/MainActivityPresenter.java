@@ -26,6 +26,7 @@ import org.jsoup.nodes.Document;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -194,7 +195,7 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
                 try {
                     in = new FileInputStream(file);
                     byte[] buf = new byte[1024];
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     while((in.read(buf)) != -1){
                         sb.append(new String(buf));
                         buf = new byte[1024];//重新生成，避免和上次读取的数据重复
@@ -226,6 +227,36 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
     @Override
     public MusicBasicInfo getMusicDataUsePid(long pid) throws NullPointerException{
         return mDaoSession.getMusicBasicInfoDao().load(pid);
+    }
+
+    /**
+     * 获取歌词数据
+     * @param musicBasicInfo long pid
+     * @return string
+     */
+    @Override
+    public String getLyricFromDBUsePid(MusicBasicInfo musicBasicInfo) {
+        String lyricPath = musicBasicInfo.getMusicLyricPath();  //歌词文件路径
+        FileInputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(new File(lyricPath));
+            byte[] buf = new byte[1024];
+            StringBuilder sb = new StringBuilder();
+            while((inputStream.read(buf)) != -1){
+                sb.append(new String(buf));
+                buf = new byte[1024];//重新生成，避免和上次读取的数据重复
+            }
+            //歌词string
+            String string = sb.toString();  //歌词文件文本
+            inputStream.close();
+
+            //json解析
+            JSONObject jsonObject = (JSONObject)JSON.parse(string);
+            return jsonObject.getString("lyric");   //歌词
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     /**

@@ -25,12 +25,12 @@ import java.util.ArrayList;
 public class PlayMusicService extends Service implements MainActivity.IServiceDataTrans {
     private String TAG = "testni";
     private MediaPlayer mMediaPlayer; // 媒体播放器对象
-    private ArrayList<Long> musicIds;
+    private ArrayList<Long> mMusicIds;
     private byte mPlayStatus = 0;   // 0:列表循环  1:列表播放一次  2：随即播放  3：单曲循环
     private BroadcastReceiver mReceiver;
     private int mCurrentTime;        //当前播放进度
     private int mPosition;
-    private MyBinder myBinder = new MyBinder();             //
+    private MyBinder myBinder = new MyBinder();             //MyBinder获取PlayMusicService
     private IServiceDataToActivity mServiceDataToActivity;  //接口，负责将数据传给Activity
 
     @Override
@@ -103,7 +103,8 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      * 将Service的数据传给Activity
      */
     public interface IServiceDataToActivity {
-        String getMusicFilePath(long pid);
+        String getMusicFilePath(long pid);   //获取音乐文件路径
+        void showLyricAtActivity(long pid);  //展示歌词,通过pid查询到文件路径，再解析歌词文件
     }
 
     /**
@@ -113,13 +114,13 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     private void playMusic(int i, int currentTime) {
         try {
             mMediaPlayer.reset();// 把各项参数恢复到初始状态
-            mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(musicIds.get(i)));
+            mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(mMusicIds.get(i)));
             mMediaPlayer.prepare(); // 进行缓冲
             mMediaPlayer.setOnPreparedListener(new PreparedListener(currentTime));// 注册一个监听器
             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
-                    mPosition = (mPosition + 1) % musicIds.size();
+                    mPosition = (mPosition + 1) % mMusicIds.size();
                     playMusic(mPosition, 0);
                 }
             });
@@ -128,17 +129,18 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        //在playMusic之后再读取歌词文件，因为所有播放音乐的最后一步都是在这里实现的，所以只用写一份代码
+        mServiceDataToActivity.showLyricAtActivity(mMusicIds.get(i));
     }
 
     /**
      * Activity和Service传递数据
      */
     @Override
-    public void initServiceData(ArrayList<Long> musicPath) {
-        Log.i(TAG, "transData: service接收到数据");
-        musicIds = new ArrayList<>();
-        musicIds = musicPath;
-        Log.i(TAG, "initServiceData: " + musicIds.size());
+    public void initServiceData(ArrayList<Long> musicId) {
+        mMusicIds = new ArrayList<>();
+        mMusicIds = musicId;
     }
 
     /**
@@ -170,11 +172,6 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             if (currentTime > 0) { // 如果音乐不是从头播放
                 mMediaPlayer.seekTo(currentTime);
             }
-//            Intent intent = new Intent();
-//            intent.setAction(MUSIC_DURATION);
-//            duration = mediaPlayer.getDuration();
-//            intent.putExtra("duration", duration);  //通过Intent来传递歌曲的总长度
-//            sendBroadcast(intent);
         }
     }
 
@@ -198,11 +195,11 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      */
     @Override
     public void replaceBackStageMusicList(ArrayList<Long> musicInfoList, int position) {
-        if (musicIds == null){
-            musicIds = new ArrayList<>();
+        if (mMusicIds == null){
+            mMusicIds = new ArrayList<>();
         }
-        musicIds.clear();
-        musicIds = musicInfoList;   //pid
+        mMusicIds.clear();
+        mMusicIds = musicInfoList;   //pid
         mPosition = position;       //position
         playMusic(mPosition, 0);
     }

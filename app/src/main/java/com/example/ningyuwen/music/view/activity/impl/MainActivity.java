@@ -32,6 +32,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.R;
@@ -70,6 +71,8 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private TabLayout mTabLayout;
     public static final String NOTIFICATION_CHANNEL_ID = "4655";
     private IServiceDataTrans mServiceDataTrans;  //Activity和Service交互的接口
+    private TextView mTvMusicName;  //显示音乐名
+    private TextView mTvMusicLyric; //显示音乐歌词
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -242,7 +245,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
      * Activity和Service传递数据
      */
     public interface IServiceDataTrans{
-        void initServiceData(ArrayList<Long> musicPath);  //初始化Service的数据，音乐路径
+        void initServiceData(ArrayList<Long> musicId);  //初始化Service的数据，音乐路径
         void playMusicFromClick(int position);              //用户点击播放，传入position
         void playOrPause();                                 //播放或暂停
         void replaceBackStageMusicList(ArrayList<Long> musicInfoList, int position);//修改后台播放列表，传入musicId,当前播放顺序
@@ -252,6 +255,8 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
      * 将Service的数据传给Activity
      */
     private PlayMusicService.IServiceDataToActivity mServiceDataToActivity = new PlayMusicService.IServiceDataToActivity() {
+
+        //获取音乐文件路径
         @Override
         public String getMusicFilePath(long pid) {
             try {
@@ -260,6 +265,16 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                 e.printStackTrace();
                 return "";
             }
+        }
+
+        //展示歌词,通过pid查询到文件路径，再解析歌词文件
+        @Override
+        public void showLyricAtActivity(long pid) {
+            MusicBasicInfo musicBasicInfo = mPresenter.getMusicDataUsePid(pid);
+            mTvMusicName.setText(musicBasicInfo.getMusicName());   // 显示音乐名
+            String lyric = mPresenter.getLyricFromDBUsePid(musicBasicInfo);   //获取歌词
+            Log.i(TAG, "showLyricAtActivity: " + lyric);
+//            if ()
         }
     };
 
@@ -275,7 +290,8 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private void findView() {
         mDrawerMenu = (DrawerLayout) findViewById(R.id.dr_main);              //侧滑菜单布局
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-
+        mTvMusicName = (TextView) findViewById(R.id.tv_music_name);
+        mTvMusicLyric = (TextView) findViewById(R.id.tv_music_lyric);
         mMainViewPager = (ViewPager) findViewById(R.id.vp_main_page);         //主页面的viewpager
         mIvBg = (ImageView) findViewById(R.id.iv_main_activity_bg);
         mTabLayout = (TabLayout) findViewById(R.id.tab_layout);

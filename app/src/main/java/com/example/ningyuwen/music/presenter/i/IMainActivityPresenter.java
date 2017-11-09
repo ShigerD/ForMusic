@@ -23,4 +23,5 @@ public interface IMainActivityPresenter {
     void addLrcPathAndMusicPicToDB(String musicName, String musicPlayer, String musicPic, String filePath);  //扫描歌词文件，将文件路径存储到数据库
     void scanLyricFileFromSD() throws IOException;  //网易云音乐、QQ音乐、虾米音乐等几款音乐播放器歌词路径
     MusicBasicInfo getMusicDataUsePid(long pid);  //用pid查询音乐数据基本信息
+    String getLyricFromDBUsePid(MusicBasicInfo musicBasicInfo);        //获取歌词数据
 }
