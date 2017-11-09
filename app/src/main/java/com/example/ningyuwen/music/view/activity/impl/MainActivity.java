@@ -35,17 +35,22 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toolbar;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
+import com.example.ningyuwen.music.model.entity.lyric.Lyric;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.presenter.impl.MainActivityPresenter;
 import com.example.ningyuwen.music.service.PlayMusicService;
 import com.example.ningyuwen.music.util.FastBlurUtil;
 import com.example.ningyuwen.music.util.NotificationsUtils;
+import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.i.IMainActivity;
 import com.example.ningyuwen.music.view.adapter.MainFragmentAdapter;
 import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
@@ -53,6 +58,7 @@ import com.example.ningyuwen.music.view.fragment.impl.ClassifyMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,32 +97,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         mMainViewPager.setCurrentItem(0);
 
         //线程池，添加一个任务
-        MusicApplication.fixedThreadPool.execute(runnable);
-
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                mMusicDatas = new ArrayList<>();
-//                //先检查数据库中是否有数据，若有则读取数据库中的数据
-//                mMusicDatas = mPresenter.getMusicBasicInfoFromDB();
-//
-//                //如果返回数据为空，从SD卡读取数据
-//                if (mMusicDatas.size() == 0){
-//                    //获取读写权限，并获取音乐数据，存储到数据库，和 存储到 mMusicDatas
-//                    getReadPermissionAndGetInfoFromSD();
-//                }else {
-//                    //fragment更新数据
-//                    sendBroadcast(new Intent("AllMusicRefresh"));
-//                    startPlayMusicService();
-//                }
-//            }
-//        }).start();
+        MusicApplication.getFixedThreadPool().execute(runnable);
 
     }
 
@@ -246,13 +227,22 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         findViewById(R.id.iv_bar_search).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MusicApplication.fixedThreadPool.execute(new Runnable() {
+                MusicApplication.getFixedThreadPool().execute(new Runnable() {
                     @Override
                     public void run() {
-                        //重新导入音乐数据，查看权限并扫描SD卡
-                        getReadPermissionAndGetInfoFromSD();
-                        //发广播，更新四个fragment里面的数据
-//                        sendBroadcast(new Intent("RefreshMusicData"));
+//                        //重新导入音乐数据，查看权限并扫描SD卡
+//                        getReadPermissionAndGetInfoFromSD();
+//                        //发广播，更新四个fragment里面的数据
+////                        sendBroadcast(new Intent("RefreshMusicData"));
+
+
+                        try {
+                            mPresenter.scanLyricFileFromSD();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Log.i(TAG, "run: 异常2");
+                        }
+
                     }
                 });
             }
@@ -322,7 +312,8 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
             if (i != PackageManager.PERMISSION_GRANTED) {
                 // 如果没有授予该权限，就去提示用户请求
-                ActivityCompat.requestPermissions(this, permissions, 321);
+                ActivityCompat.requestPermissions(this, permissions,
+                        StaticFinalUtil.MUSIC_FILE_PERMISSION);
                 shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS);
                 //没有该权限，返回
                 return;
@@ -335,7 +326,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 321) {
+        if (requestCode == StaticFinalUtil.MUSIC_FILE_PERMISSION) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     //获取权限失败

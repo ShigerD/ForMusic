@@ -31,6 +31,8 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
         public final static Property MusicAlbum = new Property(4, String.class, "musicAlbum", false, "MUSIC_ALBUM");
         public final static Property MusicFilePath = new Property(5, String.class, "musicFilePath", false, "MUSIC_FILE_PATH");
         public final static Property MusicFileSize = new Property(6, long.class, "musicFileSize", false, "MUSIC_FILE_SIZE");
+        public final static Property MusicLyricPath = new Property(7, String.class, "musicLyricPath", false, "MUSIC_LYRIC_PATH");
+        public final static Property MusicAlbumPicUrl = new Property(8, String.class, "musicAlbumPicUrl", false, "MUSIC_ALBUM_PIC_URL");
     }
 
 
@@ -52,7 +54,9 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
                 "\"MUSIC_TIME\" INTEGER NOT NULL ," + // 3: musicTime
                 "\"MUSIC_ALBUM\" TEXT," + // 4: musicAlbum
                 "\"MUSIC_FILE_PATH\" TEXT," + // 5: musicFilePath
-                "\"MUSIC_FILE_SIZE\" INTEGER NOT NULL );"); // 6: musicFileSize
+                "\"MUSIC_FILE_SIZE\" INTEGER NOT NULL ," + // 6: musicFileSize
+                "\"MUSIC_LYRIC_PATH\" TEXT," + // 7: musicLyricPath
+                "\"MUSIC_ALBUM_PIC_URL\" TEXT);"); // 8: musicAlbumPicUrl
     }
 
     /** Drops the underlying database table. */
@@ -91,6 +95,16 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
             stmt.bindString(6, musicFilePath);
         }
         stmt.bindLong(7, entity.getMusicFileSize());
+ 
+        String musicLyricPath = entity.getMusicLyricPath();
+        if (musicLyricPath != null) {
+            stmt.bindString(8, musicLyricPath);
+        }
+ 
+        String musicAlbumPicUrl = entity.getMusicAlbumPicUrl();
+        if (musicAlbumPicUrl != null) {
+            stmt.bindString(9, musicAlbumPicUrl);
+        }
     }
 
     @Override
@@ -123,6 +137,16 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
             stmt.bindString(6, musicFilePath);
         }
         stmt.bindLong(7, entity.getMusicFileSize());
+ 
+        String musicLyricPath = entity.getMusicLyricPath();
+        if (musicLyricPath != null) {
+            stmt.bindString(8, musicLyricPath);
+        }
+ 
+        String musicAlbumPicUrl = entity.getMusicAlbumPicUrl();
+        if (musicAlbumPicUrl != null) {
+            stmt.bindString(9, musicAlbumPicUrl);
+        }
     }
 
     @Override
@@ -139,7 +163,9 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
             cursor.getInt(offset + 3), // musicTime
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // musicAlbum
             cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // musicFilePath
-            cursor.getLong(offset + 6) // musicFileSize
+            cursor.getLong(offset + 6), // musicFileSize
+            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // musicLyricPath
+            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8) // musicAlbumPicUrl
         );
         return entity;
     }
@@ -153,6 +179,8 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
         entity.setMusicAlbum(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
         entity.setMusicFilePath(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
         entity.setMusicFileSize(cursor.getLong(offset + 6));
+        entity.setMusicLyricPath(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
+        entity.setMusicAlbumPicUrl(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
      }
     
     @Override

@@ -24,10 +24,14 @@ public class MusicBasicInfo {
     private String musicAlbum;      //音乐专辑名
     private String musicFilePath;   //音乐文件路径
     private long musicFileSize;     //音乐文件大小
-    @Generated(hash = 990824296)
+    private String musicLyricPath;   //音乐歌词文件路径
+    private String musicAlbumPicUrl; //音乐文件专辑图片，目前只能找到这个了
+
+
+    @Generated(hash = 1088212059)
     public MusicBasicInfo(Long pId, String musicName, String musicPlayer,
             int musicTime, String musicAlbum, String musicFilePath,
-            long musicFileSize) {
+            long musicFileSize, String musicLyricPath, String musicAlbumPicUrl) {
         this.pId = pId;
         this.musicName = musicName;
         this.musicPlayer = musicPlayer;
@@ -35,6 +39,8 @@ public class MusicBasicInfo {
         this.musicAlbum = musicAlbum;
         this.musicFilePath = musicFilePath;
         this.musicFileSize = musicFileSize;
+        this.musicLyricPath = musicLyricPath;
+        this.musicAlbumPicUrl = musicAlbumPicUrl;
     }
     @Generated(hash = 1276167751)
     public MusicBasicInfo() {
@@ -81,6 +87,21 @@ public class MusicBasicInfo {
     public void setMusicFileSize(long musicFileSize) {
         this.musicFileSize = musicFileSize;
     }
+    public String getMusicLyricPath() {
+        return this.musicLyricPath;
+    }
+    public void setMusicLyricPath(String musicLyricPath) {
+        this.musicLyricPath = musicLyricPath;
+    }
+    public String getMusicAlbumPicUrl() {
+        return this.musicAlbumPicUrl;
+    }
+    public void setMusicAlbumPicUrl(String musicAlbumPicUrl) {
+        this.musicAlbumPicUrl = musicAlbumPicUrl;
+    }
+
+    
+    
     
 
 }

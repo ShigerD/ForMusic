@@ -61,6 +61,10 @@ public class MusicApplication extends Application {
         return daoSession;
     }
 
+    /**
+     * 获取线程池实例
+     * @return ExecutorService
+     */
     public static ExecutorService getFixedThreadPool(){
         if (fixedThreadPool == null || fixedThreadPool.isShutdown()){
             fixedThreadPool = Executors.newFixedThreadPool(3);
