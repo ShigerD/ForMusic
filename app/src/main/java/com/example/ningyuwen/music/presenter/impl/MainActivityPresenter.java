@@ -8,6 +8,7 @@ import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.util.Pair;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -266,20 +267,44 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
      * @param lyric lyric
      */
     @Override
-    public void analysisLyric(String lyric) {
+    public List<Pair<Long, String>> analysisLyric(String lyric) {
         String[] strings = lyric.split("\n");
         Log.i(TAG, "analysisLyric: " + strings.length);
 
-        String regx1="\\[\\d{2}:\\d{2}.\\d{3}\\]*";
-        String regx2="\\[\\d{2}:\\d{2}\\]";
-        Pattern p = Pattern.compile(regx1);
-        String str = "[24:00.00]";
-        Matcher m = p.matcher(strings[2]);
-        if(!m.matches()){
-            Log.i(TAG, "analysisLyric: 输入格式不符合要求" );
-        }else{
-            Log.i(TAG, "analysisLyric: 输入格式正确!　匹配格式为:" + "[00:00.00]");
+        //List，用于存储歌词的时间和歌词
+        List<Pair<Long, String>> timeAndLyric = new ArrayList<>();
+
+        String regx="\\[\\d{2}:\\d{2}.\\d{3}\\]";
+        Pattern p = Pattern.compile(regx);
+
+        for (int i = 0;i < strings.length;i++) {
+            Matcher m = p.matcher(strings[i]);
+            if(!m.find()){
+                Log.i(TAG, "analysisLyric: 输入格式不符合要求" );
+            }else{
+                //有时间，解析
+                Pair<Long, String> pair;  //一个新的对象，存储时间和歌词
+                String[] str = strings[i].split("\\[|\\]");
+
+//                Log.i(TAG, "analysisLyric: " + str[1].split("\\:|\\.")[0] + str[1].split("\\:|\\.")[1] +
+//                        str[1].split("\\:|\\.")[2]);
+
+                //歌词时间
+                long time = Long.parseLong(str[1].split("\\:|\\.")[0])*60*1000 +
+                        Long.parseLong(str[1].split("\\:|\\.")[1])*1000 +
+                        Long.parseLong(str[1].split("\\:|\\.")[2]);
+                try {
+                    Log.i(TAG, "analysisLyric: " + time + " " + str[2]);
+                    pair = Pair.create(time, str[2]);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Log.i(TAG, "analysisLyric: 异常 " + time + " " + str[1]);
+                    pair = Pair.create(time, "");
+                }
+                timeAndLyric.add(pair);  //添加到List
+            }
         }
+        return timeAndLyric;
     }
 
     /**

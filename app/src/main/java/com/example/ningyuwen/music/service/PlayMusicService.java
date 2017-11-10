@@ -38,7 +38,6 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         super.onCreate();
         mMediaPlayer = new MediaPlayer();
 
-        setStatusListener();
         setBroadCastReceiver();
         Log.i(TAG, "onCreate: ");
     }
@@ -73,7 +72,10 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      */
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
+
+        @Override
         public void handleMessage(android.os.Message msg) {
+            super.handleMessage(msg);
             // 1 为每一秒发送过来更新播放时间等数据
             if (msg.what == 1) {
                 if(mMediaPlayer != null) {
@@ -87,17 +89,8 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 }
 
             }
-        };
+        }
     };
-
-    private void setStatusListener() {
-        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-
-            }
-        });
-    }
 
     /**
      * 将Service的数据传给Activity
@@ -202,6 +195,15 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         mMusicIds = musicInfoList;   //pid
         mPosition = position;       //position
         playMusic(mPosition, 0);
+    }
+
+    /**
+     * 获取播放进度，返回毫秒
+     * @return int
+     */
+    @Override
+    public int getMusicPlayTimeStamp() {
+        return mMediaPlayer.getCurrentPosition();
     }
 
     /**

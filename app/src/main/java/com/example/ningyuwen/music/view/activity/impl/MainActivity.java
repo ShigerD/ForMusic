@@ -1,6 +1,7 @@
 package com.example.ningyuwen.music.view.activity.impl;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -15,7 +16,9 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -29,6 +32,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -52,6 +56,7 @@ import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,9 +75,11 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private ImageView mIvBg;
     private TabLayout mTabLayout;
     public static final String NOTIFICATION_CHANNEL_ID = "4655";
-    private IServiceDataTrans mServiceDataTrans;  //Activity和Service交互的接口
+    private static IServiceDataTrans mServiceDataTrans;  //Activity和Service交互的接口
     private TextView mTvMusicName;  //显示音乐名
-    private TextView mTvMusicLyric; //显示音乐歌词
+    private static TextView mTvMusicLyric; //显示音乐歌词
+    private static List<Pair<Long, String>> mTimeAndLyric;   //歌词
+//    private static MyHandler mMyHandler;   //handler
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -80,8 +87,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        getNotification();
-
+//        mMyHandler = new MyHandler(MainActivity.this);
         //绑定控件和设置监听
         findView();
         setMainActivityBg();
@@ -249,6 +255,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         void playMusicFromClick(int position);              //用户点击播放，传入position
         void playOrPause();                                 //播放或暂停
         void replaceBackStageMusicList(ArrayList<Long> musicInfoList, int position);//修改后台播放列表，传入musicId,当前播放顺序
+        int getMusicPlayTimeStamp();                        //获取播放进度，返回毫秒
     }
 
     /**
@@ -278,10 +285,128 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                 mTvMusicLyric.setText("暂无歌词");
                 return;
             }
-            //歌词不为空
-            mPresenter.analysisLyric(lyric);
+
+            //歌词List，时间加歌词
+            if (mTimeAndLyric == null){
+                mTimeAndLyric = new ArrayList<>();
+            }
+            mTimeAndLyric.clear();
+            mTimeAndLyric = mPresenter.analysisLyric(lyric);   //歌词
+            MusicApplication.getSingleThreadPool().execute(LyricRunnable.getInstance());
         }
     };
+
+    /**
+     * handler
+     */
+//    private static class HandlerActivity extends Handler{
+//        private static HandlerActivity mHandlerActivity;  //Activity的handler实例
+//
+//        static HandlerActivity getInstance(){
+//            if (mHandlerActivity == null){
+//                mHandlerActivity = new HandlerActivity();
+//            }
+//            return mHandlerActivity;
+//        }
+//
+//        @Override
+//        public void handleMessage(Message message){
+//            super.handleMessage(message);
+//            switch (message.what){
+//                case StaticFinalUtil.HANDLER_ACTIVITY_LYRIC:
+//                    //显示歌词
+//                    mTvMusicLyric.setText(mTimeAndLyric.get(message.arg1).second);
+//                    break;
+//            }
+//        }
+//    }
+
+//    static class MyHandler extends Handler {
+//        WeakReference<MainActivity> mActivityReference;
+//
+//        MyHandler(MainActivity activity) {
+//            mActivityReference= new WeakReference<MainActivity>(activity);
+//        }
+//
+//        @Override
+//        public void handleMessage(Message message) {
+//            Log.i("ningtest", "handleMessage: 信息");
+//
+//            final MainActivity activity = mActivityReference.get();
+//            if (activity == null){
+//                return;
+//            }
+//            switch (message.what){
+//                case StaticFinalUtil.HANDLER_ACTIVITY_LYRIC:
+//                    //显示歌词
+//                    mTvMusicLyric.setText(mTimeAndLyric.get(message.arg1).second);
+//                    break;
+//            }
+//        }
+//    }
+
+    /**
+     * handler
+     */
+    @SuppressLint("HandlerLeak")
+    static Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message message) {
+            switch (message.what){
+                case StaticFinalUtil.HANDLER_ACTIVITY_LYRIC:
+                    //显示歌词
+                    mTvMusicLyric.setText(mTimeAndLyric.get(message.arg1).second);
+                    break;
+            }
+        }
+    };
+
+    /**
+     * 用于控制歌词的显示
+     */
+    private static class LyricRunnable implements Runnable{
+        private static LyricRunnable mLyricRunnable;
+
+        static LyricRunnable getInstance(){
+            if (mLyricRunnable == null){
+                mLyricRunnable = new LyricRunnable();
+            }
+            return mLyricRunnable;
+        }
+
+        @Override
+        public void run() {
+            Log.i("ningtest", "run: ningtest");
+            Message msg = handler.obtainMessage();
+            msg.arg1 = 0;
+            msg.what = StaticFinalUtil.HANDLER_ACTIVITY_LYRIC;
+            msg.sendToTarget();
+            //一直运行
+            while (mTimeAndLyric.size() > 0) {
+                try {
+                    int nowTime = mServiceDataTrans.getMusicPlayTimeStamp();  //当前播放时间
+                    //遍历找到对应的歌词顺序
+                    for (int i = 0; i < mTimeAndLyric.size(); i++) {
+                        if (nowTime > mTimeAndLyric.get(i).first && nowTime < mTimeAndLyric.get(i + 1).first) {
+                            //发送msg更新歌词
+//                            handler.obtainMessage(StaticFinalUtil.HANDLER_ACTIVITY_LYRIC, i, 0);
+                            msg = handler.obtainMessage();
+                            msg.arg1 = i;
+                            msg.what = StaticFinalUtil.HANDLER_ACTIVITY_LYRIC;
+                            msg.sendToTarget();
+                            mTimeAndLyric.remove(i);
+                            break;
+                        }
+                    }
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.i("ningtest", "run: 空指针异常");
+                    break;
+                }
+            }
+        }
+    }
 
     /**
      * 用户点击了音乐，需要在后台播放

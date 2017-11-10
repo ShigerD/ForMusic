@@ -6,6 +6,7 @@ package com.example.ningyuwen.music.util;
  */
 
 public class StaticFinalUtil {
-    public static final int MUSIC_FILE_PERMISSION = 1;
+    public static final int MUSIC_FILE_PERMISSION = 1001;  //权限
+    public static final int HANDLER_ACTIVITY_LYRIC = 1002;  //歌词
 
 }

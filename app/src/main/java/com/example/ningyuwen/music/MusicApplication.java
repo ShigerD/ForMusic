@@ -32,7 +32,8 @@ public class MusicApplication extends Application {
 
     //现在使用newFixedThreadPool类型的线程池，线程一直存在，线程数为3,当线程池中没有空闲线程时，进入线程队列等待
     //MusicApplication.getFixedThreadPool().execute(Runnable);
-    private static ExecutorService fixedThreadPool;
+    private static ExecutorService fixedThreadPool;   //线程总数为3
+    private static ExecutorService singleThreadPool;  //线程总数为1
 
     @Override
     public void onCreate() {
@@ -70,6 +71,19 @@ public class MusicApplication extends Application {
             fixedThreadPool = Executors.newFixedThreadPool(3);
         }
         return fixedThreadPool;
+    }
+
+    /**
+     * 获取线程池实例  唯一的工作线程来执行任务， 主要用于歌词的显示，使用之前先shutdown
+     * @return ExecutorService
+     */
+    public static ExecutorService getSingleThreadPool(){
+        //singleThreadPool为空，则直接new，不为空，先shutdownNow
+        if (singleThreadPool != null){
+            singleThreadPool.shutdownNow();
+        }
+        singleThreadPool = Executors.newSingleThreadExecutor();
+        return singleThreadPool;
     }
 
 //    public DaoMaster getDaoMaster()
