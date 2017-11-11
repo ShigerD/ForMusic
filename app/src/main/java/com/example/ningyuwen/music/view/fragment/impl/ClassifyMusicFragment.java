@@ -18,6 +18,7 @@ import android.widget.ExpandableListView;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
+import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.example.ningyuwen.music.view.adapter.ClassifyMusicAdapter;
 import com.example.ningyuwen.music.view.fragment.i.IClassifyMusicFragment;
@@ -30,7 +31,8 @@ import java.util.List;
  * Created by ningyuwen on 17-9-26.
  */
 
-public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFragment {
+public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFragment,
+        IMainActivityToFragment {
 
     private static final String TAG = "test22";
     private BroadcastReceiver receiver;
@@ -134,5 +136,18 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
                 return false;
             }
         });
+    }
+
+    /**
+     * 刷新音乐列表，初始化时通知几个Fragment获取相应数据
+     */
+    @Override
+    public void refreshAllMusic() {
+        Log.i(TAG, "refreshAllMusic: 刷新列表class");
+        if (mDatas == null){
+            mDatas = new ArrayList<>();
+        }
+        mDatas.clear();
+        showClassifyMusicInfo();
     }
 }

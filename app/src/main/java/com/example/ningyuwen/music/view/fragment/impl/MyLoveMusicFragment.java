@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
+import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.example.ningyuwen.music.view.adapter.MyLoveMusicAdapter;
 import com.example.ningyuwen.music.view.fragment.i.IMyLoveMusicFragment;
@@ -28,7 +29,8 @@ import java.util.List;
  * Created by ningyuwen on 17-9-26.
  */
 
-public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragment, MyLoveMusicAdapter.AddItemClickListener {
+public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragment,
+        MyLoveMusicAdapter.AddItemClickListener, IMainActivityToFragment {
     private static final String TAG = "test22";
     private BroadcastReceiver receiver;
     private RecyclerView mRvMyLoveMusic;
@@ -147,5 +149,20 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
     @Override
     public void setIsLove(int position) {
 
+    }
+
+    /**
+     * 刷新音乐列表，初始化时通知几个Fragment获取相应数据
+     */
+    @Override
+    public void refreshAllMusic() {
+        Log.i(TAG, "refreshAllMusic: 刷新列表MyLove");
+        //重新导入音乐数据时，刷新列表
+        if (mMyLoveMusicDatas == null){
+            mMyLoveMusicDatas = new ArrayList<>();
+        }
+        mMyLoveMusicDatas.clear();
+        mMyLoveMusicDatas.addAll(((MainActivity)getActivity()).getMyLoveMusicData());
+        mAdapter.notifyDataSetChanged();
     }
 }

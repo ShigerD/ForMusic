@@ -16,9 +16,11 @@ import android.view.ViewGroup;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
+import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.example.ningyuwen.music.view.adapter.AllMusicInfoAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,7 +28,8 @@ import java.util.List;
  * Created by ningyuwen on 17-9-26.
  */
 
-public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.AddItemClickListener {
+public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.AddItemClickListener,
+        IMainActivityToFragment{
     private static final String TAG = "test22";
     private BroadcastReceiver receiver;
     private List<MusicData> mMusicDatas;
@@ -128,5 +131,19 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
             intent.putExtra("pid", mMusicDatas.get(position).getpId());
             getActivity().sendBroadcast(intent);
         }
+    }
+
+    /**
+     * 刷新音乐列表，初始化时通知几个Fragment获取相应数据
+     */
+    @Override
+    public void refreshAllMusic() {
+        Log.i(TAG, "refreshAllMusic: 刷新列表AllMusic");
+        if (mMusicDatas == null){
+            mMusicDatas = new ArrayList<>();
+        }
+        mMusicDatas.clear();
+        mMusicDatas = ((MainActivity)getActivity()).getMusicDatas();
+        showMusicInfo();
     }
 }

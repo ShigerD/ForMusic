@@ -49,6 +49,7 @@ import com.example.ningyuwen.music.service.PlayMusicService;
 import com.example.ningyuwen.music.util.FastBlurUtil;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.i.IMainActivity;
+import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
 import com.example.ningyuwen.music.view.adapter.MainFragmentAdapter;
 import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.ClassifyMusicFragment;
@@ -57,7 +58,6 @@ import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
 import com.freedom.lauzy.playpauseviewlib.PlayPauseView;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +72,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 //    public static List<MusicData> mMusicDatas;
     private DrawerLayout mDrawerMenu;
     private ViewPager mMainViewPager;
-    private ArrayList<Fragment> fragments;
+    private static ArrayList<Fragment> mFragments;
     private ImageView mIvBg;
     private TabLayout mTabLayout;
     public static final String NOTIFICATION_CHANNEL_ID = "4655";
@@ -143,7 +143,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     }
 
     /**
-     * 获取去音乐数据，数据库有则获取数据库中的数据，数据库没有则扫描SD卡中的数据，再启动服务 startPlayMusicService
+     * 获取音乐数据，数据库有则获取数据库中的数据，数据库没有则扫描SD卡中的数据，再启动服务 startPlayMusicService
      */
     Runnable runnable = new Runnable() {
         @Override
@@ -164,7 +164,10 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                 getReadPermissionAndGetInfoFromSD();
             }else {
                 //fragment更新数据
-                sendBroadCastForString("AllMusicRefresh");
+//                sendBroadCastForString("AllMusicRefresh");
+                Message message = handler.obtainMessage();
+                message.what = StaticFinalUtil.HANDLER_REFRESH_MUSIC;
+                message.sendToTarget();
                 startPlayMusicService();
             }
         }
@@ -362,6 +365,15 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                         e.printStackTrace();
                     }
                     break;
+                case StaticFinalUtil.HANDLER_REFRESH_MUSIC:
+                    ((IMainActivityToFragment)mFragments.get(0)).refreshAllMusic();
+//                    ((IMainActivityToFragment)mFragments.get(1)).refreshAllMusic();
+//                    ((IMainActivityToFragment)mFragments.get(2)).refreshAllMusic();
+//                    ((IMainActivityToFragment)mFragments.get(3)).refreshAllMusic();
+                    break;
+                default:
+                    break;
+
             }
         }
     };
@@ -495,13 +507,13 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
      * ViewPager内部是Fragment
      */
     private void initPage() {
-        fragments = new ArrayList<>();  //Fragment的List
-        fragments.add(new AllMusicFragment());                 //添加需要展示的Fragment
-        fragments.add(new CustomizeMusicFragment());
-        fragments.add(new MyLoveMusicFragment());
-        fragments.add(new ClassifyMusicFragment());
+        mFragments = new ArrayList<>();  //Fragment的List
+        mFragments.add(new AllMusicFragment());                 //添加需要展示的Fragment
+        mFragments.add(new CustomizeMusicFragment());
+        mFragments.add(new MyLoveMusicFragment());
+        mFragments.add(new ClassifyMusicFragment());
         MainFragmentAdapter mainFragmentAdapter =           //ViewPager的适配器
-                new MainFragmentAdapter(getSupportFragmentManager(), fragments);
+                new MainFragmentAdapter(getSupportFragmentManager(), mFragments);
         mMainViewPager.setAdapter(mainFragmentAdapter);        //设置ViewPager的适配器
         mTabLayout.setupWithViewPager(mMainViewPager);
     }
@@ -608,7 +620,10 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 
             //从musicBasicInfos 和 数据库读取数据到 mMusicDatas
             mMusicDatas = mPresenter.getMusicAllInfo(musicBasicInfos);
-            sendBroadCastForString("AllMusicRefresh");
+//            sendBroadCastForString("AllMusicRefresh");
+            Message message = handler.obtainMessage();
+            message.what = StaticFinalUtil.HANDLER_REFRESH_MUSIC;
+            message.sendToTarget();
             startPlayMusicService();
         }
     }

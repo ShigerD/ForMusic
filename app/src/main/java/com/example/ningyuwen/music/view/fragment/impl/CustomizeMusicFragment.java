@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
+import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.example.ningyuwen.music.view.activity.impl.MusicSongListActivity;
 import com.example.ningyuwen.music.view.adapter.CustomizeMusicAdapter;
@@ -49,7 +50,8 @@ import static android.view.LayoutInflater.from;
  * Created by ningyuwen on 17-9-26.
  */
 
-public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicFragment, CustomizeMusicAdapter.AddItemClickListener {
+public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicFragment,
+        CustomizeMusicAdapter.AddItemClickListener, IMainActivityToFragment {
 
     private static final String TAG = "test22";
     private BroadcastReceiver receiver;
@@ -189,5 +191,19 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    /**
+     * 刷新音乐列表，初始化时通知几个Fragment获取相应数据
+     */
+    @Override
+    public void refreshAllMusic() {
+        Log.i(TAG, "refreshAllMusic: 刷新列表custom");
+        if (mSongListInfos == null){
+            mSongListInfos = new ArrayList<>();
+        }
+        mSongListInfos.clear();
+        mSongListInfos = ((MainActivity)getActivity()).getSongListInfo();
+        mAdapter.notifyDataSetChanged();
     }
 }
