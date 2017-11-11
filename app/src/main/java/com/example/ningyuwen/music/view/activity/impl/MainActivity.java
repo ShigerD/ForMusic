@@ -54,6 +54,7 @@ import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.ClassifyMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
+import com.freedom.lauzy.playpauseviewlib.PlayPauseView;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -355,7 +356,11 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             switch (message.what){
                 case StaticFinalUtil.HANDLER_ACTIVITY_LYRIC:
                     //显示歌词
-                    mTvMusicLyric.setText(mTimeAndLyric.get(message.arg1).second);
+                    try {
+                        mTvMusicLyric.setText(mTimeAndLyric.get(message.arg1).second);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
                     break;
             }
         }
@@ -449,7 +454,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                 mDrawerMenu.openDrawer(GravityCompat.START);
             }
         });
-        findViewById(R.id.iv_music_pic).setOnClickListener(this);
+//        findViewById(R.id.iv_music_pic).setOnClickListener(this);
         //viewpager页码变化监听
         mMainViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -465,6 +470,22 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             @Override
             public void onPageScrollStateChanged(int state) {
 
+            }
+        });
+
+        //播放暂停按钮
+        ((PlayPauseView)findViewById(R.id.iv_music_pic)).setPlayPauseListener(new PlayPauseView.PlayPauseListener(){
+
+            @Override
+            public void play() {
+                mServiceDataTrans.playOrPause();
+                showToast(mTabLayout, "播放");
+            }
+
+            @Override
+            public void pause() {
+                mServiceDataTrans.playOrPause();
+                showToast(mTabLayout, "暂停");
             }
         });
     }
@@ -607,10 +628,10 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 //            case R.id.tv_tab_last:
 //                mMainViewPager.setCurrentItem(3);
 //                break;
-            case R.id.iv_music_pic:
-                //点击播放暂停按钮
-                mServiceDataTrans.playOrPause();
-                break;
+//            case R.id.iv_music_pic:
+//                //点击播放暂停按钮
+//                mServiceDataTrans.playOrPause();
+//                break;
             default:
                 break;
         }

@@ -59,4 +59,8 @@ dependencies {
     compile 'com.github.bumptech.glide:okhttp3-integration:1.4.0@aar'
     compile 'com.squareup.okhttp3:okhttp:3.6.0'
     implementation files('libs/jsoup-1.11.1.jar')
+
+    //播放、暂停
+    compile 'com.github.Lauzy:PlayPauseView:1.0.4'
+
 }
