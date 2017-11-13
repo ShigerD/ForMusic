@@ -647,6 +647,11 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 //                //点击播放暂停按钮
 //                mServiceDataTrans.playOrPause();
 //                break;
+            case R.id.cv_show_state_lyric:
+                //cardview，显示歌词的位置，点击进入PlayActivity
+                Intent intent = new Intent(this, PlayActivity.class);
+                startActivity(intent);
+                break;
             default:
                 break;
         }

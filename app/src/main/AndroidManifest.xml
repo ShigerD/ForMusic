@@ -34,6 +34,7 @@
 
         <activity android:name=".view.activity.impl.MainActivity"/>
         <activity android:name=".view.activity.impl.MusicSongListActivity"/>
+        <activity android:name=".view.activity.impl.PlayActivity"/>
 
         <activity
             android:name="com.tencent.bugly.beta.ui.BetaActivity"
