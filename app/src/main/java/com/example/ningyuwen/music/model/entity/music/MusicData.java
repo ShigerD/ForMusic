@@ -23,9 +23,18 @@ public class MusicData {
     private String musicAlbum;      //音乐专辑名
     private String musicFilePath;   //音乐文件路径
     private long musicFileSize;     //音乐文件大小
+    private String musicAlbumPicUrl; //音乐文件专辑图片，目前只能找到这个了
     private int musicPlayTimes;  //音乐播放次数
     private boolean isLove;    //是否添加到我喜爱的
     private String musicSongList;    //被添加到的歌单名,用户自定义歌单
+
+    public String getMusicAlbumPicUrl() {
+        return musicAlbumPicUrl;
+    }
+
+    public void setMusicAlbumPicUrl(String musicAlbumPicUrl) {
+        this.musicAlbumPicUrl = musicAlbumPicUrl;
+    }
 
     public Long getpId() {
         return pId;

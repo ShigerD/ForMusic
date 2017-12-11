@@ -20,8 +20,23 @@ public class PlayActivity extends BaseActivity<PlayPresenter> implements IPlayAc
         setContentView(R.layout.activity_play);
     }
 
+    /**
+     * 获取Presenter实例
+     * @return presenter
+     */
     @Override
     protected PlayPresenter getPresenter() {
         return new PlayPresenter(this);
+    }
+
+    /**
+     * 关闭
+     */
+    @Override
+    public void finish() {
+        // TODO Auto-generated method stub
+        super.finish();
+        //关闭窗体动画显示
+        this.overridePendingTransition(0, R.anim.activity_close);
     }
 }

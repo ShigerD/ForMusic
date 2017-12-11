@@ -6,9 +6,10 @@
 
     <ImageView
         android:id="@+id/iv_play_state"
-        android:layout_width="35dp"
+        android:layout_width="50dp"
         android:layout_marginStart="10dp"
         android:layout_height="50dp"
+        android:padding="5dp"
         android:foregroundGravity="center"
         android:src="@mipmap/ic_menu_open" />
 
@@ -18,7 +19,8 @@
         android:layout_height="50dp"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="5dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:src="@mipmap/ic_not_love"
+        android:padding="5dp"/>
 
     <TextView
         android:id="@+id/tv_music_name"

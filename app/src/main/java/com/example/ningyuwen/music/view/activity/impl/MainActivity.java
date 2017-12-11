@@ -651,6 +651,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                 //cardview，显示歌词的位置，点击进入PlayActivity
                 Intent intent = new Intent(this, PlayActivity.class);
                 startActivity(intent);
+                overridePendingTransition(R.anim.activity_open,0);
                 break;
             default:
                 break;

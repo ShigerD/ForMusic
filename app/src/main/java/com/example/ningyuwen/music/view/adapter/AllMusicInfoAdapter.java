@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 
@@ -42,14 +43,19 @@ public class AllMusicInfoAdapter extends RecyclerView.Adapter<AllMusicInfoAdapte
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Log.i("test", "onCreateViewHolder: test 2");
-        holder.tvMusicName.setText(mMusicDatas.get(position).getMusicName());
-        holder.ivState.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.ic_launcher));
-
+        holder.tvMusicName.setText(getItem(position).getMusicName());
+//        holder.ivState.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.ic_launcher));
+        Glide.with(mContext).load(getItem(position).getMusicAlbumPicUrl()).into(holder.ivState);
+        if (getItem(position).isLove()){
+            holder.ivIsLove.setImageResource(R.mipmap.ic_love);
+        }else {
+            holder.ivIsLove.setImageResource(R.mipmap.ic_not_love);
+        }
         setPlayAndIsLoveListener(holder, position);
 
     }
 
-    private void setPlayAndIsLoveListener(MyViewHolder holder, final int position) {
+    private void setPlayAndIsLoveListener(final MyViewHolder holder, final int position) {
         holder.tvMusicName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -59,9 +65,23 @@ public class AllMusicInfoAdapter extends RecyclerView.Adapter<AllMusicInfoAdapte
         holder.ivIsLove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (getItem(position).isLove()){
+                    holder.ivIsLove.setImageResource(R.mipmap.ic_not_love);
+                }else {
+                    holder.ivIsLove.setImageResource(R.mipmap.ic_love);
+                }
                 listener.setIsLove(position);
             }
         });
+    }
+
+    /**
+     * 获取其中的一个item
+     * @param position position
+     * @return MusicData
+     */
+    public MusicData getItem(int position){
+        return mMusicDatas.get(position);
     }
 
     @Override

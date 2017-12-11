@@ -90,6 +90,7 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
             data.setMusicFilePath(basicInfoList.get(i).getMusicFilePath());
             data.setMusicTime(basicInfoList.get(i).getMusicTime());
             data.setMusicFileSize(basicInfoList.get(i).getMusicFileSize());
+            data.setMusicAlbumPicUrl(basicInfoList.get(i).getMusicAlbumPicUrl());
 
             //通过pid在表recordInfo中查询信息存储到
             MusicRecordInfo recordInfo = mDaoSession.getMusicRecordInfoDao().load(basicInfoList.get(i).getPId());
