@@ -27,4 +27,5 @@ public interface IMainActivityPresenter {
     MusicBasicInfo getMusicDataUsePid(long pid);  //用pid查询音乐数据基本信息
     String getLyricFromDBUsePid(MusicBasicInfo musicBasicInfo);        //获取歌词数据
     List<Pair<Long, String>> analysisLyric(String lyric);               //解析歌词,返回歌词List
+    boolean existSongListName(String songlistName);     //判断歌单名是否存在或是否为空，不满足前两项才能添加歌单
 }

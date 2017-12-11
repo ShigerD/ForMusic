@@ -118,7 +118,7 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
     public void showCustomizeMusicInfo() {
         mRvCustomizeMusic.setLayoutManager(new LinearLayoutManager(getContext()));
         mSongListInfos = ((MainActivity)getActivity()).getSongListInfo();
-        mAdapter = new CustomizeMusicAdapter(getActivity(), mSongListInfos);
+        mAdapter = new CustomizeMusicAdapter(getActivity(), mSongListInfos, false);
         mRvCustomizeMusic.setAdapter(mAdapter);
         mAdapter.addItemClickListener(this);
     }
@@ -176,8 +176,14 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 //判断数据库中是否存在名字相同的歌单，存在则不能添加
-
-
+                if ("".equals(et.getText().toString())){
+                    ((MainActivity)getActivity()).showToast(mRvCustomizeMusic, "歌单名不能为空");
+                    return;
+                }
+                if (((MainActivity)getActivity()).existSongListName(et.getText().toString())){
+                    ((MainActivity)getActivity()).showToast(mRvCustomizeMusic, "歌单已存在");
+                    return;
+                }
                 ((MainActivity)getActivity()).showToast(mRvCustomizeMusic, "添加成功");
                 SongListInfo info = new SongListInfo();
                 info.setName(et.getText().toString());

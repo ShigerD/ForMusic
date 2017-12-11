@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -25,7 +26,7 @@ public class AllMusicInfoAdapter extends RecyclerView.Adapter<AllMusicInfoAdapte
 
     private List<MusicData> mMusicDatas;
     private Context mContext;
-    private AddItemClickListener listener;
+    private AddItemClickListener listener;  //监听回调
 
     public AllMusicInfoAdapter(Context context, List<MusicData> musicDatas) {
         super();
@@ -52,6 +53,13 @@ public class AllMusicInfoAdapter extends RecyclerView.Adapter<AllMusicInfoAdapte
             holder.ivIsLove.setImageResource(R.mipmap.ic_not_love);
         }
         setPlayAndIsLoveListener(holder, position);
+    }
+
+    /**
+     * 设置是否喜爱的图片
+     * @param isLove bool
+     */
+    public void setIsLoveImage(boolean isLove){
 
     }
 
@@ -71,6 +79,26 @@ public class AllMusicInfoAdapter extends RecyclerView.Adapter<AllMusicInfoAdapte
                     holder.ivIsLove.setImageResource(R.mipmap.ic_love);
                 }
                 listener.setIsLove(position);
+            }
+        });
+        holder.tvMusicName.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (v.getId() == R.id.tv_music_name) {
+                    listener.longClickMusicItem(position);
+                    return true;
+                }
+                return false;
+            }
+        });
+        holder.ivState.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (v.getId() == R.id.iv_play_state) {
+                    listener.longClickMusicItem(position);
+                    return true;
+                }
+                return false;
             }
         });
     }
@@ -110,18 +138,21 @@ public class AllMusicInfoAdapter extends RecyclerView.Adapter<AllMusicInfoAdapte
     public interface AddItemClickListener{
         void playMusic(int position);
         void setIsLove(int position);
+        void longClickMusicItem(int position);
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {
         ImageView ivState;
         TextView tvMusicName;
         ImageView ivIsLove;
+        RelativeLayout rlItem;
 
         MyViewHolder(View view) {
             super(view);
             ivState = (ImageView) view.findViewById(R.id.iv_play_state);
             tvMusicName = (TextView) view.findViewById(R.id.tv_music_name);
             ivIsLove = (ImageView) view.findViewById(R.id.iv_is_love);
+            rlItem = (RelativeLayout) view.findViewById(R.id.rl_item_all_music);
         }
     }
 }

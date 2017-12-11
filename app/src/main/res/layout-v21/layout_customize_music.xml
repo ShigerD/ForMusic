@@ -4,7 +4,8 @@
     android:id="@+id/rl_song_list"
     android:layout_width="match_parent"
     android:layout_height="70dp"
-    android:background="?android:attr/selectableItemBackground">
+    android:theme="@android:style/ThemeOverlay.Material.Dark"
+    android:background="?attr/selectableItemBackground">
 
     <ImageView
         android:id="@+id/iv_custom_music_pic"

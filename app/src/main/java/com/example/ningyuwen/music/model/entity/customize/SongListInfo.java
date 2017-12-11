@@ -17,13 +17,16 @@ public class SongListInfo {
     private Long id;
 
     @Property
-    private String name;
-    private int number;
-    @Generated(hash = 572508834)
-    public SongListInfo(Long id, String name, int number) {
+    private String name;    //歌单名
+    private int number;     //歌单中的音乐数目
+    private String songlistImgUrl;  //歌单封面图，取歌单第一首的图片
+
+    @Generated(hash = 2096882423)
+    public SongListInfo(Long id, String name, int number, String songlistImgUrl) {
         this.id = id;
         this.name = name;
         this.number = number;
+        this.songlistImgUrl = songlistImgUrl;
     }
     @Generated(hash = 1610687539)
     public SongListInfo() {
@@ -45,6 +48,12 @@ public class SongListInfo {
     }
     public void setNumber(int number) {
         this.number = number;
+    }
+    public String getSonglistImgUrl() {
+        return this.songlistImgUrl;
+    }
+    public void setSonglistImgUrl(String songlistImgUrl) {
+        this.songlistImgUrl = songlistImgUrl;
     }
 
    

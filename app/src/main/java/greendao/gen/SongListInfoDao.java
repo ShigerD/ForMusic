@@ -27,6 +27,7 @@ public class SongListInfoDao extends AbstractDao<SongListInfo, Long> {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property Name = new Property(1, String.class, "name", false, "NAME");
         public final static Property Number = new Property(2, int.class, "number", false, "NUMBER");
+        public final static Property SonglistImgUrl = new Property(3, String.class, "songlistImgUrl", false, "SONGLIST_IMG_URL");
     }
 
 
@@ -44,7 +45,8 @@ public class SongListInfoDao extends AbstractDao<SongListInfo, Long> {
         db.execSQL("CREATE TABLE " + constraint + "\"SONG_LIST_INFO\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY ," + // 0: id
                 "\"NAME\" TEXT," + // 1: name
-                "\"NUMBER\" INTEGER NOT NULL );"); // 2: number
+                "\"NUMBER\" INTEGER NOT NULL ," + // 2: number
+                "\"SONGLIST_IMG_URL\" TEXT);"); // 3: songlistImgUrl
     }
 
     /** Drops the underlying database table. */
@@ -67,6 +69,11 @@ public class SongListInfoDao extends AbstractDao<SongListInfo, Long> {
             stmt.bindString(2, name);
         }
         stmt.bindLong(3, entity.getNumber());
+ 
+        String songlistImgUrl = entity.getSonglistImgUrl();
+        if (songlistImgUrl != null) {
+            stmt.bindString(4, songlistImgUrl);
+        }
     }
 
     @Override
@@ -83,6 +90,11 @@ public class SongListInfoDao extends AbstractDao<SongListInfo, Long> {
             stmt.bindString(2, name);
         }
         stmt.bindLong(3, entity.getNumber());
+ 
+        String songlistImgUrl = entity.getSonglistImgUrl();
+        if (songlistImgUrl != null) {
+            stmt.bindString(4, songlistImgUrl);
+        }
     }
 
     @Override
@@ -95,7 +107,8 @@ public class SongListInfoDao extends AbstractDao<SongListInfo, Long> {
         SongListInfo entity = new SongListInfo( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // name
-            cursor.getInt(offset + 2) // number
+            cursor.getInt(offset + 2), // number
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3) // songlistImgUrl
         );
         return entity;
     }
@@ -105,6 +118,7 @@ public class SongListInfoDao extends AbstractDao<SongListInfo, Long> {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setNumber(cursor.getInt(offset + 2));
+        entity.setSonglistImgUrl(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
      }
     
     @Override

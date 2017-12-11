@@ -813,6 +813,16 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     }
 
     /**
+     * 判断歌单名是否存在或是否为空，不满足前两项才能添加歌单
+     * @param songlistName 歌单名
+     * @return bool
+     */
+    @Override
+    public boolean existSongListName(String songlistName) {
+        return mPresenter.existSongListName(songlistName);
+    }
+
+    /**
      * 传入音乐人姓名，获取音乐人有多少音乐
      * @param musicPlayer musicPlayer
      * @return int

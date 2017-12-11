@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 
 import greendao.gen.MusicBasicInfoDao;
 import greendao.gen.MusicRecordInfoDao;
+import greendao.gen.SongListInfoDao;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -306,6 +307,17 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
             }
         }
         return timeAndLyric;
+    }
+
+    /**
+     * 判断歌单名是否存在或是否为空，不满足前两项才能添加歌单
+     * @param songlistName 歌单名
+     * @return bool
+     */
+    @Override
+    public boolean existSongListName(String songlistName) {
+        return mDaoSession.getSongListInfoDao().queryBuilder().where(
+                SongListInfoDao.Properties.Name.eq(songlistName)).list().size() > 0;
     }
 
     /**

@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -28,11 +29,13 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
     private Context mContext;
     private List<SongListInfo> mSongListInfo;
     private CustomizeMusicAdapter.AddItemClickListener listener;
+    private boolean isDialog;
 
-    public CustomizeMusicAdapter(Context context, List<SongListInfo> songListInfoList) {
+    public CustomizeMusicAdapter(Context context, List<SongListInfo> songListInfoList, boolean isDialog) {
         super();
-        mContext = context;
-        mSongListInfo = songListInfoList;
+        this.mContext = context;
+        this.mSongListInfo = songListInfoList;
+        this.isDialog = isDialog;
     }
 
     @Override
@@ -49,18 +52,48 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
 //            holder.tvCustomName.setGravity(Gravity.CENTER);
 //            holder.tvCustomName.setTextColor(Color.parseColor("#0000FF"));
 //            holder.tvCustomName.setTextSize(26);
-            holder.rlAddSongList.setVisibility(View.VISIBLE);
-            holder.rlSongList.setVisibility(View.GONE);
+            holder.flAddPlayList.setVisibility(View.VISIBLE);
+            holder.llAddPlayList.setVisibility(View.GONE);
+            holder.ivCustomPic.setImageResource(R.mipmap.ic_add_playlist);
+//            holder.tvCustomNumber.setVisibility(View.GONE);
+            if (isDialog){
+                holder.tvAddPlayList.setTextColor(Color.parseColor("#000000"));
+            }else {
+                holder.tvAddPlayList.setTextColor(Color.parseColor("#FFFFFF"));
+            }
+            holder.ivStatusPlay.setVisibility(View.GONE);
+//            holder.tvCustomName.setText("新建歌单");
+//            holder.rlAddSongList.setVisibility(View.VISIBLE);
+//            holder.rlSongList.setVisibility(View.GONE);
             return;
         }
-        holder.rlAddSongList.setVisibility(View.GONE);
+        holder.flAddPlayList.setVisibility(View.GONE);
+        holder.tvCustomNumber.setVisibility(View.VISIBLE);
+        if (isDialog){
+            holder.ivStatusPlay.setVisibility(View.GONE);
+            holder.tvCustomName.setTextColor(Color.parseColor("#000000"));
+            holder.tvCustomNumber.setTextColor(Color.parseColor("#000000"));
+        }else {
+            holder.ivStatusPlay.setVisibility(View.VISIBLE);
+            holder.tvCustomName.setTextColor(Color.parseColor("#FFFFFF"));
+            holder.tvCustomNumber.setTextColor(Color.parseColor("#FFFFFF"));
+        }
+//        holder.rlAddSongList.setVisibility(View.GONE);
         holder.rlSongList.setVisibility(View.VISIBLE);
-        holder.tvCustomName.setTextSize(24);
-        holder.tvCustomName.setTextColor(Color.parseColor("#FFFFFF"));
-        holder.tvCustomName.setText(mSongListInfo.get(position).getName());
-        holder.tvCustomNumber.setTextSize(18);
-        holder.tvCustomNumber.setTextColor(Color.parseColor("#FFFFFF"));
-        holder.tvCustomNumber.setText(mSongListInfo.get(position).getNumber() + "首");
+        holder.tvCustomName.setTextSize(16);
+        holder.tvCustomName.setText(getItem(position).getName());
+        holder.tvCustomNumber.setTextSize(14);
+        holder.tvCustomNumber.setText(getItem(position).getNumber() + "首");
+//        if (getItem(position))
+    }
+
+    /**
+     * 获取条目
+     * @param position position
+     * @return SongListInfo
+     */
+    public SongListInfo getItem(int position){
+        return mSongListInfo.get(position);
     }
 
     /**
@@ -75,12 +108,12 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
                 listener.jumpSongList(position);
             }
         });
-        holder.rlAddSongList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.addSongList(position);
-            }
-        });
+//        holder.rlAddSongList.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                listener.addSongList(position);
+//            }
+//        });
     }
 
     @Override
@@ -101,16 +134,24 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
         ImageView ivCustomPic;      //歌单图片
         TextView tvCustomName;      //歌单名
         TextView tvCustomNumber;    //歌曲数量
-        RelativeLayout rlAddSongList;  //添加歌单按钮布局
+//        RelativeLayout rlAddSongList;  //添加歌单按钮布局
         RelativeLayout rlSongList;      //存在的歌单
+        ImageView ivStatusPlay;         //播放状态
+        FrameLayout flAddPlayList;      //新建歌单
+        LinearLayout llAddPlayList;
+        TextView tvAddPlayList;
 
         MyViewHolder(View view) {
             super(view);
             ivCustomPic = (ImageView) view.findViewById(R.id.iv_custom_music_pic);
             tvCustomName = (TextView) view.findViewById(R.id.tv_custom_music_name);
             tvCustomNumber = (TextView) view.findViewById(R.id.tv_custom_music_number);
-            rlAddSongList = (RelativeLayout) view.findViewById(R.id.rl_add_song_list);
+//            rlAddSongList = (RelativeLayout) view.findViewById(R.id.rl_add_song_list);
             rlSongList = (RelativeLayout) view.findViewById(R.id.rl_song_list);
+            ivStatusPlay = (ImageView) view.findViewById(R.id.iv_status_play);
+            flAddPlayList = (FrameLayout) view.findViewById(R.id.fl_add_playlist);
+            llAddPlayList = (LinearLayout) view.findViewById(R.id.ll_add_playlist);
+            tvAddPlayList = (TextView) view.findViewById(R.id.tv_add_playlist);
         }
     }
 }

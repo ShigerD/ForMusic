@@ -1,7 +1,9 @@
 package com.example.ningyuwen.music.view.fragment.impl;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.app.Fragment;
@@ -19,6 +21,7 @@ import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.example.ningyuwen.music.view.adapter.AllMusicInfoAdapter;
+import com.example.ningyuwen.music.view.widget.AddToPlaylistDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +38,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     private List<MusicData> mMusicDatas;
     private RecyclerView mRvAllMusicInfo;
     private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
+    private AddToPlaylistDialog mAddToPlaylistDialog;
 
     @Nullable
     @Override
@@ -104,7 +108,8 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
      */
     @Override
     public void playMusic(int position) {
-        ((MainActivity)getActivity()).showToast(mRvAllMusicInfo, "音乐位置： " + position);
+        ((MainActivity)getActivity()).showToast(mRvAllMusicInfo, "音乐名： "
+                + mMusicDatas.get(position).getMusicName());
         ((MainActivity)getActivity()).playMusicOnBackstage(position);
 
     }
@@ -131,6 +136,51 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
             intent.putExtra("pid", mMusicDatas.get(position).getpId());
             getActivity().sendBroadcast(intent);
         }
+    }
+
+    /**
+     * 长按音乐item，弹出dialog
+     * @param position positon
+     */
+    @Override
+    public void longClickMusicItem(final int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("歌曲:" + mMusicDatas.get(position).getMusicName());
+        String[] items = {"播放", "收藏到歌单", "分享音乐", "剪辑歌曲"};
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case 0:
+                        //播放
+                        playMusic(position);
+                        break;
+                    case 1:
+                        //收藏到歌单
+                        if (mAddToPlaylistDialog == null){
+                            mAddToPlaylistDialog = new AddToPlaylistDialog(getActivity());
+                        }
+                        mAddToPlaylistDialog.setTitle("收藏到歌单");
+                        mAddToPlaylistDialog.show();
+                        break;
+//                    case 2:
+//                        //添加到我喜爱的
+//                        setIsLove(position);
+//                        break;
+                    case 2:
+                        //分享音乐
+                        ((MainActivity)getActivity()).showToast(mRvAllMusicInfo, "功能暂未开放");
+                        break;
+                    case 3:
+                        //剪辑歌曲
+                        ((MainActivity)getActivity()).showToast(mRvAllMusicInfo, "功能暂未开放");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+        builder.create().show();
     }
 
     /**
