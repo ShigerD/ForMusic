@@ -60,6 +60,7 @@ import com.freedom.lauzy.playpauseviewlib.PlayPauseView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 主页面，音乐播放，扫描音乐等
@@ -80,6 +81,8 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private TextView mTvMusicName;  //显示音乐名
     private static TextView mTvMusicLyric; //显示音乐歌词
     private static List<Pair<Long, String>> mTimeAndLyric;   //歌词
+    private PlayPauseView mPlayPauseView;   //播放暂停按钮
+
 //    private static MyHandler mMyHandler;   //handler
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -432,6 +435,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     public void playMusicOnBackstage(int position){
         //不使用广播，使用接口回调
         mServiceDataTrans.playMusicFromClick(position);
+        mPlayPauseView.play();
     }
 
     private void findView() {
@@ -442,6 +446,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         mMainViewPager = (ViewPager) findViewById(R.id.vp_main_page);         //主页面的viewpager
         mIvBg = (ImageView) findViewById(R.id.iv_main_activity_bg);
         mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        mPlayPauseView = (PlayPauseView) findViewById(R.id.iv_music_pic);
         findViewById(R.id.iv_bar_search).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -486,16 +491,18 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         });
 
         //播放暂停按钮
-        ((PlayPauseView)findViewById(R.id.iv_music_pic)).setPlayPauseListener(new PlayPauseView.PlayPauseListener(){
+        mPlayPauseView.setPlayPauseListener(new PlayPauseView.PlayPauseListener(){
 
             @Override
             public void play() {
+                mPlayPauseView.play();
                 mServiceDataTrans.playOrPause();
                 showToast(mTabLayout, "播放");
             }
 
             @Override
             public void pause() {
+                mPlayPauseView.pause();
                 mServiceDataTrans.playOrPause();
                 showToast(mTabLayout, "暂停");
             }
@@ -843,5 +850,20 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mServiceConnection);
+    }
+
+    /**
+     * 取消我喜爱的音乐，传入MusicData
+     */
+    public void updateLoveMusic(MusicData musicData){
+        musicData.setLove(false);
+        mPresenter.updateLoveMusicToDisLike(musicData);     //数据库
+        for (int i = 0;i < mMusicDatas.size();i++){
+            if (Objects.equals(mMusicDatas.get(i).getpId(), musicData.getpId())){
+                mMusicDatas.set(i, musicData);
+                break;
+            }
+        }
+        ((IMainActivityToFragment)mFragments.get(0)).refreshAllMusicDislike(musicData);
     }
 }

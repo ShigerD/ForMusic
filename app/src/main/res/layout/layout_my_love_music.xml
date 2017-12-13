@@ -2,28 +2,36 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="50dp">
+    android:layout_height="wrap_content">
 
     <ImageView
-        android:id="@+id/iv_play_status"
-        android:layout_width="60dp"
-        android:layout_height="match_parent"
-        android:src="@mipmap/ic_launcher"/>
+        android:id="@+id/iv_play_state"
+        android:layout_width="50dp"
+        android:layout_marginStart="10dp"
+        android:layout_height="50dp"
+        android:padding="5dp"
+        android:foregroundGravity="center"
+        android:src="@mipmap/ic_menu_open" />
 
     <ImageView
-        android:id="@+id/iv_is_my_love"
-        android:layout_width="60dp"
-        android:layout_height="match_parent"
+        android:id="@+id/iv_is_love"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignParentEnd="true"
-        android:src="@mipmap/ic_launcher"/>
+        android:layout_marginEnd="5dp"
+        android:src="@mipmap/ic_not_love"
+        android:padding="5dp"/>
 
     <TextView
-        android:id="@+id/tv_mylove_music_name"
+        android:id="@+id/tv_music_name"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textSize="24sp"
-        android:gravity="center_vertical"
-        android:layout_toEndOf="@id/iv_play_status"
-        android:layout_toStartOf="@id/iv_is_my_love"/>
+        android:layout_height="50dp"
+        android:textSize="20sp"
+        android:textColor="#FFF"
+        android:layout_marginStart="5dp"
+        android:layout_toEndOf="@id/iv_play_state"
+        android:layout_toStartOf="@id/iv_is_love"
+        android:foregroundGravity="center"
+        android:gravity="center_vertical"/>
 
 </RelativeLayout>

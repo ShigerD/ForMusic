@@ -146,9 +146,17 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
         ((MainActivity)getActivity()).playMusicOnBackstage(position);
     }
 
+    /**
+     * 取消喜爱
+     * @param position position
+     */
     @Override
-    public void setIsLove(int position) {
+    public void setNotLove(int position) {
+        //通知AllMusicFragment更新，将这首音乐变为不喜欢
+        ((MainActivity)getActivity()).updateLoveMusic(mMyLoveMusicDatas.get(position));
 
+        mMyLoveMusicDatas.remove(position);
+        mAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -164,5 +172,10 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
         mMyLoveMusicDatas.clear();
         mMyLoveMusicDatas.addAll(((MainActivity)getActivity()).getMyLoveMusicData());
         mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void refreshAllMusicDislike(MusicData musicData) {
+
     }
 }

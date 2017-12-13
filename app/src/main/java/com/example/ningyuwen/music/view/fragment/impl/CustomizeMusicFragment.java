@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
+import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.example.ningyuwen.music.view.activity.impl.MusicSongListActivity;
@@ -211,5 +212,10 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
         mSongListInfos.clear();
         mSongListInfos = ((MainActivity)getActivity()).getSongListInfo();
         mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void refreshAllMusicDislike(MusicData musicData) {
+
     }
 }

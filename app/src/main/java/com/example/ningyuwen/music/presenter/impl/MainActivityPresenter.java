@@ -58,6 +58,7 @@ import okhttp3.Request;
 
 public class MainActivityPresenter extends BasePresenter<MainActivity>
         implements IMainActivityPresenter {
+
     public MainActivityPresenter(MainActivity view) {
         super(view);
     }
@@ -395,6 +396,17 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
     public boolean existSongListName(String songlistName) {
         return mDaoSession.getSongListInfoDao().queryBuilder().where(
                 SongListInfoDao.Properties.Name.eq(songlistName)).list().size() > 0;
+    }
+
+    /**
+     * 将之前喜爱的音乐变为不喜欢
+     * @param musicData musicData
+     */
+    @Override
+    public void updateLoveMusicToDisLike(MusicData musicData) {
+        MusicRecordInfo info = mDaoSession.getMusicRecordInfoDao().load(musicData.getpId());
+        info.setIsLove(false);
+        mDaoSession.getMusicRecordInfoDao().update(info);
     }
 
     /**

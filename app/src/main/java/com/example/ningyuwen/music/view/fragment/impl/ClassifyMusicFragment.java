@@ -150,4 +150,9 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
         mDatas.clear();
         showClassifyMusicInfo();
     }
+
+    @Override
+    public void refreshAllMusicDislike(MusicData musicData) {
+
+    }
 }

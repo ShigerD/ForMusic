@@ -7,8 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 
@@ -39,17 +41,34 @@ public class MyLoveMusicAdapter extends RecyclerView.Adapter<MyLoveMusicAdapter.
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        holder.tvLoveMusicName.setText(mMyLoveMusicDatas.get(position).getMusicName());
+        Glide.with(mContext).load(getItem(position).getMusicAlbumPicPath()).into(holder.ivState);
+        holder.tvMusicName.setText(getItem(position).getMusicName());
+        holder.ivIsLove.setImageResource(R.mipmap.ic_love);
         setClickListener(holder, position);
     }
 
     private void setClickListener(MyViewHolder holder, final int position) {
-        holder.tvLoveMusicName.setOnClickListener(new View.OnClickListener() {
+        holder.tvMusicName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 listener.playMusic(position);
             }
         });
+        holder.ivIsLove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.setNotLove(position);
+            }
+        });
+    }
+
+    /**
+     * 获取其中的一个item
+     * @param position position
+     * @return MusicData
+     */
+    public MusicData getItem(int position){
+        return mMyLoveMusicDatas.get(position);
     }
 
     public void addItemClickListener(AddItemClickListener addItemClickListener){
@@ -58,7 +77,7 @@ public class MyLoveMusicAdapter extends RecyclerView.Adapter<MyLoveMusicAdapter.
 
     public interface AddItemClickListener{
         void playMusic(int position);
-        void setIsLove(int position);
+        void setNotLove(int position);
     }
 
     @Override
@@ -68,15 +87,17 @@ public class MyLoveMusicAdapter extends RecyclerView.Adapter<MyLoveMusicAdapter.
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {
-//        ImageView ivState;
-        TextView tvLoveMusicName;
-//        ImageView ivIsLove;
+        ImageView ivState;
+        TextView tvMusicName;
+        ImageView ivIsLove;
+        RelativeLayout rlItem;
 
         MyViewHolder(View view) {
             super(view);
-//            ivState = (ImageView) view.findViewById(R.id.iv_play_state);
-            tvLoveMusicName = (TextView) view.findViewById(R.id.tv_mylove_music_name);
-//            ivIsLove = (ImageView) view.findViewById(R.id.iv_is_love);
+            ivState = (ImageView) view.findViewById(R.id.iv_play_state);
+            tvMusicName = (TextView) view.findViewById(R.id.tv_music_name);
+            ivIsLove = (ImageView) view.findViewById(R.id.iv_is_love);
+            rlItem = (RelativeLayout) view.findViewById(R.id.rl_item_all_music);
         }
     }
 }

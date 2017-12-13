@@ -25,6 +25,7 @@ import com.example.ningyuwen.music.view.widget.AddToPlaylistDialog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 所有歌曲页面
@@ -33,12 +34,15 @@ import java.util.List;
 
 public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.AddItemClickListener,
         IMainActivityToFragment{
+
     private static final String TAG = "test22";
     private BroadcastReceiver receiver;
     private List<MusicData> mMusicDatas;
     private RecyclerView mRvAllMusicInfo;
     private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
     private AddToPlaylistDialog mAddToPlaylistDialog;
+    private AllMusicInfoAdapter mAdapter;   //adapter
+    private static boolean shouldRefresh = false;   //是否需要刷新
 
     @Nullable
     @Override
@@ -46,8 +50,6 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
         super.onCreateView(inflater, container, savedInstanceState);
         View allMusicFragmentView = inflater.inflate(R.layout.fragment_all_music, container, false);
         mRvAllMusicInfo = allMusicFragmentView.findViewById(R.id.rv_all_music_info);
-
-
 
 
         Log.i("test", "onCreateView: ");
@@ -59,6 +61,15 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         createBroadcastReceiver();
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser && shouldRefresh){
+            mAdapter.notifyDataSetChanged();
+            shouldRefresh = false;
+        }
     }
 
     /**
@@ -89,7 +100,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     private void showMusicInfo() {
         Log.i("test", "showMusicInfo: " + mMusicDatas.size());
         mRvAllMusicInfo.setLayoutManager(new LinearLayoutManager(getContext()));
-        AllMusicInfoAdapter mAdapter = new AllMusicInfoAdapter(getActivity(), mMusicDatas);
+        mAdapter = new AllMusicInfoAdapter(getActivity(), mMusicDatas);
         mRvAllMusicInfo.setAdapter(mAdapter);
         mAdapter.addItemClickListener(this);
     }
@@ -195,5 +206,19 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
         mMusicDatas.clear();
         mMusicDatas = ((MainActivity)getActivity()).getMusicDatas();
         showMusicInfo();
+    }
+
+    /**
+     * 在我喜爱的页面将音乐取消喜爱，在所有音乐页面将它置为不喜欢
+     */
+    @Override
+    public void refreshAllMusicDislike(MusicData musicData) {
+        for (int i = 0;i < mMusicDatas.size();i++){
+            if (Objects.equals(mMusicDatas.get(i).getpId(), musicData.getpId())){
+                mMusicDatas.set(i, musicData);
+                break;
+            }
+        }
+        shouldRefresh = true;
     }
 }
