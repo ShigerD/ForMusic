@@ -27,6 +27,15 @@ public class MusicData {
     private int musicPlayTimes;  //音乐播放次数
     private boolean isLove;    //是否添加到我喜爱的
     private String musicSongList;    //被添加到的歌单名,用户自定义歌单
+    private String musicAlbumPicPath;   //专辑图片路径
+
+    public String getMusicAlbumPicPath() {
+        return musicAlbumPicPath;
+    }
+
+    public void setMusicAlbumPicPath(String musicAlbumPicPath) {
+        this.musicAlbumPicPath = musicAlbumPicPath;
+    }
 
     public String getMusicAlbumPicUrl() {
         return musicAlbumPicUrl;

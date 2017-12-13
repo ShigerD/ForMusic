@@ -27,12 +27,15 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
         public final static Property PId = new Property(0, Long.class, "pId", true, "_id");
         public final static Property MusicName = new Property(1, String.class, "musicName", false, "MUSIC_NAME");
         public final static Property MusicPlayer = new Property(2, String.class, "musicPlayer", false, "MUSIC_PLAYER");
-        public final static Property MusicTime = new Property(3, int.class, "musicTime", false, "MUSIC_TIME");
-        public final static Property MusicAlbum = new Property(4, String.class, "musicAlbum", false, "MUSIC_ALBUM");
-        public final static Property MusicFilePath = new Property(5, String.class, "musicFilePath", false, "MUSIC_FILE_PATH");
-        public final static Property MusicFileSize = new Property(6, long.class, "musicFileSize", false, "MUSIC_FILE_SIZE");
-        public final static Property MusicLyricPath = new Property(7, String.class, "musicLyricPath", false, "MUSIC_LYRIC_PATH");
-        public final static Property MusicAlbumPicUrl = new Property(8, String.class, "musicAlbumPicUrl", false, "MUSIC_ALBUM_PIC_URL");
+        public final static Property WhichApp = new Property(3, String.class, "whichApp", false, "WHICH_APP");
+        public final static Property MusicTime = new Property(4, int.class, "musicTime", false, "MUSIC_TIME");
+        public final static Property MusicAlbum = new Property(5, String.class, "musicAlbum", false, "MUSIC_ALBUM");
+        public final static Property MusicAlbumId = new Property(6, String.class, "musicAlbumId", false, "MUSIC_ALBUM_ID");
+        public final static Property MusicFilePath = new Property(7, String.class, "musicFilePath", false, "MUSIC_FILE_PATH");
+        public final static Property MusicFileSize = new Property(8, long.class, "musicFileSize", false, "MUSIC_FILE_SIZE");
+        public final static Property MusicLyricPath = new Property(9, String.class, "musicLyricPath", false, "MUSIC_LYRIC_PATH");
+        public final static Property MusicAlbumPicUrl = new Property(10, String.class, "musicAlbumPicUrl", false, "MUSIC_ALBUM_PIC_URL");
+        public final static Property MusicAlbumPicPath = new Property(11, String.class, "musicAlbumPicPath", false, "MUSIC_ALBUM_PIC_PATH");
     }
 
 
@@ -51,12 +54,15 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
                 "\"_id\" INTEGER PRIMARY KEY ," + // 0: pId
                 "\"MUSIC_NAME\" TEXT," + // 1: musicName
                 "\"MUSIC_PLAYER\" TEXT," + // 2: musicPlayer
-                "\"MUSIC_TIME\" INTEGER NOT NULL ," + // 3: musicTime
-                "\"MUSIC_ALBUM\" TEXT," + // 4: musicAlbum
-                "\"MUSIC_FILE_PATH\" TEXT," + // 5: musicFilePath
-                "\"MUSIC_FILE_SIZE\" INTEGER NOT NULL ," + // 6: musicFileSize
-                "\"MUSIC_LYRIC_PATH\" TEXT," + // 7: musicLyricPath
-                "\"MUSIC_ALBUM_PIC_URL\" TEXT);"); // 8: musicAlbumPicUrl
+                "\"WHICH_APP\" TEXT," + // 3: whichApp
+                "\"MUSIC_TIME\" INTEGER NOT NULL ," + // 4: musicTime
+                "\"MUSIC_ALBUM\" TEXT," + // 5: musicAlbum
+                "\"MUSIC_ALBUM_ID\" TEXT," + // 6: musicAlbumId
+                "\"MUSIC_FILE_PATH\" TEXT," + // 7: musicFilePath
+                "\"MUSIC_FILE_SIZE\" INTEGER NOT NULL ," + // 8: musicFileSize
+                "\"MUSIC_LYRIC_PATH\" TEXT," + // 9: musicLyricPath
+                "\"MUSIC_ALBUM_PIC_URL\" TEXT," + // 10: musicAlbumPicUrl
+                "\"MUSIC_ALBUM_PIC_PATH\" TEXT);"); // 11: musicAlbumPicPath
     }
 
     /** Drops the underlying database table. */
@@ -83,27 +89,42 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
         if (musicPlayer != null) {
             stmt.bindString(3, musicPlayer);
         }
-        stmt.bindLong(4, entity.getMusicTime());
+ 
+        String whichApp = entity.getWhichApp();
+        if (whichApp != null) {
+            stmt.bindString(4, whichApp);
+        }
+        stmt.bindLong(5, entity.getMusicTime());
  
         String musicAlbum = entity.getMusicAlbum();
         if (musicAlbum != null) {
-            stmt.bindString(5, musicAlbum);
+            stmt.bindString(6, musicAlbum);
+        }
+ 
+        String musicAlbumId = entity.getMusicAlbumId();
+        if (musicAlbumId != null) {
+            stmt.bindString(7, musicAlbumId);
         }
  
         String musicFilePath = entity.getMusicFilePath();
         if (musicFilePath != null) {
-            stmt.bindString(6, musicFilePath);
+            stmt.bindString(8, musicFilePath);
         }
-        stmt.bindLong(7, entity.getMusicFileSize());
+        stmt.bindLong(9, entity.getMusicFileSize());
  
         String musicLyricPath = entity.getMusicLyricPath();
         if (musicLyricPath != null) {
-            stmt.bindString(8, musicLyricPath);
+            stmt.bindString(10, musicLyricPath);
         }
  
         String musicAlbumPicUrl = entity.getMusicAlbumPicUrl();
         if (musicAlbumPicUrl != null) {
-            stmt.bindString(9, musicAlbumPicUrl);
+            stmt.bindString(11, musicAlbumPicUrl);
+        }
+ 
+        String musicAlbumPicPath = entity.getMusicAlbumPicPath();
+        if (musicAlbumPicPath != null) {
+            stmt.bindString(12, musicAlbumPicPath);
         }
     }
 
@@ -125,27 +146,42 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
         if (musicPlayer != null) {
             stmt.bindString(3, musicPlayer);
         }
-        stmt.bindLong(4, entity.getMusicTime());
+ 
+        String whichApp = entity.getWhichApp();
+        if (whichApp != null) {
+            stmt.bindString(4, whichApp);
+        }
+        stmt.bindLong(5, entity.getMusicTime());
  
         String musicAlbum = entity.getMusicAlbum();
         if (musicAlbum != null) {
-            stmt.bindString(5, musicAlbum);
+            stmt.bindString(6, musicAlbum);
+        }
+ 
+        String musicAlbumId = entity.getMusicAlbumId();
+        if (musicAlbumId != null) {
+            stmt.bindString(7, musicAlbumId);
         }
  
         String musicFilePath = entity.getMusicFilePath();
         if (musicFilePath != null) {
-            stmt.bindString(6, musicFilePath);
+            stmt.bindString(8, musicFilePath);
         }
-        stmt.bindLong(7, entity.getMusicFileSize());
+        stmt.bindLong(9, entity.getMusicFileSize());
  
         String musicLyricPath = entity.getMusicLyricPath();
         if (musicLyricPath != null) {
-            stmt.bindString(8, musicLyricPath);
+            stmt.bindString(10, musicLyricPath);
         }
  
         String musicAlbumPicUrl = entity.getMusicAlbumPicUrl();
         if (musicAlbumPicUrl != null) {
-            stmt.bindString(9, musicAlbumPicUrl);
+            stmt.bindString(11, musicAlbumPicUrl);
+        }
+ 
+        String musicAlbumPicPath = entity.getMusicAlbumPicPath();
+        if (musicAlbumPicPath != null) {
+            stmt.bindString(12, musicAlbumPicPath);
         }
     }
 
@@ -160,12 +196,15 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // pId
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // musicName
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // musicPlayer
-            cursor.getInt(offset + 3), // musicTime
-            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // musicAlbum
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // musicFilePath
-            cursor.getLong(offset + 6), // musicFileSize
-            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // musicLyricPath
-            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8) // musicAlbumPicUrl
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // whichApp
+            cursor.getInt(offset + 4), // musicTime
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // musicAlbum
+            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // musicAlbumId
+            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // musicFilePath
+            cursor.getLong(offset + 8), // musicFileSize
+            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // musicLyricPath
+            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // musicAlbumPicUrl
+            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11) // musicAlbumPicPath
         );
         return entity;
     }
@@ -175,12 +214,15 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
         entity.setPId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setMusicName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setMusicPlayer(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setMusicTime(cursor.getInt(offset + 3));
-        entity.setMusicAlbum(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setMusicFilePath(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setMusicFileSize(cursor.getLong(offset + 6));
-        entity.setMusicLyricPath(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
-        entity.setMusicAlbumPicUrl(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
+        entity.setWhichApp(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setMusicTime(cursor.getInt(offset + 4));
+        entity.setMusicAlbum(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
+        entity.setMusicAlbumId(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
+        entity.setMusicFilePath(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
+        entity.setMusicFileSize(cursor.getLong(offset + 8));
+        entity.setMusicLyricPath(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
+        entity.setMusicAlbumPicUrl(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
+        entity.setMusicAlbumPicPath(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
      }
     
     @Override

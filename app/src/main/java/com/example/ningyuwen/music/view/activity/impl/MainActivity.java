@@ -583,6 +583,8 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                 String tilte = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
                 //歌曲的专辑名：MediaStore.Audio.Media.ALBUM
                 String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+                //专辑id
+                String albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
                 //歌曲的歌手名： MediaStore.Audio.Media.ARTIST
                 String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
                 //歌曲文件的路径 ：MediaStore.Audio.Media.DATA
@@ -601,7 +603,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
                     data.setMusicFilePath(url);
                     data.setMusicTime(duration);
                     data.setMusicFileSize(size);
-
+                    data.setMusicAlbumId(albumId);
                     musicBasicInfos.add(data);   //保存到基本信息List，存储到数据库，其他信息不变
                 }
                 cursor.moveToNext();

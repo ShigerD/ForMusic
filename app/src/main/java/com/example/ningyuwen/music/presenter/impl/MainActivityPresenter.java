@@ -4,15 +4,21 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.ImageView;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
@@ -24,10 +30,14 @@ import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -92,6 +102,7 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
             data.setMusicTime(basicInfoList.get(i).getMusicTime());
             data.setMusicFileSize(basicInfoList.get(i).getMusicFileSize());
             data.setMusicAlbumPicUrl(basicInfoList.get(i).getMusicAlbumPicUrl());
+            data.setMusicAlbumPicPath(basicInfoList.get(i).getMusicAlbumPicPath());
 
             //通过pid在表recordInfo中查询信息存储到
             MusicRecordInfo recordInfo = mDaoSession.getMusicRecordInfoDao().load(basicInfoList.get(i).getPId());
@@ -150,12 +161,12 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
      * 将音乐歌词文件路径存储到对应的音乐数据中
      * @param musicName musicName
      * @param musicPlayer musicPlayer
-     * @param musicPic 专辑图片
-     * @param filePath 歌词文件路径
+     * @param musicPicUrl 专辑图片
+     * @param lyricFilePath 歌词文件路径
      */
     @Override
     public void addLrcPathAndMusicPicToDB(String musicName, String musicPlayer,
-                                          String musicPic, String filePath) {
+                                          String musicPicUrl, String lyricFilePath, String whichApp) {
         SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(
                 "/data/data/com.example.ningyuwen.music/databases/music.db",null);
 
@@ -169,14 +180,26 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
 //            Log.i(TAG, "addLyricPathToDB: " + cursor.getLong(0));
 
             MusicBasicInfo musicBasicInfo = mDaoSession.getMusicBasicInfoDao().readEntity(cursor,0);
-            musicBasicInfo.setMusicLyricPath(filePath);     //歌词路径
-            musicBasicInfo.setMusicAlbumPicUrl(musicPic);   //专辑图片
+            musicBasicInfo.setMusicLyricPath(lyricFilePath);     //歌词路径
+
+//            if ("netease".equals(whichApp)) { //网易云音乐
+//                musicBasicInfo.setMusicAlbumPicUrl(musicPicUrl);   //专辑图片
+//                musicBasicInfo.setWhichApp("netease");
+//            }else if ("xiami".equals(whichApp)){
+//                if (!"".equals(musicBasicInfo.getMusicAlbumPicUrl())) {
+//                    String albumPicPath = musicBasicInfo.getMusicAlbumId();
+//                    musicBasicInfo.setMusicAlbumPicPath(getAlbumArt(albumPicPath));
+//                    musicBasicInfo.setWhichApp("xiami");
+//                }
+//            }
+
+            String albumPicPath = musicBasicInfo.getMusicAlbumId();
+            musicBasicInfo.setMusicAlbumPicPath(getAlbumArt(albumPicPath));
+            musicBasicInfo.setWhichApp(whichApp);
             mDaoSession.getMusicBasicInfoDao().insertOrReplace(musicBasicInfo);
         }
         cursor.close();
         db.close();
-
-
     }
 
     /**
@@ -189,7 +212,62 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
      */
     @Override
     public void scanLyricFileFromSD() throws IOException {
+        getLyricFromNetease();
+        getLyricFromXiami();
+    }
 
+    /**
+     * 虾米音乐
+     */
+    private void getLyricFromXiami() throws IOException {
+        File neteaseFile = new File("/storage/emulated/0/xiami/lyrics");
+        if (neteaseFile.exists() && neteaseFile.canRead()){
+            //文件存在
+            File[] files = neteaseFile.listFiles();
+            FileInputStream in = null;
+            for (File file:files){
+                try {
+                    // read file content from file
+                    StringBuilder sb= new StringBuilder("");
+                    FileReader reader = new FileReader(file);
+                    BufferedReader br = new BufferedReader(reader);
+                    String str = null;
+                    String musicName = "", musicPlayer = "";
+//                    String regx1 = "\\[\\d{2}:\\d{2}.\\d{3}\\]";
+//                    String regx = "\\[ti:\\]";
+//                    Pattern p = Pattern.compile(regx);
+                    while((str = br.readLine()) != null) {
+                        sb.append(str).append("/n");
+                        if (str.contains("ti:")){
+                            musicName = str.replace("[", "")
+                                    .replace("]","")
+                                    .replace("ti:","");
+                        }
+                        if (str.contains("ar:")){
+                            musicPlayer = str.replace("[", "")
+                                    .replace("]","")
+                                    .replace("ar:","");
+                            break;
+                        }
+                    }
+                    br.close();
+                    reader.close();
+
+                    //根据音乐名在数据库中查询，再将musicPic存储到数据库
+                    //在数据库中查询音乐名和音乐人对应的歌曲名
+                    addLrcPathAndMusicPicToDB(musicName, musicPlayer, "", file.getPath(),
+                            "xiami");
+                } catch(IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * 网易云音乐
+     */
+    private void getLyricFromNetease() throws IOException {
         File neteaseFile = new File("/storage/emulated/0/netease/cloudmusic/Download/Lyric");
         if (neteaseFile.exists() && neteaseFile.canRead()){
             //文件存在
@@ -221,7 +299,6 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
                 in.close();
             }
         }
-
     }
 
     /**
@@ -362,7 +439,6 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
         String url = "http://music.163.com/api/song/detail/?id=" + musicId + "&ids=[" + musicId + "]";
 
         try {
-
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder()
                     .url(url)
@@ -404,8 +480,8 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
 
                     //根据音乐名在数据库中查询，再将musicPic存储到数据库
                     //在数据库中查询音乐名和音乐人对应的歌曲名
-                    addLrcPathAndMusicPicToDB(musicName, musicPlayer, musicPic, filePath);
-
+                    addLrcPathAndMusicPicToDB(musicName, musicPlayer, musicPic, filePath,
+                            "netease");
                 }
             });
         } catch (Exception e) {
@@ -413,5 +489,27 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
         }
     }
 
+    /**
+     * 获取专辑图片
+     * @param album_id 专辑id
+     * @return path
+     */
+    private String getAlbumArt(String album_id) {
+        String mUriAlbums = "content://media/external/audio/albums";
+        String[] projection = new String[] { "album_art" };
+        Cursor cur = mView.getContentResolver().query(Uri.parse(mUriAlbums + "/" +
+                album_id),  projection, null,
+                null, null);
+        String album_art = null;
+        if (cur != null && cur.getCount() > 0 && cur.getColumnCount() > 0) {
+            cur.moveToNext();
+            album_art = cur.getString(0);
+        }
+        if (cur != null) {
+            cur.close();
+        }
+        cur = null;
+        return album_art;
+    }
 
 }
