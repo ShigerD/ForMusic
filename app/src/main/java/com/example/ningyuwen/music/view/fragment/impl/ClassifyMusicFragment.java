@@ -70,16 +70,11 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 Log.i("test", "onReceive: " + action);
-                if ("AllMusicRefresh".equals(action)){
-                    Log.i(TAG, "onReceive: classify");
-                    mDatas.clear();
-                    showClassifyMusicInfo();
-                }
+
             }
         };
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction("AllMusicRefresh");  //重新导入音乐数据时，刷新列表
         getActivity().registerReceiver(receiver, filter);
     }
 

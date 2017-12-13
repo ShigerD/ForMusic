@@ -89,17 +89,11 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 Log.i("test", "onReceive: " + action);
-                if ("AllMusicRefresh".equals(action)){
-                    Log.i(TAG, "onReceive: custom");
-                    mSongListInfos.clear();
-                    mSongListInfos = ((MainActivity)getActivity()).getSongListInfo();
-                    mAdapter.notifyDataSetChanged();
-                }
+
             }
         };
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction("AllMusicRefresh");   //重新导入音乐数据时，刷新列表
         getActivity().registerReceiver(receiver, filter);
     }
 

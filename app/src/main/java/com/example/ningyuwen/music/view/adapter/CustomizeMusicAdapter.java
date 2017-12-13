@@ -48,27 +48,20 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
     public void onBindViewHolder(MyViewHolder holder, int position) {
         setClickListener(holder, position);
         if (getItemCount() - 1 == position){
-//            holder.tvCustomName.setText("+");
-//            holder.tvCustomName.setGravity(Gravity.CENTER);
-//            holder.tvCustomName.setTextColor(Color.parseColor("#0000FF"));
-//            holder.tvCustomName.setTextSize(26);
-            holder.flAddPlayList.setVisibility(View.VISIBLE);
             holder.llAddPlayList.setVisibility(View.GONE);
+            holder.tvAddPlayList.setVisibility(View.VISIBLE);
             holder.ivCustomPic.setImageResource(R.mipmap.ic_add_playlist);
-//            holder.tvCustomNumber.setVisibility(View.GONE);
             if (isDialog){
                 holder.tvAddPlayList.setTextColor(Color.parseColor("#000000"));
             }else {
                 holder.tvAddPlayList.setTextColor(Color.parseColor("#FFFFFF"));
             }
             holder.ivStatusPlay.setVisibility(View.GONE);
-//            holder.tvCustomName.setText("新建歌单");
-//            holder.rlAddSongList.setVisibility(View.VISIBLE);
-//            holder.rlSongList.setVisibility(View.GONE);
             return;
         }
-        holder.flAddPlayList.setVisibility(View.GONE);
-        holder.tvCustomNumber.setVisibility(View.VISIBLE);
+        holder.llAddPlayList.setVisibility(View.VISIBLE);
+        holder.tvAddPlayList.setVisibility(View.GONE);
+        holder.ivCustomPic.setImageResource(R.mipmap.ic_launcher);
         if (isDialog){
             holder.ivStatusPlay.setVisibility(View.GONE);
             holder.tvCustomName.setTextColor(Color.parseColor("#000000"));
@@ -78,8 +71,6 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
             holder.tvCustomName.setTextColor(Color.parseColor("#FFFFFF"));
             holder.tvCustomNumber.setTextColor(Color.parseColor("#FFFFFF"));
         }
-//        holder.rlAddSongList.setVisibility(View.GONE);
-        holder.rlSongList.setVisibility(View.VISIBLE);
         holder.tvCustomName.setTextSize(16);
         holder.tvCustomName.setText(getItem(position).getName());
         holder.tvCustomNumber.setTextSize(14);
@@ -114,6 +105,12 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
 //                listener.addSongList(position);
 //            }
 //        });
+        holder.flAddPlayList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.addSongList(position);
+            }
+        });
     }
 
     @Override

@@ -82,18 +82,11 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 Log.i("test", "onReceive: " + action);
-                if ("AllMusicRefresh".equals(action)){
-//                    mMusicDatas = MainActivity.mMusicDatas;
-                    Log.i(TAG, "onReceive: allmusic");
-                    mMusicDatas = ((MainActivity)getActivity()).getMusicDatas();
-//                    ((MainActivity)getActivity()).clearMusicData();
-                    showMusicInfo();
-                }
+
             }
         };
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction("AllMusicRefresh");
         getActivity().registerReceiver(receiver, filter);
     }
 

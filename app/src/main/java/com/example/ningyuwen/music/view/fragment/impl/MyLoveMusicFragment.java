@@ -36,7 +36,7 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
     private RecyclerView mRvMyLoveMusic;
     private List<MusicData> mMyLoveMusicDatas;
     private MyLoveMusicAdapter mAdapter;
-    private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
+    private static boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
 
     @Nullable
     @Override
@@ -94,19 +94,12 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
                         }
                         mMyLoveMusicDatas.add(0, musicData);
                     }
-                }else if ("AllMusicRefresh".equals(action)){
-                    Log.i(TAG, "onReceive: mylove");
-                    //重新导入音乐数据时，刷新列表
-                    mMyLoveMusicDatas.clear();
-                    mMyLoveMusicDatas.addAll(((MainActivity)getActivity()).getMyLoveMusicData());
-                    mAdapter.notifyDataSetChanged();
                 }
             }
         };
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetMyLove");
-        filter.addAction("AllMusicRefresh");  //重新导入音乐数据时，刷新列表
         getActivity().registerReceiver(receiver, filter);
     }
 
