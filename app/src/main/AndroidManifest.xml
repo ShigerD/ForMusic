@@ -32,7 +32,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".view.activity.impl.MainActivity"/>
+        <activity android:name=".view.activity.impl.MainActivity"
+            android:launchMode="singleTask"/>
         <activity android:name=".view.activity.impl.MusicSongListActivity"/>
         <activity android:name=".view.activity.impl.PlayActivity"/>
 

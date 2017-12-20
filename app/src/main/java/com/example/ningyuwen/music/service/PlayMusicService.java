@@ -1,18 +1,27 @@
 package com.example.ningyuwen.music.service;
 
 import android.annotation.SuppressLint;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.RemoteViews;
 
+import com.example.ningyuwen.music.MusicApplication;
+import com.example.ningyuwen.music.R;
+import com.example.ningyuwen.music.model.entity.music.MusicData;
+import com.example.ningyuwen.music.util.DensityUtil;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
 import java.util.ArrayList;
@@ -32,6 +41,14 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     private int mPosition;
     private MyBinder myBinder = new MyBinder();             //MyBinder获取PlayMusicService
     private IServiceDataToActivity mServiceDataToActivity;  //接口，负责将数据传给Activity
+    private NotificationCompat.Builder mNotificationBuilder;     //builder,用于通知栏数据准备
+    private NotificationManager mNotificationManager;               //管理通知
+    private Intent buttonPlayIntent;
+    private String nowPlayMusicName;    //当前播放的音乐名
+    private String nowPlayMusicAlbum;           //当前播放的专辑名
+    private String nowPlayAlbumPic;             //专辑图片
+    private long pid;                           //此pid用于临时记录，第一次进入app时，数据未完全加载，但是有上一次播放结束时的pid
+                                                //本次进入暂时 mPosition=0,当开始播放时，判断pid是否不为0,不为0,则说明需要找到真正的mPosition
 
     @Override
     public void onCreate() {
@@ -39,7 +56,123 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         mMediaPlayer = new MediaPlayer();
 
         setBroadCastReceiver();
-        Log.i(TAG, "onCreate: ");
+
+        pid = getSharedPreferences("notes", MODE_PRIVATE).getLong("lastTimePlayPid", 0);
+
+        nowPlayMusicName = getSharedPreferences("notes", MODE_PRIVATE).getString("lastPlayMusicName","");
+        nowPlayMusicAlbum = getSharedPreferences("notes", MODE_PRIVATE).getString("lastPlayMusicAlbum","");
+        nowPlayAlbumPic = getSharedPreferences("notes", MODE_PRIVATE).getString("lastPlayMusicPicPath","");
+
+        showCustomView(false);
+    }
+
+    private void showCustomView(boolean isPlay) {
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        RemoteViews remoteViews = new RemoteViews(getPackageName(),
+                R.layout.layout_music_notification);
+
+        remoteViews.setTextViewText(R.id.music_name, nowPlayMusicName); //设置textview
+        try {
+            if (!"".equals(nowPlayAlbumPic)) {
+                remoteViews.setImageViewUri(R.id.iv_music_pic, Uri.parse(nowPlayAlbumPic));   //专辑图
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            remoteViews.setImageViewResource(R.id.iv_music_pic, R.mipmap.ic_play_album);   //专辑图
+        }
+        remoteViews.setTextViewText(R.id.album_name, nowPlayMusicAlbum);    //专辑名
+        if (isPlay){
+            //播放
+            remoteViews.setImageViewResource(R.id.ic_notification_play_music, R.mipmap.ic_notification_play_music);
+        }else {
+            //暂停
+            remoteViews.setImageViewResource(R.id.ic_notification_play_music, R.mipmap.ic_notification_pause_music);
+        }
+
+        //设置按钮事件 -- 发送广播 --广播接收后进行对应的处理
+        //播放、暂停
+        buttonPlayIntent = new Intent(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_PLAY); //----设置通知栏按钮广播
+        PendingIntent pendButtonPlayIntent = PendingIntent.getBroadcast(this, 0, buttonPlayIntent, 0);
+        remoteViews.setOnClickPendingIntent(R.id.ic_notification_play_music, pendButtonPlayIntent);//----设置对应的按钮ID监控
+
+        //下一曲
+        Intent buttonPlayIntent1 = new Intent(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_NEXT); //----设置通知栏按钮广播
+        PendingIntent pendButtonPlayIntent1 = PendingIntent.getBroadcast(this, 0, buttonPlayIntent1, 0);
+        remoteViews.setOnClickPendingIntent(R.id.ic_notification_next_music, pendButtonPlayIntent1);//----设置对应的按钮ID监控
+
+        //关闭
+        Intent buttonPlayIntent2 = new Intent(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_CLOSE); //----设置通知栏按钮广播
+        PendingIntent pendButtonPlayIntent2 = PendingIntent.getBroadcast(this, 0, buttonPlayIntent2, 0);
+        remoteViews.setOnClickPendingIntent(R.id.ic_notification_close_music, pendButtonPlayIntent2);//----设置对应的按钮ID监控
+
+        //获取PendingIntent
+        Intent mainIntent = new Intent(this, MainActivity.class);
+        PendingIntent mainPendingIntent = PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        mNotificationBuilder = new NotificationCompat.Builder(this);
+        mNotificationBuilder.setContent(remoteViews).setSmallIcon(R.mipmap.ic_launcher)
+                .setOngoing(true)
+                .setTicker("music is playing")
+                .setContentIntent(mainPendingIntent);
+
+        assert mNotificationManager != null;
+        mNotificationManager.notify(1, mNotificationBuilder.build());
+    }
+
+    /**
+     * 广播接收器
+     */
+    public class ServiceReceiver extends BroadcastReceiver {
+        public static final String NOTIFICATION_ITEM_BUTTON_CLOSE
+                = "com.example.notification.ServiceReceiver.last";//----通知栏上一首按钮
+        public static final String NOTIFICATION_ITEM_BUTTON_PLAY
+                = "com.example.notification.ServiceReceiver.play";//----通知栏播放按钮
+        public static final String NOTIFICATION_ITEM_BUTTON_NEXT
+                = "com.example.notification.ServiceReceiver.next";//----通知栏下一首按钮
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String action = intent.getAction();
+            if (action.equals(NOTIFICATION_ITEM_BUTTON_CLOSE)) {//----通知栏播放按钮响应事件
+//                Toast.makeText(context, "上一首", Toast.LENGTH_LONG).show();
+                //关闭进程
+                long id = mMusicIds.get(mPosition);
+                getSharedPreferences("notes", MODE_PRIVATE).edit()
+                        .putLong("lastTimePlayPid", id)
+                        .putString("lastPlayMusicName", nowPlayMusicName)
+                        .putString("lastPlayMusicAlbum", nowPlayMusicAlbum)
+                        .putString("lastPlayMusicPicPath", nowPlayAlbumPic).apply();
+
+                mNotificationManager.cancel(1);
+                MusicApplication.exitApp();
+                stopSelf();
+            } else if (action.equals(NOTIFICATION_ITEM_BUTTON_PLAY)) {//----通知栏播放按钮响应事件
+//                Toast.makeText(context, "暂停", Toast.LENGTH_LONG).show();
+                //播放或暂停
+                //播放按钮变为暂停
+                playOrPause();
+            } else if (action.equals(NOTIFICATION_ITEM_BUTTON_NEXT)) {//----通知栏下一首按钮响应事件
+                //下一曲,更新通知栏
+                mPosition = (mPosition + 1) % mMusicIds.size();
+                refreshNotification();
+                playMusic(mPosition, 0);
+            }
+        }
+    }
+
+    /**
+     * 更新通知栏，用于在用户点击音乐列表之后的播放 和 点击通知栏的播放
+     */
+    private void refreshNotification(){
+        MusicData musicData = mServiceDataToActivity.getPlayMusicData(mMusicIds.get(mPosition));
+        if (musicData == null){
+            return;
+        }
+        nowPlayMusicName = musicData.getMusicName();
+        nowPlayMusicAlbum = musicData.getMusicAlbum();
+        nowPlayAlbumPic = musicData.getMusicAlbumPicPath();
+        showCustomView(true);
     }
 
     @Override
@@ -52,19 +185,12 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     }
 
     private void setBroadCastReceiver() {
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                switch (action){
-                    default:
-                        break;
-                }
-            }
-        };
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("ReplaceMusicList");  //替换音乐列表数据，可能在歌手分类，我喜爱的，自定歌单这些页面用到
-        registerReceiver(mReceiver, filter);
+        mReceiver = new ServiceReceiver();//----注册广播
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_CLOSE);
+        intentFilter.addAction(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_PLAY);
+        intentFilter.addAction(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_NEXT);
+        registerReceiver(mReceiver, intentFilter);
     }
 
     /**
@@ -98,6 +224,8 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     public interface IServiceDataToActivity {
         String getMusicFilePath(long pid);   //获取音乐文件路径
         void showLyricAtActivity(long pid);  //展示歌词,通过pid查询到文件路径，再解析歌词文件
+        MusicData getPlayMusicData(long pid);   //获取MusicData,展示通知栏时需要获取专辑图片,音乐名和专辑名
+        int getPositionFromDataOnPid(long pid);  //根据pid查询歌曲在歌单中的位置，第一次进入app时需要用pid查询到mPosition
     }
 
     /**
@@ -105,6 +233,13 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      * @param currentTime 当前时间
      */
     private void playMusic(int i, int currentTime) {
+        //这里是个问题，第一次进入app，获取不到mPosition，需要根据pid查询得到mPosition
+        if (pid != 0) {
+            mPosition = mServiceDataToActivity.getPositionFromDataOnPid(pid);
+            i = mPosition;
+            pid = 0;
+        }
+
         try {
             mMediaPlayer.reset();// 把各项参数恢复到初始状态
             mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(mMusicIds.get(i)));
@@ -114,6 +249,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     mPosition = (mPosition + 1) % mMusicIds.size();
+                    refreshNotification();  //通知栏
                     playMusic(mPosition, 0);
                 }
             });
@@ -143,7 +279,8 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     @Override
     public void playMusicFromClick(int position) {
         mPosition = position;
-        //播放音乐
+        //播放音乐,更新通知栏
+        refreshNotification();  //通知栏
         playMusic(mPosition, 0);
     }
 
@@ -175,8 +312,9 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     public void playOrPause() {
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
-//            isPause = true;
+            showCustomView(false);
         }else {
+            showCustomView(true);
             playMusic(mPosition, mCurrentTime);
         }
     }
@@ -228,6 +366,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             unregisterReceiver(mReceiver);
             mMediaPlayer = null;
         }
+//        mNotificationManager.cancel(1);
         Log.i(TAG, "onDestroy: ");
     }
 
@@ -236,6 +375,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     // 不要直接实现这个接口，而应该从Binder派生。
     // Binder类已实现了IBinder接口
     public class MyBinder extends Binder {
+
         /** * 获取Service的方法 * @return 返回PlayerService */
         public PlayMusicService getService(){
             return PlayMusicService.this;

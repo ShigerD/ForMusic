@@ -15,6 +15,11 @@ android {
             // 设置支持的SO库架构
             abiFilters 'armeabi' //, 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
         }
+        manifestPlaceholders = [
+                JPUSH_APPKEY : "0bbd47fc3874e74977556f41", //JPush上注册的包名对应的appkey.
+                JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
+        ]
+
     }
     buildTypes {
         release {
@@ -56,11 +61,15 @@ dependencies {
     //Glide
     compile 'com.github.bumptech.glide:glide:3.7.0'
     //网络框架
-    compile 'com.github.bumptech.glide:okhttp3-integration:1.4.0@aar'
-    compile 'com.squareup.okhttp3:okhttp:3.6.0'
+    compile 'com.github.bumptech.glide:okhttp3-integration:1.5.0@aar'
+    compile 'com.squareup.okhttp3:okhttp:3.8.1'
     implementation files('libs/jsoup-1.11.1.jar')
 
     //播放、暂停
     compile 'com.github.Lauzy:PlayPauseView:1.0.4'
+
+    //极光
+    compile 'cn.jiguang.sdk:janalytics:1.1.1' // 此处以JAnalytics 1.1.1 版本为例。
+    compile 'cn.jiguang.sdk:jcore:1.1.8' // 此处以JCore 1.1.2 版本为例。
 
 }

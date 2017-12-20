@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import cn.jiguang.analytics.android.api.JAnalyticsInterface;
 import greendao.GreenDaoHelper;
 import greendao.gen.DaoMaster;
 import greendao.gen.DaoSession;
@@ -41,6 +42,8 @@ public class MusicApplication extends Application {
         Bugly.init(getApplicationContext(), "1c9b07d4ed", true);
         application = this;
         daoSession = getDaoSession();
+        //初始化极光统计平台
+        JAnalyticsInterface.init(this);
     }
 
     public static MusicApplication getApplication(){
@@ -57,7 +60,6 @@ public class MusicApplication extends Application {
             GreenDaoHelper helper = new GreenDaoHelper(this);
             DaoMaster daoMaster = new DaoMaster(helper.getWritableDb());
             daoSession = daoMaster.newSession();
-            Log.i("ning", "getDaoSession: 0");
         }
         return daoSession;
     }
@@ -84,6 +86,10 @@ public class MusicApplication extends Application {
         }
         singleThreadPool = Executors.newSingleThreadExecutor();
         return singleThreadPool;
+    }
+
+    public static void exitApp(){
+        System.exit(0);
     }
 
 //    public DaoMaster getDaoMaster()

@@ -16,5 +16,6 @@ public class StartPageActivity extends AppCompatActivity{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         startActivity(new Intent(StartPageActivity.this, MainActivity.class));
+        finish();
     }
 }

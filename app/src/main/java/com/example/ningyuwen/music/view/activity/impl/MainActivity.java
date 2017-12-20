@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +28,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -105,7 +107,28 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         //线程池，添加一个任务
         MusicApplication.getFixedThreadPool().execute(runnable);
 
+//        sendNotification();
     }
+
+    private void sendNotification() {
+        //获取NotificationManager实例
+        NotificationManager notifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        //获取PendingIntent
+        Intent mainIntent = new Intent(this, MainActivity.class);
+        PendingIntent mainPendingIntent = PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        //创建 Notification.Builder 对象
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                //点击通知后自动清除
+                .setAutoCancel(true)
+                .setContentTitle("我是带Action的Notification")
+                .setContentText("点我会打开MainActivity")
+                .setContentIntent(mainPendingIntent);
+        //发送通知
+        assert notifyManager != null;
+        notifyManager.notify(3, builder.build());
+    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void getNotification() {
@@ -300,6 +323,21 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             mTimeAndLyric.clear();
             mTimeAndLyric = mPresenter.analysisLyric(lyric);   //歌词
             MusicApplication.getSingleThreadPool().execute(LyricRunnable.getInstance());
+        }
+
+        /**
+         * 获取MusicData,展示通知栏时需要获取专辑图片,音乐名和专辑名
+         * @param pid pid
+         * @return MusicData
+         */
+        @Override
+        public MusicData getPlayMusicData(long pid) {
+            return getDataFromPid(pid);
+        }
+
+        @Override
+        public int getPositionFromDataOnPid(long pid) {
+            return getPositionFromPid(pid);
         }
     };
 
@@ -755,6 +793,20 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             }
         }
         return null;
+    }
+
+    /**
+     * 获取歌单中某首歌曲的位置
+     * @param pid pid
+     * @return position
+     */
+    public int getPositionFromPid(long pid){
+        for (int i = 0;i < mMusicDatas.size();i++){
+            if (mMusicDatas.get(i).getpId() == pid){
+                return i;
+            }
+        }
+        return 0;
     }
 
     /**
