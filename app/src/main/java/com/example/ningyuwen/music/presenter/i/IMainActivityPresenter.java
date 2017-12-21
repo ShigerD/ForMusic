@@ -30,4 +30,5 @@ public interface IMainActivityPresenter {
     List<Pair<Long, String>> analysisLyric(String lyric);               //解析歌词,返回歌词List
     boolean existSongListName(String songlistName);     //判断歌单名是否存在或是否为空，不满足前两项才能添加歌单
     void updateLoveMusicToDisLike(MusicData musicData); //将之前喜爱的音乐变为不喜欢
+    void addMusicToSongList(long musicId, long songListId);              //将音乐添加至歌单
 }

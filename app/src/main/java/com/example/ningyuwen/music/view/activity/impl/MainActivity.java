@@ -625,6 +625,14 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         }
     }
 
+    /**
+     * toast
+     * @param message message
+     */
+    public void showToast(String message){
+        showToast(mIvBg, message);
+    }
+
     private String TAG = "test";
 
     /**
@@ -898,6 +906,24 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     @Override
     public boolean existSongListName(String songlistName) {
         return mPresenter.existSongListName(songlistName);
+    }
+
+    /**
+     * 将音乐添加至歌单，主要是修改记录信息，而不修改基本信息
+     * @param musicId 音乐id
+     * @param songListId  歌单id
+     */
+    @Override
+    public void addMusicToSongList(long musicId, long songListId) {
+        mPresenter.addMusicToSongList(musicId, songListId);
+    }
+
+    /**
+     * 提示歌单页面刷新数据
+     * @param songListInfo songListInfo
+     */
+    public void refreshCustomMusic(SongListInfo songListInfo){
+        ((IMainActivityToFragment)mFragments.get(1)).refreshCustomMusic(songListInfo);
     }
 
     /**

@@ -15,6 +15,7 @@ import android.widget.ExpandableListView;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
+import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
@@ -39,13 +40,16 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
     private List<List<MusicData>> mDatas;
     private int mGroupPosition = -1;  //记录当前播放的音乐人
     private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
+    private View classifyMusicFragmentView;     //根布局
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View classifyMusicFragmentView = inflater.inflate(R.layout.fragment_classify_music, container, false);
-        mElClassifyMusic = (ExpandableListView) classifyMusicFragmentView.findViewById(R.id.el_classify_music);
+        if (classifyMusicFragmentView == null) {
+            classifyMusicFragmentView = inflater.inflate(R.layout.fragment_classify_music, container, false);
+            mElClassifyMusic = (ExpandableListView) classifyMusicFragmentView.findViewById(R.id.el_classify_music);
+        }
 
         mDatas = new ArrayList<>();
         showClassifyMusicInfo();
@@ -146,6 +150,11 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
 
     @Override
     public void refreshAllMusicDislike(MusicData musicData) {
+
+    }
+
+    @Override
+    public void refreshCustomMusic(SongListInfo songListInfo) {
 
     }
 }

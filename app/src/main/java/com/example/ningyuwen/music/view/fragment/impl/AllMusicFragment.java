@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.ningyuwen.music.R;
+import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
@@ -40,20 +41,18 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     private List<MusicData> mMusicDatas;
     private RecyclerView mRvAllMusicInfo;
     private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
-    private AddToPlaylistDialog mAddToPlaylistDialog;
     private AllMusicInfoAdapter mAdapter;   //adapter
     private static boolean shouldRefresh = false;   //是否需要刷新
+    private View allMusicFragmentView;      //根布局
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View allMusicFragmentView = inflater.inflate(R.layout.fragment_all_music, container, false);
-        mRvAllMusicInfo = allMusicFragmentView.findViewById(R.id.rv_all_music_info);
-
-
-        Log.i("test", "onCreateView: ");
-
+        if (allMusicFragmentView == null) {
+            allMusicFragmentView = inflater.inflate(R.layout.fragment_all_music, container, false);
+            mRvAllMusicInfo = allMusicFragmentView.findViewById(R.id.rv_all_music_info);
+        }
         return allMusicFragmentView;
     }
 
@@ -161,10 +160,17 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
                         break;
                     case 1:
                         //收藏到歌单
-                        if (mAddToPlaylistDialog == null){
-                            mAddToPlaylistDialog = new AddToPlaylistDialog(getActivity());
-                        }
+                        final AddToPlaylistDialog mAddToPlaylistDialog = new AddToPlaylistDialog(getActivity());
                         mAddToPlaylistDialog.setTitle("收藏到歌单");
+                        mAddToPlaylistDialog.setThisMusicPid(mAdapter.getItem(position).getpId());
+                        //设置监听回调，将音乐添加到歌单中
+                        mAddToPlaylistDialog.setListener(new AddToPlaylistDialog.AddItemClickListener() {
+                            @Override
+                            public void addMusicToSongList(long musicId, long songListId) {
+                                ((MainActivity)getActivity()).addMusicToSongList(musicId, songListId);
+                                mAddToPlaylistDialog.dismiss();
+                            }
+                        });
                         mAddToPlaylistDialog.show();
                         break;
 //                    case 2:
@@ -214,4 +220,10 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
         }
         shouldRefresh = true;
     }
+
+    @Override
+    public void refreshCustomMusic(SongListInfo songListInfo) {
+
+    }
+
 }

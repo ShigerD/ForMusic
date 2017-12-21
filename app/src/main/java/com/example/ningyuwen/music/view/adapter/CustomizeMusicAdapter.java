@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
@@ -60,7 +61,11 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
         }
         holder.llAddPlayList.setVisibility(View.VISIBLE);
         holder.tvAddPlayList.setVisibility(View.GONE);
-        holder.ivCustomPic.setImageResource(R.mipmap.ic_play_album);
+        if ("".equals(getItem(position).getSonglistImgUrl())) {
+            holder.ivCustomPic.setImageResource(R.mipmap.ic_play_album);
+        }else {
+            Glide.with(mContext).load(getItem(position).getSonglistImgUrl()).into(holder.ivCustomPic);
+        }
         if (isDialog){
             holder.ivStatusPlay.setVisibility(View.GONE);
             holder.tvCustomName.setTextColor(Color.parseColor("#000000"));
@@ -74,7 +79,6 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
         holder.tvCustomName.setText(getItem(position).getName());
         holder.tvCustomNumber.setTextSize(14);
         holder.tvCustomNumber.setText(getItem(position).getNumber() + "首");
-//        if (getItem(position))
     }
 
     /**

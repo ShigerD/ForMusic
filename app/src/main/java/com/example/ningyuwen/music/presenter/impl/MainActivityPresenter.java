@@ -391,6 +391,36 @@ public class MainActivityPresenter extends BasePresenter<MainActivity>
     }
 
     /**
+     * 将音乐添加至歌单，主要是修改记录信息，而不修改基本信息
+     * @param musicId 音乐id
+     * @param songListId  歌单id
+     */
+    @Override
+    public void addMusicToSongList(long musicId, long songListId) {
+        //修改记录信息中的歌单id
+        MusicRecordInfo info = mDaoSession.getMusicRecordInfoDao().load(musicId);
+        if (info.getMusicSongListId() == songListId){
+            //歌曲以存在于此歌单，
+            mView.showToast("此歌曲已存在于本歌单中");
+            return;
+        }
+        info.setMusicSongListId(songListId);
+        mDaoSession.getMusicRecordInfoDao().update(info);
+
+        //修改SongListInfo表中的number和URL信息
+        String urlPath = mDaoSession.getMusicBasicInfoDao().load(musicId).getMusicAlbumPicPath();
+        SongListInfo songListInfo = mDaoSession.getSongListInfoDao().load(songListId);
+        int musicNumber = songListInfo.getNumber();
+        songListInfo.setNumber(++musicNumber);
+        songListInfo.setSonglistImgUrl(urlPath);
+        mDaoSession.getSongListInfoDao().update(songListInfo);
+        mView.showToast("添加成功");
+
+        //修改歌单页面数据
+        mView.refreshCustomMusic(songListInfo);
+    }
+
+    /**
      * 传入歌词string，文本文件路径，用于解析歌词文件
      * @param lyricStr string
      * @param filePath string:文件路径

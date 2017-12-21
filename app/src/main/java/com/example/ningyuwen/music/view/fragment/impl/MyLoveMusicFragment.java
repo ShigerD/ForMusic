@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.ningyuwen.music.R;
+import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
@@ -37,13 +38,17 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
     private List<MusicData> mMyLoveMusicDatas;
     private MyLoveMusicAdapter mAdapter;
     private static boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
+    private View allMusicFragmentView;      //根布局
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View allMusicFragmentView = inflater.inflate(R.layout.fragment_love_music, container, false);
-        mRvMyLoveMusic = (RecyclerView) allMusicFragmentView.findViewById(R.id.rv_mylove_music);
+        if (allMusicFragmentView == null) {
+            allMusicFragmentView = inflater.inflate(R.layout.fragment_love_music, container, false);
+            mRvMyLoveMusic = (RecyclerView) allMusicFragmentView.findViewById(R.id.rv_mylove_music);
+        }
+
         mMyLoveMusicDatas = new ArrayList<>();
         showMyLoveMusicInfo();
         return allMusicFragmentView;
@@ -171,4 +176,10 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
     public void refreshAllMusicDislike(MusicData musicData) {
 
     }
+
+    @Override
+    public void refreshCustomMusic(SongListInfo songListInfo) {
+
+    }
+
 }

@@ -48,13 +48,16 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
     private CustomizeMusicAdapter mAdapter;   //adapter,歌单列表
     private List<SongListInfo> mSongListInfos; //歌单List
     private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
+    private View customizeMusicFragment;    //根布局
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View customizeMusicFragment = inflater.inflate(R.layout.fragment_customize_music, container, false);
-        mRvCustomizeMusic = customizeMusicFragment.findViewById(R.id.rv_customize_music);
+        if (customizeMusicFragment == null) {
+            customizeMusicFragment = inflater.inflate(R.layout.fragment_customize_music, container, false);
+            mRvCustomizeMusic = customizeMusicFragment.findViewById(R.id.rv_customize_music);
+        }
 
         mSongListInfos = new ArrayList<>();
         showCustomizeMusicInfo();
@@ -116,7 +119,12 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
 //        dialog.setTitle("歌曲列表");
 //        dialog.show();
 
-        startActivity(new Intent(getActivity(), MusicSongListActivity.class).putExtra("title", info.getName()));
+        startActivity(new Intent(getActivity(), MusicSongListActivity.class)
+                .putExtra("name", info.getName())
+                .putExtra("picUrl",info.getSonglistImgUrl())
+                .putExtra("number",info.getNumber())
+                .putExtra("id",info.getId()));
+
     }
 
     /**
@@ -193,12 +201,24 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
             mSongListInfos = new ArrayList<>();
         }
         mSongListInfos.clear();
-        mSongListInfos = ((MainActivity)getActivity()).getSongListInfo();
+        mSongListInfos.addAll(((MainActivity)getActivity()).getSongListInfo());
         mAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void refreshAllMusicDislike(MusicData musicData) {
 
+    }
+
+    /**
+     * 将音乐添加进入歌单时，这里需要刷新数据，传入pid，只修改这一个歌单数据，减少消耗
+     * @param songListInfo songListId
+     */
+    @Override
+    public void refreshCustomMusic(SongListInfo songListInfo) {
+        int num = mSongListInfos.indexOf(songListInfo);
+        mSongListInfos.get(num).setNumber(songListInfo.getNumber());
+        mSongListInfos.get(num).setSonglistImgUrl(songListInfo.getSonglistImgUrl());
+        mAdapter.notifyDataSetChanged();
     }
 }

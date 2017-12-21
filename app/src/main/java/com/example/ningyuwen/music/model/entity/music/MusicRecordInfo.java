@@ -19,7 +19,8 @@ public class MusicRecordInfo {
     private int musicPlayTimes = 0;  //音乐播放次数
     private boolean isLove = false;    //是否添加到我喜爱的
     private String musicSongList = "";    //被添加到的歌单名,用户自定义歌单
-    private long musicSongListId;
+    private long musicSongListId;       //被添加到的歌单id
+
     @Generated(hash = 179489123)
     public MusicRecordInfo(Long pId, int musicPlayTimes, boolean isLove,
             String musicSongList, long musicSongListId) {

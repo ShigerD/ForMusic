@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.Toast;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
@@ -26,6 +27,8 @@ public class AddToPlaylistDialog extends Dialog implements CustomizeMusicAdapter
     private CustomizeMusicAdapter mAdapter;   //adapter,歌单列表
     private Context mContext;
     private List<SongListInfo> mSongListInfos; //歌单List
+    private long mMusicPid;     //点击的这首音乐的id
+    private AddItemClickListener listener;  //监听
 
     public AddToPlaylistDialog(@NonNull Context context) {
         super(context);
@@ -40,6 +43,25 @@ public class AddToPlaylistDialog extends Dialog implements CustomizeMusicAdapter
     protected AddToPlaylistDialog(@NonNull Context context, boolean cancelable, @Nullable OnCancelListener cancelListener) {
         super(context, cancelable, cancelListener);
         this.mContext = context;
+    }
+
+    /**
+     * 设置
+     * @param pid pid
+     */
+    public void setThisMusicPid(long pid){
+        mMusicPid = pid;
+    }
+
+    /**
+     * 设置监听回调
+     */
+    public void setListener(AddItemClickListener listener){
+        this.listener = listener;
+    }
+
+    public interface AddItemClickListener{
+        void addMusicToSongList(long musicId, long songListId);      //将音乐添加到歌单
     }
 
     @Override
@@ -69,9 +91,13 @@ public class AddToPlaylistDialog extends Dialog implements CustomizeMusicAdapter
         super.setTitle(title);
     }
 
+    /**
+     * 在这个dialog这里是将音乐添加到某个歌单中
+     * @param info info
+     */
     @Override
     public void jumpSongList(SongListInfo info) {
-
+        listener.addMusicToSongList(mMusicPid, info.getId());
     }
 
     @Override
