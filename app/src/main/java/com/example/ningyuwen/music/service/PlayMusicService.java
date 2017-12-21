@@ -43,11 +43,10 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     private IServiceDataToActivity mServiceDataToActivity;  //接口，负责将数据传给Activity
     private NotificationCompat.Builder mNotificationBuilder;     //builder,用于通知栏数据准备
     private NotificationManager mNotificationManager;               //管理通知
-    private Intent buttonPlayIntent;
     private String nowPlayMusicName;    //当前播放的音乐名
     private String nowPlayMusicAlbum;           //当前播放的专辑名
     private String nowPlayAlbumPic;             //专辑图片
-    private long pid;                           //此pid用于临时记录，第一次进入app时，数据未完全加载，但是有上一次播放结束时的pid
+    private long pid = 0;                           //此pid用于临时记录，第一次进入app时，数据未完全加载，但是有上一次播放结束时的pid
                                                 //本次进入暂时 mPosition=0,当开始播放时，判断pid是否不为0,不为0,则说明需要找到真正的mPosition
 
     @Override
@@ -92,7 +91,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 
         //设置按钮事件 -- 发送广播 --广播接收后进行对应的处理
         //播放、暂停
-        buttonPlayIntent = new Intent(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_PLAY); //----设置通知栏按钮广播
+        Intent buttonPlayIntent = new Intent(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_PLAY); //----设置通知栏按钮广播
         PendingIntent pendButtonPlayIntent = PendingIntent.getBroadcast(this, 0, buttonPlayIntent, 0);
         remoteViews.setOnClickPendingIntent(R.id.ic_notification_play_music, pendButtonPlayIntent);//----设置对应的按钮ID监控
 
@@ -135,26 +134,21 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 
             String action = intent.getAction();
             if (action.equals(NOTIFICATION_ITEM_BUTTON_CLOSE)) {//----通知栏播放按钮响应事件
-//                Toast.makeText(context, "上一首", Toast.LENGTH_LONG).show();
                 //关闭进程
-                long id = mMusicIds.get(mPosition);
-                getSharedPreferences("notes", MODE_PRIVATE).edit()
-                        .putLong("lastTimePlayPid", id)
-                        .putString("lastPlayMusicName", nowPlayMusicName)
-                        .putString("lastPlayMusicAlbum", nowPlayMusicAlbum)
-                        .putString("lastPlayMusicPicPath", nowPlayAlbumPic).apply();
-
                 mNotificationManager.cancel(1);
-                MusicApplication.exitApp();
                 stopSelf();
+                MusicApplication.exitApp();
             } else if (action.equals(NOTIFICATION_ITEM_BUTTON_PLAY)) {//----通知栏播放按钮响应事件
-//                Toast.makeText(context, "暂停", Toast.LENGTH_LONG).show();
                 //播放或暂停
                 //播放按钮变为暂停
                 playOrPause();
             } else if (action.equals(NOTIFICATION_ITEM_BUTTON_NEXT)) {//----通知栏下一首按钮响应事件
-                //下一曲,更新通知栏
-                mPosition = (mPosition + 1) % mMusicIds.size();
+                //下一曲,更新通知栏,第一次进入时点击下一曲，需要判断pid
+                if (pid != 0){
+                    mPosition = mServiceDataToActivity.getPositionFromDataOnPid(pid);   //上一次关闭时的位置
+                    pid = 0;
+                }
+                mPosition = (mPosition + 1) % mMusicIds.size();     //下一曲
                 refreshNotification();
                 playMusic(mPosition, 0);
             }
@@ -226,6 +220,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         void showLyricAtActivity(long pid);  //展示歌词,通过pid查询到文件路径，再解析歌词文件
         MusicData getPlayMusicData(long pid);   //获取MusicData,展示通知栏时需要获取专辑图片,音乐名和专辑名
         int getPositionFromDataOnPid(long pid);  //根据pid查询歌曲在歌单中的位置，第一次进入app时需要用pid查询到mPosition
+        void refreshPlayPauseAnimation(boolean play);   //更新主页面的播放暂停动画
     }
 
     /**
@@ -233,6 +228,14 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      * @param currentTime 当前时间
      */
     private void playMusic(int i, int currentTime) {
+        //存储记录，方便下一次进入的开始播放次序
+        long id = mMusicIds.get(mPosition);
+        getSharedPreferences("notes", MODE_PRIVATE).edit()
+                .putLong("lastTimePlayPid", id)
+                .putString("lastPlayMusicName", nowPlayMusicName)
+                .putString("lastPlayMusicAlbum", nowPlayMusicAlbum)
+                .putString("lastPlayMusicPicPath", nowPlayAlbumPic).apply();
+
         //这里是个问题，第一次进入app，获取不到mPosition，需要根据pid查询得到mPosition
         if (pid != 0) {
             mPosition = mServiceDataToActivity.getPositionFromDataOnPid(pid);
@@ -279,6 +282,8 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     @Override
     public void playMusicFromClick(int position) {
         mPosition = position;
+        //pid = 0;
+        pid = 0;
         //播放音乐,更新通知栏
         refreshNotification();  //通知栏
         playMusic(mPosition, 0);
@@ -313,9 +318,13 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
             showCustomView(false);
+            //通知MainActivity更新播放暂停动画
+            mServiceDataToActivity.refreshPlayPauseAnimation(false);
         }else {
             showCustomView(true);
             playMusic(mPosition, mCurrentTime);
+            //通知MainActivity更新播放暂停动画
+            mServiceDataToActivity.refreshPlayPauseAnimation(true);
         }
     }
 

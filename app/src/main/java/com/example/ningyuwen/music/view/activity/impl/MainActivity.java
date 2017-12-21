@@ -339,6 +339,11 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         public int getPositionFromDataOnPid(long pid) {
             return getPositionFromPid(pid);
         }
+
+        @Override
+        public void refreshPlayPauseAnimation(boolean play) {
+            refreshPlayPauseView(play);
+        }
     };
 
     /**
@@ -473,7 +478,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     public void playMusicOnBackstage(int position){
         //不使用广播，使用接口回调
         mServiceDataTrans.playMusicFromClick(position);
-        mPlayPauseView.play();
+        refreshPlayPauseView(true);
     }
 
     private void findView() {
@@ -533,18 +538,30 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 
             @Override
             public void play() {
-                mPlayPauseView.play();
+                refreshPlayPauseView(true);
                 mServiceDataTrans.playOrPause();
                 showToast(mTabLayout, "播放");
             }
 
             @Override
             public void pause() {
-                mPlayPauseView.pause();
+                refreshPlayPauseView(false);
                 mServiceDataTrans.playOrPause();
                 showToast(mTabLayout, "暂停");
             }
         });
+    }
+
+    /**
+     * 播放或暂停，那个动画
+     * @param play bool
+     */
+    public void refreshPlayPauseView(boolean play){
+        if (play){
+            mPlayPauseView.play();
+        }else {
+            mPlayPauseView.pause();
+        }
     }
 
     /**
