@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
+import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
 import java.util.List;
 
@@ -59,7 +60,7 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
         }
         holder.llAddPlayList.setVisibility(View.VISIBLE);
         holder.tvAddPlayList.setVisibility(View.GONE);
-        holder.ivCustomPic.setImageResource(R.mipmap.ic_launcher);
+        holder.ivCustomPic.setImageResource(R.mipmap.ic_play_album);
         if (isDialog){
             holder.ivStatusPlay.setVisibility(View.GONE);
             holder.tvCustomName.setTextColor(Color.parseColor("#000000"));
@@ -90,23 +91,23 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
      * @param holder holder
      * @param position position
      */
-    private void setClickListener(MyViewHolder holder, final int position) {
-        holder.tvCustomName.setOnClickListener(new View.OnClickListener() {
+    private void setClickListener(final MyViewHolder holder, final int position) {
+        holder.llAddPlayList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.jumpSongList(position);
+                listener.jumpSongList(getItem(position));
             }
         });
-//        holder.rlAddSongList.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                listener.addSongList(position);
-//            }
-//        });
         holder.flAddPlayList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 listener.addSongList(position);
+            }
+        });
+        holder.ivStatusPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity)mContext).showToast(holder.ivStatusPlay, "暂未开放此功能");
             }
         });
     }
@@ -121,7 +122,7 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
     }
 
     public interface AddItemClickListener{
-        void jumpSongList(int position);
+        void jumpSongList(SongListInfo info);
         void addSongList(int position);
     }
 

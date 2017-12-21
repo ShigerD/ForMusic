@@ -70,7 +70,7 @@ public class AddToPlaylistDialog extends Dialog implements CustomizeMusicAdapter
     }
 
     @Override
-    public void jumpSongList(int position) {
+    public void jumpSongList(SongListInfo info) {
 
     }
 

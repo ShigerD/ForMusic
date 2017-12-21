@@ -108,14 +108,15 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
 
     /**
      * 跳转到歌单
-     * @param position position
+     * @param info
      */
     @Override
-    public void jumpSongList(int position) {
+    public void jumpSongList(SongListInfo info) {
 //        Dialog dialog = new Dialog(getActivity());
 //        dialog.setTitle("歌曲列表");
 //        dialog.show();
-        startActivity(new Intent(getActivity(), MusicSongListActivity.class));
+
+        startActivity(new Intent(getActivity(), MusicSongListActivity.class).putExtra("title", info.getName()));
     }
 
     /**

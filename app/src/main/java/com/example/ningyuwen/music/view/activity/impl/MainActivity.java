@@ -571,9 +571,9 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private void initPage() {
         mFragments = new ArrayList<>();  //Fragment的List
         mFragments.add(new AllMusicFragment());                 //添加需要展示的Fragment
-        mFragments.add(new CustomizeMusicFragment());
-        mFragments.add(new MyLoveMusicFragment());
-        mFragments.add(new ClassifyMusicFragment());
+        mFragments.add(new CustomizeMusicFragment());           //歌单
+        mFragments.add(new MyLoveMusicFragment());              //我喜爱的
+        mFragments.add(new ClassifyMusicFragment());            //分类
         MainFragmentAdapter mainFragmentAdapter =           //ViewPager的适配器
                 new MainFragmentAdapter(getSupportFragmentManager(), mFragments);
         mMainViewPager.setAdapter(mainFragmentAdapter);        //设置ViewPager的适配器

@@ -78,4 +78,66 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
             drawerLayout.setFitsSystemWindows(false);
         }
     }
+
+    /**
+     * 设置状态栏透明
+     * 使用于非为DrawerLayout.当以图片作为背景时,图片会铺满全屏
+     */
+    public void setStatusBarTransparent() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            //设置状态栏透明
+            this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            //设置跟布局的参数,让布局从状态栏下方开始,而不是跟状态栏重合
+            ViewGroup rootView = (ViewGroup) ((ViewGroup) this.findViewById(android.R.id.content)).getChildAt(0);
+            rootView.setFitsSystemWindows(false);
+            rootView.setClipToPadding(false);
+        }
+    }
+
+    /**
+     * 获取状态栏高度
+     *
+     * @return 状态栏高度
+     */
+    private int getStatusBarHeight() {
+        int resourceId = this.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        return this.getResources().getDimensionPixelSize(resourceId);
+    }
+
+    /**
+     * 获取一个和状态栏大小相同的View
+     *
+     * @param color view的颜色,ARGB值
+     * @return view
+     */
+    public View createStatusBarView(int color) {
+        //绘制一个和状态栏大小相同的view
+        View statusView = new View(this);
+        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, getStatusBarHeight());
+        statusView.setLayoutParams(params);
+        statusView.setBackgroundColor(color);              //设置背景色
+        return statusView;
+    }
+
+    /**
+     * 设置状态栏颜色
+     * 适用于非DrawerLayout,布局包含toolbar时，可以将状态栏设置为何toolbar相同的颜色
+     *
+     * @param color 设置的状态栏的颜色ARGB值
+     */
+    public void setStatusBarColor(int color) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            //设置状态栏透明
+            this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            View statusView = createStatusBarView(color);  //生成一个和状态栏一样大小的View
+            ViewGroup decorView = (ViewGroup) this.getWindow().getDecorView(); //获取布局容器
+            decorView.addView(statusView);  //添加View到布局中
+            //设置跟布局的参数,让布局从状态栏下方开始,而不是跟状态栏重合
+            ViewGroup rootView = (ViewGroup) ((ViewGroup) this
+                    .findViewById(android.R.id.content)).getChildAt(0);
+            rootView.setFitsSystemWindows(true);
+            rootView.setClipToPadding(true);
+        }
+    }
 }

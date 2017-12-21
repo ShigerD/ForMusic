@@ -34,7 +34,8 @@
 
         <activity android:name=".view.activity.impl.MainActivity"
             android:launchMode="singleTask"/>
-        <activity android:name=".view.activity.impl.MusicSongListActivity"/>
+        <activity android:name=".view.activity.impl.MusicSongListActivity"
+            android:theme="@style/translucentStatus"/>
         <activity android:name=".view.activity.impl.PlayActivity"/>
 
         <activity
