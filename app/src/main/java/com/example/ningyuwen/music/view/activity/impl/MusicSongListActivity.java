@@ -29,10 +29,10 @@ import java.util.List;
 
 public class MusicSongListActivity extends BaseActivity<MusicSongListPresenter> {
 
-    private long pid;   //歌单id
-    private String mSongListName;   //歌单名
-    private String mSongListPicUrl; //歌单图片
-    private int mSongListNumber;    //歌单中的歌曲总数
+    private long pid = 0;   //歌单id
+    private String mSongListName = "";   //歌单名
+    private String mSongListPicUrl = ""; //歌单图片
+    private int mSongListNumber = 0;    //歌单中的歌曲总数
     private RecyclerView mRvSongListMusic;  //歌单中的音乐
     private TextView mTvPlayAllMusic;       //播放全部显示的音乐数目
     private AllMusicInfoAdapter mAdapter;   //adapter
@@ -79,10 +79,10 @@ public class MusicSongListActivity extends BaseActivity<MusicSongListPresenter> 
         mRvSongListMusic = (RecyclerView) findViewById(R.id.rv_song_list_music);
         mTvPlayAllMusic = (TextView) findViewById(R.id.tv_play_all_music);
         ImageView imageView = (ImageView) findViewById(R.id.iv_music_pic);
-        if (!"".equals(mSongListPicUrl)){
-            Glide.with(this).load(mSongListPicUrl).into(imageView);
-        }else {
+        if ("".equals(mSongListPicUrl) || mSongListPicUrl == null){
             Glide.with(this).load(R.drawable.bg_default_play_list).into(imageView);
+        }else {
+            Glide.with(this).load(mSongListPicUrl).into(imageView);
         }
     }
 

@@ -3,6 +3,7 @@ package com.example.ningyuwen.music.view.adapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,8 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
-import com.example.ningyuwen.music.view.activity.impl.MainActivity;
+import com.example.ningyuwen.music.util.DensityUtil;
+import com.example.ningyuwen.music.view.widget.MusicPopupWindow;
 
 import java.util.List;
 
@@ -61,8 +63,8 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
         }
         holder.llAddPlayList.setVisibility(View.VISIBLE);
         holder.tvAddPlayList.setVisibility(View.GONE);
-        if ("".equals(getItem(position).getSonglistImgUrl())) {
-            holder.ivCustomPic.setImageResource(R.mipmap.ic_play_album);
+        if (getItem(position).getSonglistImgUrl() == null || "".equals(getItem(position).getSonglistImgUrl())) {
+            Glide.with(mContext).load(R.mipmap.ic_play_album).into(holder.ivCustomPic);
         }else {
             Glide.with(mContext).load(getItem(position).getSonglistImgUrl()).into(holder.ivCustomPic);
         }
@@ -111,7 +113,9 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
         holder.ivStatusPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity)mContext).showToast(holder.ivStatusPlay, "暂未开放此功能");
+//                ((MainActivity)mContext).showToast(holder.ivStatusPlay, "暂未开放此功能");
+                //弹出popupwindow
+                listener.showPopupWindow(getItem(position).getName());
             }
         });
     }
@@ -126,8 +130,9 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
     }
 
     public interface AddItemClickListener{
-        void jumpSongList(SongListInfo info);
-        void addSongList(int position);
+        void jumpSongList(SongListInfo info);     //跳转到歌单页面
+        void addSongList(int position); //添加歌单
+        void showPopupWindow(String listName);
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {

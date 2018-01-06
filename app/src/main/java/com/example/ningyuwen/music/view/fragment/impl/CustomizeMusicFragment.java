@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,20 +15,25 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
+import com.example.ningyuwen.music.util.DensityUtil;
 import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.example.ningyuwen.music.view.activity.impl.MusicSongListActivity;
 import com.example.ningyuwen.music.view.adapter.CustomizeMusicAdapter;
 import com.example.ningyuwen.music.view.fragment.i.ICustomizeMusicFragment;
+import com.example.ningyuwen.music.view.widget.MusicPopupWindow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +55,7 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
     private List<SongListInfo> mSongListInfos; //歌单List
     private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
     private View customizeMusicFragment;    //根布局
+    private MusicPopupWindow mPopupWindow;   //显示歌单三个点的点击事件
 
     @Nullable
     @Override
@@ -189,6 +196,32 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    /**
+     * 显示PopupWindow
+     */
+    @Override
+    public void showPopupWindow(String listName) {
+        if (mPopupWindow == null){
+            mPopupWindow = new MusicPopupWindow(LayoutInflater.from(getActivity())
+                    .inflate(R.layout.layout_music_popup_window, null),
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    600, true);
+
+            mPopupWindow.setTitle(listName);
+
+//            View view = LayoutInflater.from(getActivity()).inflate(R.layout.layout_music_popup_window,
+//                    (ViewGroup) customizeMusicFragment, false);
+//            mPopupWindow.setContentView(view);
+//            mPopupWindow.setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
+//            mPopupWindow.setHeight(DensityUtil.dip2px(getActivity(), 200));
+            mPopupWindow.setOutsideTouchable(true);
+        }
+        mPopupWindow.setTitle(listName);
+//        mPopupWindow.showAsDropDown(mRvCustomizeMusic, Gravity.BOTTOM, 0, 0);
+        mPopupWindow.showAtLocation(((MainActivity)getActivity()).findViewById(R.id.iv_main_activity_bg),
+                Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
     }
 
     /**
