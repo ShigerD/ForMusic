@@ -70,8 +70,8 @@ import java.util.Objects;
  */
 
 public class MainActivity extends BaseActivity<MainActivityPresenter> implements
-        View.OnClickListener , IMainActivity{
-    private List<MusicData> mMusicDatas;
+        View.OnClickListener , IMainActivity, BaseActivity.IBaseActivityToOther {
+
 //    public static List<MusicData> mMusicDatas;
     private DrawerLayout mDrawerMenu;
     private ViewPager mMainViewPager;
@@ -79,10 +79,10 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private ImageView mIvBg;
     private TabLayout mTabLayout;
     public static final String NOTIFICATION_CHANNEL_ID = "4655";
-    private static IServiceDataTrans mServiceDataTrans;  //Activity和Service交互的接口
+
     private TextView mTvMusicName;  //显示音乐名
     private static TextView mTvMusicLyric; //显示音乐歌词
-    private static List<Pair<Long, String>> mTimeAndLyric;   //歌词
+
     private PlayPauseView mPlayPauseView;   //播放暂停按钮
 
 //    private static MyHandler mMyHandler;   //handler
@@ -108,64 +108,6 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         MusicApplication.getFixedThreadPool().execute(runnable);
 
 //        sendNotification();
-    }
-
-    private void sendNotification() {
-        //获取NotificationManager实例
-        NotificationManager notifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        //获取PendingIntent
-        Intent mainIntent = new Intent(this, MainActivity.class);
-        PendingIntent mainPendingIntent = PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        //创建 Notification.Builder 对象
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                //点击通知后自动清除
-                .setAutoCancel(true)
-                .setContentTitle("我是带Action的Notification")
-                .setContentText("点我会打开MainActivity")
-                .setContentIntent(mainPendingIntent);
-        //发送通知
-        assert notifyManager != null;
-        notifyManager.notify(3, builder.build());
-    }
-
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void getNotification() {
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        // The id of the channel.
-        String id = "my_channel_01";
-        // The user-visible name of the channel.
-        CharSequence name = getString(R.string.channel_name);
-        // The user-visible description of the channel.
-        String description = getString(R.string.channel_description);
-        int importance = NotificationManager.IMPORTANCE_LOW;
-        NotificationChannel mChannel = new NotificationChannel(id, name,importance);
-        // Configure the notification channel.
-        mChannel.setDescription(description);
-        mChannel.enableLights(true);
-        // Sets the notification light color for notifications posted to this
-        // channel, if the device supports this feature.
-        mChannel.setLightColor(Color.RED);
-        mChannel.enableVibration(true);
-        mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-        mNotificationManager.createNotificationChannel(mChannel);
-
-        mNotificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        // Sets an ID for the notification, so it can be updated.
-        int notifyID = 1;
-        // The id of the channel.
-        String CHANNEL_ID = "my_channel_01";
-        // Create a notification and set the notification channel.
-        Notification notification = new Notification.Builder(MainActivity.this)
-                .setContentTitle("New Message")
-                .setContentText("You've received new messages.")
-                .setSmallIcon(R.mipmap.ic_account_circle_white_24dp)
-                .setChannelId(CHANNEL_ID)
-                .build();
-// Issue the notification.
-        mNotificationManager.notify(notifyID, notification);
-
     }
 
     /**
@@ -223,59 +165,25 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 
     }
 
-    /**
-     * 初始化activity时启动服务，服务可能因为内存回收而自动关闭
-     */
-    public void startPlayMusicService(){
-        Intent intent = new Intent(MainActivity.this, PlayMusicService.class);
-        bindService(intent, mServiceConnection,  Context.BIND_AUTO_CREATE);
-
-    }
-
-    /**
-     * 初始化Service的数据，使用接口回调
-     */
-    private void initServiceData() throws NullPointerException{
-        if (mMusicDatas == null){
+    @Override
+    public void showLyricAtActivity(long pid) {
+        MusicBasicInfo musicBasicInfo = mPresenter.getMusicDataUsePid(pid);
+        mTvMusicName.setText(musicBasicInfo.getMusicName());   // 显示音乐名
+        String lyric = mPresenter.getLyricFromDBUsePid(musicBasicInfo);   //获取歌词
+        Log.i(TAG, "showLyricAtActivity: " + lyric);
+        if ("".equals(lyric)){
+            mTvMusicLyric.setText("暂无歌词");
             return;
         }
-        ArrayList<Long> musicId = new ArrayList<>();
-        for (int i = 0; i < mMusicDatas.size();i++){
-            musicId.add(i, mMusicDatas.get(i).getpId());
-        }
 
-        //传输初始化数据，音乐路径List
-        mServiceDataTrans.initServiceData(musicId);
+        //歌词List，时间加歌词
+        if (mTimeAndLyric == null){
+            mTimeAndLyric = new ArrayList<>();
+        }
+        mTimeAndLyric.clear();
+        mTimeAndLyric = mPresenter.analysisLyric(lyric);   //歌词
+        MusicApplication.getSingleThreadPool().execute(MainActivity.LyricRunnable.getInstance());
     }
-
-
-    /**
-     * 后台播放音乐Service，使用bindService启动，方便传输数据，startService不方便传输数据
-     * 当Service
-     */
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            //使用MyBinder类获取PlayMusicService对象，
-            PlayMusicService.MyBinder myBinder = (PlayMusicService.MyBinder)service;
-            mServiceDataTrans = myBinder.getService();
-            //设置Service对Activity的监听回调
-            myBinder.setIServiceDataToActivity(mServiceDataToActivity);
-
-            Log.i(TAG, "onServiceConnected: initServiceData");
-            //初始化Service的数据，使用接口回调
-            try {
-                initServiceData();
-            }catch (NullPointerException e){
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.i(TAG, "onServiceConnected: transData33");
-        }
-    };
 
     /**
      * Activity和Service传递数据
@@ -287,64 +195,6 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         void replaceBackStageMusicList(ArrayList<Long> musicInfoList, int position);//修改后台播放列表，传入musicId,当前播放顺序
         int getMusicPlayTimeStamp();                        //获取播放进度，返回毫秒
     }
-
-    /**
-     * 将Service的数据传给Activity
-     */
-    private PlayMusicService.IServiceDataToActivity mServiceDataToActivity = new PlayMusicService.IServiceDataToActivity() {
-
-        //获取音乐文件路径
-        @Override
-        public String getMusicFilePath(long pid) {
-            try {
-                return mPresenter.getMusicDataUsePid(pid).getMusicFilePath();
-            }catch (NullPointerException e){
-                e.printStackTrace();
-                return "";
-            }
-        }
-
-        //展示歌词,通过pid查询到文件路径，再解析歌词文件
-        @Override
-        public void showLyricAtActivity(long pid) {
-            MusicBasicInfo musicBasicInfo = mPresenter.getMusicDataUsePid(pid);
-            mTvMusicName.setText(musicBasicInfo.getMusicName());   // 显示音乐名
-            String lyric = mPresenter.getLyricFromDBUsePid(musicBasicInfo);   //获取歌词
-            Log.i(TAG, "showLyricAtActivity: " + lyric);
-            if ("".equals(lyric)){
-                mTvMusicLyric.setText("暂无歌词");
-                return;
-            }
-
-            //歌词List，时间加歌词
-            if (mTimeAndLyric == null){
-                mTimeAndLyric = new ArrayList<>();
-            }
-            mTimeAndLyric.clear();
-            mTimeAndLyric = mPresenter.analysisLyric(lyric);   //歌词
-            MusicApplication.getSingleThreadPool().execute(LyricRunnable.getInstance());
-        }
-
-        /**
-         * 获取MusicData,展示通知栏时需要获取专辑图片,音乐名和专辑名
-         * @param pid pid
-         * @return MusicData
-         */
-        @Override
-        public MusicData getPlayMusicData(long pid) {
-            return getDataFromPid(pid);
-        }
-
-        @Override
-        public int getPositionFromDataOnPid(long pid) {
-            return getPositionFromPid(pid);
-        }
-
-        @Override
-        public void refreshPlayPauseAnimation(boolean play) {
-            refreshPlayPauseView(play);
-        }
-    };
 
     /**
      * handler
@@ -396,38 +246,9 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
 //    }
 
     /**
-     * handler
-     */
-    @SuppressLint("HandlerLeak")
-    static Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message message) {
-            switch (message.what){
-                case StaticFinalUtil.HANDLER_ACTIVITY_LYRIC:
-                    //显示歌词
-                    try {
-                        mTvMusicLyric.setText(mTimeAndLyric.get(message.arg1).second);
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                    break;
-                case StaticFinalUtil.HANDLER_REFRESH_MUSIC:
-                    ((IMainActivityToFragment)mFragments.get(0)).refreshAllMusic();
-//                    ((IMainActivityToFragment)mFragments.get(1)).refreshAllMusic();
-//                    ((IMainActivityToFragment)mFragments.get(2)).refreshAllMusic();
-//                    ((IMainActivityToFragment)mFragments.get(3)).refreshAllMusic();
-                    break;
-                default:
-                    break;
-
-            }
-        }
-    };
-
-    /**
      * 用于控制歌词的显示
      */
-    private static class LyricRunnable implements Runnable{
+    public static class LyricRunnable implements Runnable{
         private static LyricRunnable mLyricRunnable;
 
         static LyricRunnable getInstance(){
@@ -470,6 +291,35 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
             }
         }
     }
+
+    /**
+     * handler
+     */
+    @SuppressLint("HandlerLeak")
+    static Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message message) {
+            switch (message.what){
+                case StaticFinalUtil.HANDLER_ACTIVITY_LYRIC:
+                    //显示歌词
+                    try {
+                        mTvMusicLyric.setText(mTimeAndLyric.get(message.arg1).second);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    break;
+                case StaticFinalUtil.HANDLER_REFRESH_MUSIC:
+                    ((IMainActivityToFragment)mFragments.get(0)).refreshAllMusic();
+//                    ((IMainActivityToFragment)mFragments.get(1)).refreshAllMusic();
+//                    ((IMainActivityToFragment)mFragments.get(2)).refreshAllMusic();
+//                    ((IMainActivityToFragment)mFragments.get(3)).refreshAllMusic();
+                    break;
+                default:
+                    break;
+
+            }
+        }
+    };
 
     /**
      * 用户点击了音乐，需要在后台播放
@@ -556,12 +406,20 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
      * 播放或暂停，那个动画
      * @param play bool
      */
+    @Override
     public void refreshPlayPauseView(boolean play){
         if (play){
             mPlayPauseView.play();
         }else {
             mPlayPauseView.pause();
         }
+    }
+
+    @Override
+    public void showMusicInfoAtActivity(int what) {
+        Message message = handler.obtainMessage();
+        message.what = what;
+        message.sendToTarget();
     }
 
     /**
@@ -583,28 +441,6 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     @Override
     protected MainActivityPresenter getPresenter() {
         return new MainActivityPresenter(this);
-    }
-
-    /**
-     * 获取权限
-     */
-    private void getReadPermissionAndGetInfoFromSD() {
-        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // 检查该权限是否已经获取
-            int i = ContextCompat.checkSelfPermission(this, permissions[0]);
-            // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
-            if (i != PackageManager.PERMISSION_GRANTED) {
-                // 如果没有授予该权限，就去提示用户请求
-                ActivityCompat.requestPermissions(this, permissions,
-                        StaticFinalUtil.MUSIC_FILE_PERMISSION);
-                shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS);
-                //没有该权限，返回
-                return;
-            }
-            //有权限，直接读取SD卡中的数据
-            getMusicInfoFromSD();
-        }
     }
 
     @Override
@@ -634,71 +470,6 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     }
 
     private String TAG = "test";
-
-    /**
-     * 从SD卡扫描音乐文件并存储到数据库
-     */
-    private void getMusicInfoFromSD() {
-        mMusicDatas.clear();
-
-        //查询媒体数据库
-        Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        //遍历媒体数据库
-        if (cursor != null && cursor.moveToFirst()) {
-            List<MusicBasicInfo> musicBasicInfos = new ArrayList<>();
-            while (!cursor.isAfterLast()) {
-                //歌曲编号
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
-                //歌曲标题
-                String tilte = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-                //歌曲的专辑名：MediaStore.Audio.Media.ALBUM
-                String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-                //专辑id
-                String albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-                //歌曲的歌手名： MediaStore.Audio.Media.ARTIST
-                String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-                //歌曲文件的路径 ：MediaStore.Audio.Media.DATA
-                String url = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                //歌曲的总播放时长 ：MediaStore.Audio.Media.DURATION
-                int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-                //歌曲文件的大小 ：MediaStore.Audio.Media.SIZE
-                Long size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-
-                if (size > 1024 * 800) {//大于800K
-                    MusicBasicInfo data = new MusicBasicInfo();
-                    data.setPId((long) id);
-                    data.setMusicName(tilte);
-                    data.setMusicPlayer(artist);
-                    data.setMusicAlbum(album);
-                    data.setMusicFilePath(url);
-                    data.setMusicTime(duration);
-                    data.setMusicFileSize(size);
-                    data.setMusicAlbumId(albumId);
-                    musicBasicInfos.add(data);   //保存到基本信息List，存储到数据库，其他信息不变
-                }
-                cursor.moveToNext();
-            }
-            cursor.close();
-            //存储数据到数据库，两张表
-            mPresenter.saveMusicInfoFromSD(musicBasicInfos);
-
-            //保存基本信息之后,匹配歌词文件路径
-            try {
-                mPresenter.scanLyricFileFromSD();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.i(TAG, "run: 异常2");
-            }
-
-            //从musicBasicInfos 和 数据库读取数据到 mMusicDatas
-            mMusicDatas = mPresenter.getMusicAllInfo(musicBasicInfos);
-//            sendBroadCastForString("AllMusicRefresh");
-            Message message = handler.obtainMessage();
-            message.what = StaticFinalUtil.HANDLER_REFRESH_MUSIC;
-            message.sendToTarget();
-            startPlayMusicService();
-        }
-    }
 
     @Override
     public void onClick(View view) {
@@ -782,56 +553,16 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     @Override
     public List<MusicData> getMyLoveMusicData() {
         List<MusicData> myLoveData = new ArrayList<>();
+        if (mMusicDatas == null){
+            mMusicDatas = new ArrayList<>();
+            getMusicInfoFromSD();
+        }
         for (int i = 0;i < mMusicDatas.size();i++){
             if (mMusicDatas.get(i).isLove()){
                 myLoveData.add(mMusicDatas.get(i));
             }
         }
         return myLoveData;
-    }
-
-    /**
-     * 設置是否喜愛，在所有歌曲頁面和我喜愛的音樂頁面都有用到
-     * @param pid pid
-     * @param isLove true,false
-     */
-    @Override
-    public void setIsLoveToDB(long pid, boolean isLove) {
-        MusicData data = getDataFromPid(pid);
-        if (data == null){
-            return;
-        }
-        data.setLove(isLove);
-        mPresenter.setIsLoveToDB(pid, isLove);
-    }
-
-    /**
-     * 添加我喜愛的音乐，需要从一个pid得到音乐数据
-     * @param pid pid
-     * @return musicdata
-     */
-    @Override
-    public MusicData getDataFromPid(long pid) {
-        for (int i = 0;i < mMusicDatas.size();i++){
-            if (mMusicDatas.get(i).getpId() == pid){
-                return mMusicDatas.get(i);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 获取歌单中某首歌曲的位置
-     * @param pid pid
-     * @return position
-     */
-    public int getPositionFromPid(long pid){
-        for (int i = 0;i < mMusicDatas.size();i++){
-            if (mMusicDatas.get(i).getpId() == pid){
-                return i;
-            }
-        }
-        return 0;
     }
 
     /**
