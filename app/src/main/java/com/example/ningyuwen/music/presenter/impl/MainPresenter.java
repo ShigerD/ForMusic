@@ -1,46 +1,29 @@
 package com.example.ningyuwen.music.presenter.impl;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.util.Log;
-import android.util.Pair;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
-import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.model.entity.music.MusicRecordInfo;
-import com.example.ningyuwen.music.presenter.i.IMainActivityPresenter;
+import com.example.ningyuwen.music.presenter.i.IMainPresenter;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import greendao.gen.MusicBasicInfoDao;
-import greendao.gen.MusicRecordInfoDao;
 import greendao.gen.SongListInfoDao;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
 /**
  * MainActivityPresenter对应MainActivity
  * Created by ningyuwen on 17-9-22.
  */
 
-public class MainActivityPresenter extends BasePresenter<MainActivity>
-        implements IMainActivityPresenter {
+public class MainPresenter extends BasePresenter<MainActivity>
+        implements IMainPresenter {
 
-    public MainActivityPresenter(MainActivity view) {
+    public MainPresenter(MainActivity view) {
         super(view);
     }
 

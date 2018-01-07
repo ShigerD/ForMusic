@@ -8,6 +8,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -23,6 +24,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
@@ -51,15 +53,13 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
     protected List<MusicData> mMusicDatas;  //音乐信息,总的音乐数据,涵盖基本信息和记录信息
     public static MainActivity.IServiceDataTrans mServiceDataTrans;  //Activity和Service交互的接口
     public static List<Pair<Long, String>> mTimeAndLyric;   //歌词
-    private IBaseActivityToOther mIBaseToOther;     //接口，基类通知父类
-
+    protected long mPlayingMusicId;   //当前播放的音乐id
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPresenter = getPresenter();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);  //设置为强制竖屏
-        mIBaseToOther = (IBaseActivityToOther) this;
     }
 
     /**
@@ -122,6 +122,13 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
             rootView.setClipToPadding(false);
         }
     }
+
+    public void setStatusBarTrans(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+    }
+
 
     /**
      * 获取状态栏高度
@@ -251,7 +258,7 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
             mMusicDatas = mPresenter.getMusicAllInfoFromBasic(musicBasicInfos);
 //            sendBroadCastForString("AllMusicRefresh");
             //显示音乐信息
-            mIBaseToOther.showMusicInfoAtActivity(StaticFinalUtil.HANDLER_REFRESH_MUSIC);
+            showMusicInfoAtActivity(StaticFinalUtil.HANDLER_REFRESH_MUSIC);
             startPlayMusicService();
         }
     }
@@ -312,7 +319,7 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
         //展示歌词,通过pid查询到文件路径，再解析歌词文件
         @Override
         public void showLyricAtActivity(long pid) {
-            mIBaseToOther.showLyricAtActivity(pid);
+            showLyricOnActivity(pid);
         }
 
         /**
@@ -333,18 +340,16 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
         @Override
         public void refreshPlayPauseAnimation(boolean play) {
 //            refreshPlayPauseView(play);
-            mIBaseToOther.refreshPlayPauseView(play);
+            refreshPlayPauseView(play);
         }
     };
 
     /**
-     * baseActivity数据修改之后通知子类修改数据,布局
+     * BaseActivity数据修改之后通知子类修改数据,布局
      */
-    public interface IBaseActivityToOther{
-        void showLyricAtActivity(long pid);
-        void refreshPlayPauseView(boolean play);
-        void showMusicInfoAtActivity(int what);
-    }
+    public abstract void showLyricOnActivity(long pid);
+    public abstract void refreshPlayPauseView(boolean play);
+    public abstract void showMusicInfoAtActivity(int what);
 
     /**
      * 获取歌单中某首歌曲的位置

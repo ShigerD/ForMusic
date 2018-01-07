@@ -100,4 +100,19 @@ public class MusicSongListActivity extends BaseActivity<MusicSongListPresenter> 
     protected MusicSongListPresenter getPresenter() {
         return new MusicSongListPresenter(this);
     }
+
+    @Override
+    public void showLyricOnActivity(long pid) {
+
+    }
+
+    @Override
+    public void refreshPlayPauseView(boolean play) {
+
+    }
+
+    @Override
+    public void showMusicInfoAtActivity(int what) {
+
+    }
 }

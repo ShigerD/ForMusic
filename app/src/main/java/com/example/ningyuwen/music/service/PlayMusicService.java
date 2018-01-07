@@ -22,6 +22,7 @@ import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.util.DensityUtil;
+import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
 import java.util.ArrayList;
@@ -136,8 +137,8 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             if (action.equals(NOTIFICATION_ITEM_BUTTON_CLOSE)) {//----通知栏播放按钮响应事件
                 //关闭进程
                 mNotificationManager.cancel(1);
+                sendBroadcast(new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
                 stopSelf();
-                MusicApplication.exitApp();
             } else if (action.equals(NOTIFICATION_ITEM_BUTTON_PLAY)) {//----通知栏播放按钮响应事件
                 //播放或暂停
                 //播放按钮变为暂停
@@ -351,6 +352,15 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     @Override
     public int getMusicPlayTimeStamp() {
         return mMediaPlayer.getCurrentPosition();
+    }
+
+    /**
+     * 获取当前播放的音乐id，查询数据，便于显示
+     * @return pid
+     */
+    @Override
+    public long getPlayingMusicId() {
+        return mMusicIds.get(mPosition);
     }
 
     /**

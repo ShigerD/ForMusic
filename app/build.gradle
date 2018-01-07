@@ -64,12 +64,15 @@ dependencies {
     compile 'com.github.bumptech.glide:okhttp3-integration:1.5.0@aar'
     compile 'com.squareup.okhttp3:okhttp:3.8.1'
     implementation files('libs/jsoup-1.11.1.jar')
-
     //播放、暂停
     compile 'com.github.Lauzy:PlayPauseView:1.0.4'
-
     //极光
-    compile 'cn.jiguang.sdk:janalytics:1.1.1' // 此处以JAnalytics 1.1.1 版本为例。
-    compile 'cn.jiguang.sdk:jcore:1.1.8' // 此处以JCore 1.1.2 版本为例。
+    compile 'cn.jiguang.sdk:janalytics:1.1.1'
+    // 此处以JAnalytics 1.1.1 版本为例。
+    compile 'cn.jiguang.sdk:jcore:1.1.8'
+    // 此处以JCore 1.1.2 版本为例。
+
+    // https://mvnrepository.com/artifact/com.jakewharton/butterknife
+    compile group: 'com.jakewharton', name: 'butterknife', version: '8.8.1'
 
 }

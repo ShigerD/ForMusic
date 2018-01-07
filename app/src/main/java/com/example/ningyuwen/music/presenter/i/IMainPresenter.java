@@ -15,7 +15,7 @@ import java.util.List;
  * Created by ningyuwen on 17-9-22.
  */
 
-public interface IMainActivityPresenter {
+public interface IMainPresenter {
     List<SongListInfo> getSongListInfoFromDB();
     void addSongListToDB(SongListInfo info);  //添加歌单
     boolean existSongListName(String songlistName);     //判断歌单名是否存在或是否为空，不满足前两项才能添加歌单

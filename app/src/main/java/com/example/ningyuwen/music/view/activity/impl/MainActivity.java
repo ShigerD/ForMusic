@@ -1,40 +1,28 @@
 package com.example.ningyuwen.music.view.activity.impl;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.ComponentName;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -46,7 +34,7 @@ import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
-import com.example.ningyuwen.music.presenter.impl.MainActivityPresenter;
+import com.example.ningyuwen.music.presenter.impl.MainPresenter;
 import com.example.ningyuwen.music.service.PlayMusicService;
 import com.example.ningyuwen.music.util.FastBlurUtil;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
@@ -59,7 +47,6 @@ import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
 import com.freedom.lauzy.playpauseviewlib.PlayPauseView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -69,8 +56,8 @@ import java.util.Objects;
  * Created by ningyuwen on 17-9-22.
  */
 
-public class MainActivity extends BaseActivity<MainActivityPresenter> implements
-        View.OnClickListener , IMainActivity, BaseActivity.IBaseActivityToOther {
+public class MainActivity extends BaseActivity<MainPresenter> implements
+        View.OnClickListener , IMainActivity {
 
 //    public static List<MusicData> mMusicDatas;
     private DrawerLayout mDrawerMenu;
@@ -84,14 +71,15 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     private static TextView mTvMusicLyric; //显示音乐歌词
 
     private PlayPauseView mPlayPauseView;   //播放暂停按钮
+    private BroadcastReceiver mReceiver;
 
-//    private static MyHandler mMyHandler;   //handler
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setStatusBarTransparent();
 
 //        mMyHandler = new MyHandler(MainActivity.this);
         //绑定控件和设置监听
@@ -108,6 +96,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         MusicApplication.getFixedThreadPool().execute(runnable);
 
 //        sendNotification();
+        setBroadCastReceiver();
     }
 
     /**
@@ -166,7 +155,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     }
 
     @Override
-    public void showLyricAtActivity(long pid) {
+    public void showLyricOnActivity(long pid) {
         MusicBasicInfo musicBasicInfo = mPresenter.getMusicDataUsePid(pid);
         mTvMusicName.setText(musicBasicInfo.getMusicName());   // 显示音乐名
         String lyric = mPresenter.getLyricFromDBUsePid(musicBasicInfo);   //获取歌词
@@ -194,6 +183,7 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
         void playOrPause();                                 //播放或暂停
         void replaceBackStageMusicList(ArrayList<Long> musicInfoList, int position);//修改后台播放列表，传入musicId,当前播放顺序
         int getMusicPlayTimeStamp();                        //获取播放进度，返回毫秒
+        long getPlayingMusicId();           //获取当前播放的音乐id，查询数据，便于显示
     }
 
     /**
@@ -439,8 +429,8 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     }
 
     @Override
-    protected MainActivityPresenter getPresenter() {
-        return new MainActivityPresenter(this);
+    protected MainPresenter getPresenter() {
+        return new MainPresenter(this);
     }
 
     @Override
@@ -676,6 +666,41 @@ public class MainActivity extends BaseActivity<MainActivityPresenter> implements
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mServiceConnection);
+        unregisterReceiver(mReceiver);
+    }
+
+    /**
+     * 设置广播接收器
+     */
+    private void setBroadCastReceiver() {
+        mReceiver = new GetReceiverFromOther();//----注册广播
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(StaticFinalUtil.RECEIVER_CLOSE_APP);
+        registerReceiver(mReceiver, intentFilter);
+    }
+
+    /**
+     * 广播接收器，主要用于接受从其他位置发送过来的广播，用于关闭APP
+     */
+    public class GetReceiverFromOther extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (StaticFinalUtil.RECEIVER_CLOSE_APP.equals(intent.getAction())){
+                //重新启动MainActivity,MainActivity设为SingleTask,然后关闭App
+                startActivity(new Intent(getApplicationContext(), MainActivity.class).setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
+            }
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (StaticFinalUtil.RECEIVER_CLOSE_APP.equals(intent.getAction())){
+            //关闭App
+            finish();
+            System.exit(0);
+        }
     }
 
     /**
