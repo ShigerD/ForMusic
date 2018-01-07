@@ -36,6 +36,8 @@ greendao {
 }
 
 
+
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -66,13 +68,16 @@ dependencies {
     implementation files('libs/jsoup-1.11.1.jar')
     //播放、暂停
     compile 'com.github.Lauzy:PlayPauseView:1.0.4'
+    //剪切
+    compile 'com.theartofdev.edmodo:android-image-cropper:2.6.0'
     //极光
     compile 'cn.jiguang.sdk:janalytics:1.1.1'
     // 此处以JAnalytics 1.1.1 版本为例。
     compile 'cn.jiguang.sdk:jcore:1.1.8'
     // 此处以JCore 1.1.2 版本为例。
-
-    // https://mvnrepository.com/artifact/com.jakewharton/butterknife
-    compile group: 'com.jakewharton', name: 'butterknife', version: '8.8.1'
-
+    //butterknife
+    compile 'com.jakewharton:butterknife:8.5.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+//circleImageView
+    compile 'de.hdodenhof:circleimageview:2.2.0'
 }

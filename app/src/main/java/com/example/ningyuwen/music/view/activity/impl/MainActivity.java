@@ -16,7 +16,6 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
@@ -26,6 +25,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.ningyuwen.music.MusicApplication;
@@ -51,6 +51,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 /**
  * 主页面，音乐播放，扫描音乐等
  * Created by ningyuwen on 17-9-22.
@@ -66,6 +68,11 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private ImageView mIvBg;
     private TabLayout mTabLayout;
     public static final String NOTIFICATION_CHANNEL_ID = "4655";
+    private CircleImageView mCircleUserHead;//用户原型头像
+    private TextView mTextNickName;//用户昵称
+    private TextView mTextSign;//用户签名
+    private ListView mListDrawer;//侧滑菜单item
+
 
     private TextView mTvMusicName;  //显示音乐名
     private static TextView mTvMusicLyric; //显示音乐歌词
@@ -323,13 +330,19 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
     private void findView() {
         mDrawerMenu = (DrawerLayout) findViewById(R.id.dr_main);              //侧滑菜单布局
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        mCircleUserHead = findViewById(R.id.ciecle_userHead);
+        mTextNickName = findViewById(R.id.tv_nickName);
+        mTextSign = findViewById(R.id.tv_userSign);
+        mListDrawer = findViewById(R.id.ls_drawer);
         mTvMusicName = (TextView) findViewById(R.id.tv_music_name);
         mTvMusicLyric = (TextView) findViewById(R.id.tv_music_lyric);
         mMainViewPager = (ViewPager) findViewById(R.id.vp_main_page);         //主页面的viewpager
         mIvBg = (ImageView) findViewById(R.id.iv_main_activity_bg);
         mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
         mPlayPauseView = (PlayPauseView) findViewById(R.id.iv_music_pic);
+
+
+
         findViewById(R.id.iv_bar_search).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
