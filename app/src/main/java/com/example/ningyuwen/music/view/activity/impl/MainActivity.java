@@ -1,8 +1,12 @@
 package com.example.ningyuwen.music.view.activity.impl;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -24,6 +28,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -70,12 +75,11 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private ImageView mIvBg;
     private TabLayout mTabLayout;
     public static final String NOTIFICATION_CHANNEL_ID = "4655";
-    private CircleImageView mCircleUserHead;//用户原型头像
-    private TextView mTextNickName;//用户昵称
-    private TextView mTextSign;//用户签名
+//    private CircleImageView mCircleUserHead;//用户原型头像
+//    private TextView mTextNickName;//用户昵称
+//    private TextView mTextSign;//用户签名
     private ListView mListDrawer;//侧滑菜单item
     private List<Map<String, Object>> List = new ArrayList<>(); ;
-    private int resouces = R.layout.item_drawer;
     private String[] item_name= {"主题换肤","关于开发者","计时关闭","退出"};
     private int[] item_icon = {R.drawable.ic_backgroudstyle,
             R.drawable.ic_aboutus,
@@ -364,9 +368,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
     private void findView() {
         mDrawerMenu = (DrawerLayout) findViewById(R.id.dr_main);              //侧滑菜单布局
-        mCircleUserHead = findViewById(R.id.ciecle_userHead);
-        mTextNickName = findViewById(R.id.tv_nickName);
-        mTextSign = findViewById(R.id.tv_userSign);
+//        mCircleUserHead = findViewById(R.id.ciecle_userHead);
+//        mTextNickName = findViewById(R.id.tv_nickName);
+//        mTextSign = findViewById(R.id.tv_userSign);
         mListDrawer = findViewById(R.id.ls_drawer);
 
         mTvMusicName = (TextView) findViewById(R.id.tv_music_name);
@@ -438,6 +442,91 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                 showToast(mTabLayout, "暂停");
             }
         });
+
+        mListDrawer.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position){
+                    case 0:
+                        //主题换肤
+                        break;
+                    case 1:
+                        //developer
+                        break;
+                    case 2:
+                        //timer
+                        setTimerDialog();
+                        break;
+                    case 3:
+                        //exit
+                        break;
+                }
+            }
+        });
+    }
+
+    /**
+     * 定时关闭的弹窗
+     */
+    private void setTimerDialog() {
+        AlertDialog Alert ;
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        final String[] choices = {"5分钟","10分钟","15分钟","30分钟","60分钟","自定义"};
+        final int[] num = {300,600,900,1800,3600};
+
+        alert.setTitle("定时停止播放");
+
+        boolean sign = false;
+        alert.setSingleChoiceItems(choices, -1, new DialogInterface.OnClickListener() {
+            Intent intent = new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP);
+            PendingIntent pi  = PendingIntent.getBroadcast(MainActivity.this,
+                    0, intent, 0);
+            AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0:
+//                        Intent intent = new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP);
+//                        PendingIntent pi  = PendingIntent.getBroadcast(MainActivity.this,
+//                                0, intent, 0);
+//                        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+                        am.setRepeating(AlarmManager.RTC_WAKEUP,
+                                System.currentTimeMillis(),
+                                num[0] * 1000,
+                                pi);
+                        showToast("3秒钟后关闭");
+                        break;
+                    case 1:
+                        am.setRepeating(AlarmManager.RTC_WAKEUP,
+                                System.currentTimeMillis(),
+                                num[1] * 1000,
+                                pi);
+                        break;
+                    case 2:
+                        am.setRepeating(AlarmManager.RTC_WAKEUP,
+                                System.currentTimeMillis(),
+                                num[2] * 1000,
+                                pi);
+                        break;
+                    case 3:
+                        am.setRepeating(AlarmManager.RTC_WAKEUP,
+                                System.currentTimeMillis(),
+                                num[3] * 1000,
+                                pi);
+                        break;
+                    case 4:
+                        am.setRepeating(AlarmManager.RTC_WAKEUP,
+                                System.currentTimeMillis(),
+                                num[4] * 1000,
+                                pi);
+                        break;
+                    case 5:
+
+                        break;
+                }
+            }
+        });
+        alert.create();
     }
 
     /**
