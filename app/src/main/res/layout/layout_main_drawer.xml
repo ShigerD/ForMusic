@@ -8,8 +8,9 @@
     android:background="#0ff">
 
     <RelativeLayout
-        android:layout_width="300dp"
-        android:layout_height="150dp"
+        android:layout_width="316dp"
+        android:layout_height="176dp"
+
     >
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/ciecle_userHead"

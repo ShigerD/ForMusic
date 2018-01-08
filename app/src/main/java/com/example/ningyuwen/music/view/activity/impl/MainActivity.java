@@ -26,6 +26,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.example.ningyuwen.music.MusicApplication;
@@ -35,7 +36,6 @@ import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.presenter.impl.MainPresenter;
-import com.example.ningyuwen.music.service.PlayMusicService;
 import com.example.ningyuwen.music.util.FastBlurUtil;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.i.IMainActivity;
@@ -48,7 +48,9 @@ import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
 import com.freedom.lauzy.playpauseviewlib.PlayPauseView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -72,6 +74,13 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private TextView mTextNickName;//用户昵称
     private TextView mTextSign;//用户签名
     private ListView mListDrawer;//侧滑菜单item
+    private List<Map<String, Object>> List = new ArrayList<>(); ;
+    private int resouces = R.layout.item_drawer;
+    private String[] item_name= {"主题换肤","关于开发者","计时关闭","退出"};
+    private int[] item_icon = {R.drawable.ic_backgroudstyle,
+            R.drawable.ic_aboutus,
+            R.drawable.ic_timer,
+            R.drawable.ic_exit};
 
 
     private TextView mTvMusicName;  //显示音乐名
@@ -98,12 +107,37 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         initPage();
         //默认第一页
         mMainViewPager.setCurrentItem(0);
+        //drawerlayout
+        initdrawer();
 
         //线程池，添加一个任务
         MusicApplication.getFixedThreadPool().execute(runnable);
 
 //        sendNotification();
         setBroadCastReceiver();
+    }
+
+    /**
+     * 设置ListView的adaptter
+     */
+    private void initdrawer() {
+//        List<Map<String, Object>> List = new ArrayList<>(); ;
+//        int resouces = R.layout.item_drawer;
+//        String[] from= {"主题换肤","关于开发者","计时关闭","退出"};
+//        int[] to = {R.drawable.ic_backgroudstyle,
+//                R.drawable.ic_aboutus,
+//                R.drawable.ic_timer,
+//                R.drawable.ic_exit};
+        for (int i = 0;i<item_name.length;i++){
+            Map<String,Object> item = new HashMap<String, Object>();
+            item.put("name",this.item_name[i]);//item text
+            item.put("icon",this.item_icon[i]);//item_image
+            this.List.add(item);
+        }
+        SimpleAdapter adapter = new SimpleAdapter(this,this.List,R.layout.item_drawer,
+                new String[] {"name","icon"},new int[] {R.id.drawerlist_text,R.id.drawerlist_icon});
+        mListDrawer.setAdapter(adapter);
+
     }
 
     /**
@@ -334,6 +368,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mTextNickName = findViewById(R.id.tv_nickName);
         mTextSign = findViewById(R.id.tv_userSign);
         mListDrawer = findViewById(R.id.ls_drawer);
+
         mTvMusicName = (TextView) findViewById(R.id.tv_music_name);
         mTvMusicLyric = (TextView) findViewById(R.id.tv_music_lyric);
         mMainViewPager = (ViewPager) findViewById(R.id.vp_main_page);         //主页面的viewpager

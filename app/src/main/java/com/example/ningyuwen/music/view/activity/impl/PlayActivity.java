@@ -30,7 +30,7 @@ import butterknife.OnClick;
 public class PlayActivity extends BaseActivity<PlayPresenter> implements IPlayActivity {
 
 
-    @BindView(R.id.toolBar)
+    @BindView(R.id.toolbar)
     Toolbar toolBar;
     @BindView(R.id.ivDiscBlackgound)
     ImageView ivDiscBlackgound;
