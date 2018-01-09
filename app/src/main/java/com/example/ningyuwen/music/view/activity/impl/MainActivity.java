@@ -17,7 +17,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.renderscript.ScriptGroup;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -26,8 +25,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.text.InputFilter;
-import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -61,8 +58,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * 主页面，音乐播放，扫描音乐等
@@ -471,24 +466,30 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     }
 
     /**
-     * 定时关闭的弹窗及设置
+     * 定时关闭的弹窗
      */
     private void setTimerDialog() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        final EditText editText = new EditText(this);
-        editText.setHint("   数分钟后,不要超过998哦");
-        editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(3)});
-        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
-        editText.setBackgroundColor(0xFFFFFFF);
+        final String[] choices = {"5分钟","10分钟","15分钟","30分钟","60分钟","自定义"};
+        final int[] num = {300,600,900,1800,3600};
 
         Intent intent = new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP);
         final PendingIntent pi  = PendingIntent.getBroadcast(MainActivity.this,
                 0, intent, 0);
         final AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-        alert.setTitle("定时停止播放");
 
-        alert.setView(editText);
+        alert.setTitle("定时停止播放");
+        alert.setSingleChoiceItems(choices, -1, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(which==5){
+                    //跳转自定义时间
+                }else {
+                    alert_finish = which;
+                }
+            }
+        });
 
         alert.setNeutralButton("取消", new DialogInterface.OnClickListener() {
             @Override
@@ -497,24 +498,21 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             }
         });
 
-
         alert.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(editText.getText()!=null)
-                {
-                    int time =Integer.getInteger(editText.getText().toString());
+                if(alert_finish!=-1){
                     am.setRepeating(AlarmManager.RTC_WAKEUP,
                             System.currentTimeMillis(),
-                            time * 60000,
+                                num[alert_finish] * 1000,
                             pi);
                 }
                 dialog.dismiss();
             }
         });
 
-        AlertDialog dialog = alert.create();
-        dialog.show();
+        AlertDialog Alert = alert.create();
+        Alert.show();
     }
 
     /**
