@@ -23,17 +23,15 @@ public class MusicBasicInfo {
     private String whichApp;          //那个app
     private int musicTime;              //歌曲长度
     private String musicAlbum;          //音乐专辑名
-    private String musicAlbumId;        //音乐专辑ID，方便之后找出专辑图片
+    private long musicAlbumId;        //音乐专辑ID，方便之后找出专辑图片
     private String musicFilePath;       //音乐文件路径
     private long musicFileSize;         //音乐文件大小
     private String musicLyricPath;      //音乐歌词文件路径
     private String musicAlbumPicUrl;    //音乐文件专辑图片，目前只能找到这个了 ，网易云音乐
     private String musicAlbumPicPath;   //音乐文件专辑图片,虾米音乐
-
-
-    @Generated(hash = 69218259)
+    @Generated(hash = 1012459087)
     public MusicBasicInfo(Long pId, String musicName, String musicPlayer,
-            String whichApp, int musicTime, String musicAlbum, String musicAlbumId,
+            String whichApp, int musicTime, String musicAlbum, long musicAlbumId,
             String musicFilePath, long musicFileSize, String musicLyricPath,
             String musicAlbumPicUrl, String musicAlbumPicPath) {
         this.pId = pId;
@@ -70,6 +68,12 @@ public class MusicBasicInfo {
     public void setMusicPlayer(String musicPlayer) {
         this.musicPlayer = musicPlayer;
     }
+    public String getWhichApp() {
+        return this.whichApp;
+    }
+    public void setWhichApp(String whichApp) {
+        this.whichApp = whichApp;
+    }
     public int getMusicTime() {
         return this.musicTime;
     }
@@ -81,6 +85,12 @@ public class MusicBasicInfo {
     }
     public void setMusicAlbum(String musicAlbum) {
         this.musicAlbum = musicAlbum;
+    }
+    public long getMusicAlbumId() {
+        return this.musicAlbumId;
+    }
+    public void setMusicAlbumId(long musicAlbumId) {
+        this.musicAlbumId = musicAlbumId;
     }
     public String getMusicFilePath() {
         return this.musicFilePath;
@@ -106,23 +116,14 @@ public class MusicBasicInfo {
     public void setMusicAlbumPicUrl(String musicAlbumPicUrl) {
         this.musicAlbumPicUrl = musicAlbumPicUrl;
     }
-    public String getMusicAlbumId() {
-        return this.musicAlbumId;
-    }
-    public void setMusicAlbumId(String musicAlbumId) {
-        this.musicAlbumId = musicAlbumId;
-    }
     public String getMusicAlbumPicPath() {
         return this.musicAlbumPicPath;
     }
     public void setMusicAlbumPicPath(String musicAlbumPicPath) {
         this.musicAlbumPicPath = musicAlbumPicPath;
     }
-    public String getWhichApp() {
-        return this.whichApp;
-    }
-    public void setWhichApp(String whichApp) {
-        this.whichApp = whichApp;
-    }
+
+
+   
 
 }

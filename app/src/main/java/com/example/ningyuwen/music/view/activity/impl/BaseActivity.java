@@ -50,10 +50,9 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
     protected P mPresenter;     //presenter对象，处理逻辑运算和数据存储
     private Snackbar mSnacker;       //toast对象
 
-    protected List<MusicData> mMusicDatas;  //音乐信息,总的音乐数据,涵盖基本信息和记录信息
+    public static List<MusicData> mMusicDatas;  //音乐信息,总的音乐数据,涵盖基本信息和记录信息
     public static MainActivity.IServiceDataTrans mServiceDataTrans;  //Activity和Service交互的接口
     public static List<Pair<Long, String>> mTimeAndLyric;   //歌词
-    protected long mPlayingMusicId;   //当前播放的音乐id
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -237,7 +236,7 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
                     data.setMusicFilePath(url);
                     data.setMusicTime(duration);
                     data.setMusicFileSize(size);
-                    data.setMusicAlbumId(albumId);
+                    data.setMusicAlbumId(Long.valueOf(albumId));
                     musicBasicInfos.add(data);   //保存到基本信息List，存储到数据库，其他信息不变
                 }
                 cursor.moveToNext();
@@ -255,7 +254,7 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
             }
 
             //从musicBasicInfos 和 数据库读取数据到 mMusicDatas
-            mMusicDatas = mPresenter.getMusicAllInfoFromBasic(musicBasicInfos);
+            mMusicDatas.addAll(mPresenter.getMusicAllInfoFromBasic(musicBasicInfos));
 //            sendBroadCastForString("AllMusicRefresh");
             //显示音乐信息
             showMusicInfoAtActivity(StaticFinalUtil.HANDLER_REFRESH_MUSIC);
@@ -387,6 +386,9 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
      */
     @Override
     public MusicData getDataFromPid(long pid) {
+        if (mMusicDatas == null){
+            return null;
+        }
         for (int i = 0;i < mMusicDatas.size();i++){
             if (mMusicDatas.get(i).getpId() == pid){
                 return mMusicDatas.get(i);

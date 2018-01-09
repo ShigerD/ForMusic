@@ -45,7 +45,8 @@ public class AllMusicInfoAdapter extends RecyclerView.Adapter<AllMusicInfoAdapte
         Log.i("test", "onCreateViewHolder: test 2");
         holder.tvMusicName.setText(getItem(position).getMusicName());
 //        holder.ivState.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.ic_launcher));
-        Glide.with(mContext).load(getItem(position).getMusicAlbumPicPath()).into(holder.ivState);
+        Glide.with(mContext).load(getItem(position).getMusicAlbumPicPath()).error(R.drawable.back_add_playlist).into(holder.ivState);
+//        Glide.with(mContext).load(getItem(position).getMusicAlbumPicUrl()).into(holder.ivState);
         if (getItem(position).isLove()){
             holder.ivIsLove.setImageResource(R.mipmap.ic_love);
         }else {

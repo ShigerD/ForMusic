@@ -82,6 +82,9 @@ public class DiscView extends RelativeLayout {
         PLAY, PAUSE, NEXT, LAST, STOP
     }
 
+    /**
+     * 监听音乐变化
+     */
     public interface IPlayInfo {
         /*用于更新标题栏变化*/
         public void onMusicInfoChanged(String musicName, String musicAuthor);

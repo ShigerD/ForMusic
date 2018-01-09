@@ -1,8 +1,15 @@
 package com.example.ningyuwen.music.presenter.impl;
 
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Pair;
 
@@ -10,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.ningyuwen.music.MusicApplication;
+import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.model.entity.music.MusicRecordInfo;
@@ -18,9 +26,12 @@ import com.example.ningyuwen.music.view.activity.impl.BaseActivity;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -215,8 +226,23 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
      */
     @Override
     public void scanLyricFileFromSD() throws IOException {
+        getAlbumPicNetease();
         getLyricFromNetease();
         getLyricFromXiami();
+    }
+
+    /**
+     * 获取头像
+     */
+    private void getAlbumPicNetease() {
+        List<MusicBasicInfo> basicInfos = mDaoSession.getMusicBasicInfoDao().loadAll();
+        for (int i = 0;i < basicInfos.size();i++) {
+            long albumId = basicInfos.get(i).getMusicAlbumId();
+//            long songId = basicInfos.get(i).getPId();
+            basicInfos.get(i).setMusicAlbumPicPath(getAlbumArt(String.valueOf(albumId)));
+//            basicInfos.get(i).setMusicAlbumPicPath(getArtwork(songId, albumId));
+        }
+        mDaoSession.getMusicBasicInfoDao().insertOrReplaceInTx(basicInfos);
     }
 
     /**
@@ -444,8 +470,8 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
 //                }
 //            }
 
-            String albumPicPath = musicBasicInfo.getMusicAlbumId();
-            musicBasicInfo.setMusicAlbumPicPath(getAlbumArt(albumPicPath));
+//            String albumPicPath = musicBasicInfo.getMusicAlbumId();
+//            musicBasicInfo.setMusicAlbumPicPath(getAlbumArt(albumPicPath));
             musicBasicInfo.setWhichApp(whichApp);
             mDaoSession.getMusicBasicInfoDao().insertOrReplace(musicBasicInfo);
         }
@@ -474,6 +500,45 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
         }
         cur = null;
         return album_art;
+    }
+
+    private static final Uri albumArtUri = Uri.parse("content://media/external/audio/albumart");
+
+    /**
+     * 获取专辑封面位图对象
+     */
+    public String getArtwork(long song_id, long album_id) {
+        if (album_id < 0) {
+            if (song_id < 0) {
+                String bm = getArtworkFromFile(song_id, -1);
+                if (bm != null) {
+                    return bm;
+                }
+            }
+        }
+        ContentResolver res = mView.getContentResolver();
+        Uri uri = ContentUris.withAppendedId(albumArtUri, album_id);
+        return uri.getPath();
+    }
+
+    /**
+     * 从文件当中获取专辑封面位图
+     */
+    private String getArtworkFromFile(long songid, long albumid) {
+        if (albumid < 0 && songid < 0) {
+            throw new IllegalArgumentException("Must specify an album or a song id");
+        }
+        Uri uri = null;
+        if (albumid < 0) {
+            uri = Uri.parse("content://media/external/audio/media/" + songid + "/albumart");
+
+        } else {
+            uri = ContentUris.withAppendedId(albumArtUri, albumid);
+        }
+        if (uri == null){
+            return "";
+        }
+        return uri.getPath();
     }
 
 }

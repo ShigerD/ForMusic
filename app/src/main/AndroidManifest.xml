@@ -38,7 +38,8 @@
             android:launchMode="singleTask"/>
         <activity android:name=".view.activity.impl.MusicSongListActivity"
             android:theme="@style/translucentStatus"/>
-        <activity android:name=".view.activity.impl.PlayActivity"/>
+        <activity android:name=".view.activity.impl.PlayActivity"
+            android:launchMode="singleTask"/>
 
         <activity
             android:name="com.tencent.bugly.beta.ui.BetaActivity"
@@ -48,6 +49,8 @@
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat"/>
         <!-- optional (needed if default theme has no action bar) -->
+
+        <activity android:name=".view.activity.impl.PlayingActivity"/>
 
         <service android:enabled="true"
             android:exported="true"

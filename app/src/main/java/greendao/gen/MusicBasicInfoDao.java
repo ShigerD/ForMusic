@@ -30,7 +30,7 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
         public final static Property WhichApp = new Property(3, String.class, "whichApp", false, "WHICH_APP");
         public final static Property MusicTime = new Property(4, int.class, "musicTime", false, "MUSIC_TIME");
         public final static Property MusicAlbum = new Property(5, String.class, "musicAlbum", false, "MUSIC_ALBUM");
-        public final static Property MusicAlbumId = new Property(6, String.class, "musicAlbumId", false, "MUSIC_ALBUM_ID");
+        public final static Property MusicAlbumId = new Property(6, long.class, "musicAlbumId", false, "MUSIC_ALBUM_ID");
         public final static Property MusicFilePath = new Property(7, String.class, "musicFilePath", false, "MUSIC_FILE_PATH");
         public final static Property MusicFileSize = new Property(8, long.class, "musicFileSize", false, "MUSIC_FILE_SIZE");
         public final static Property MusicLyricPath = new Property(9, String.class, "musicLyricPath", false, "MUSIC_LYRIC_PATH");
@@ -57,7 +57,7 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
                 "\"WHICH_APP\" TEXT," + // 3: whichApp
                 "\"MUSIC_TIME\" INTEGER NOT NULL ," + // 4: musicTime
                 "\"MUSIC_ALBUM\" TEXT," + // 5: musicAlbum
-                "\"MUSIC_ALBUM_ID\" TEXT," + // 6: musicAlbumId
+                "\"MUSIC_ALBUM_ID\" INTEGER NOT NULL ," + // 6: musicAlbumId
                 "\"MUSIC_FILE_PATH\" TEXT," + // 7: musicFilePath
                 "\"MUSIC_FILE_SIZE\" INTEGER NOT NULL ," + // 8: musicFileSize
                 "\"MUSIC_LYRIC_PATH\" TEXT," + // 9: musicLyricPath
@@ -100,11 +100,7 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
         if (musicAlbum != null) {
             stmt.bindString(6, musicAlbum);
         }
- 
-        String musicAlbumId = entity.getMusicAlbumId();
-        if (musicAlbumId != null) {
-            stmt.bindString(7, musicAlbumId);
-        }
+        stmt.bindLong(7, entity.getMusicAlbumId());
  
         String musicFilePath = entity.getMusicFilePath();
         if (musicFilePath != null) {
@@ -157,11 +153,7 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
         if (musicAlbum != null) {
             stmt.bindString(6, musicAlbum);
         }
- 
-        String musicAlbumId = entity.getMusicAlbumId();
-        if (musicAlbumId != null) {
-            stmt.bindString(7, musicAlbumId);
-        }
+        stmt.bindLong(7, entity.getMusicAlbumId());
  
         String musicFilePath = entity.getMusicFilePath();
         if (musicFilePath != null) {
@@ -199,7 +191,7 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // whichApp
             cursor.getInt(offset + 4), // musicTime
             cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // musicAlbum
-            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // musicAlbumId
+            cursor.getLong(offset + 6), // musicAlbumId
             cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // musicFilePath
             cursor.getLong(offset + 8), // musicFileSize
             cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // musicLyricPath
@@ -217,7 +209,7 @@ public class MusicBasicInfoDao extends AbstractDao<MusicBasicInfo, Long> {
         entity.setWhichApp(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setMusicTime(cursor.getInt(offset + 4));
         entity.setMusicAlbum(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setMusicAlbumId(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
+        entity.setMusicAlbumId(cursor.getLong(offset + 6));
         entity.setMusicFilePath(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
         entity.setMusicFileSize(cursor.getLong(offset + 8));
         entity.setMusicLyricPath(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));

@@ -273,7 +273,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     @Override
     public void initServiceData(ArrayList<Long> musicId) {
         mMusicIds = new ArrayList<>();
-        mMusicIds = musicId;
+        mMusicIds.addAll(musicId);
     }
 
     /**
@@ -282,6 +282,12 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      */
     @Override
     public void playMusicFromClick(int position) {
+        if (position < 0){
+            position = mMusicIds.size()-1;
+        }
+        if (position == mMusicIds.size()){
+            position = 0;
+        }
         mPosition = position;
         //pid = 0;
         pid = 0;
@@ -361,6 +367,23 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     @Override
     public long getPlayingMusicId() {
         return mMusicIds.get(mPosition);
+    }
+
+    /**
+     * 获取播放位置position
+     * @return position
+     */
+    @Override
+    public int getPlayPosition() {
+        return mPosition;
+    }
+
+    @Override
+    public boolean isPlayingMusic() {
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()){
+            return true;
+        }
+        return false;
     }
 
     /**

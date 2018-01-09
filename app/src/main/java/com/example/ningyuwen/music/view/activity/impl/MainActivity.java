@@ -158,7 +158,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
             mMusicDatas = new ArrayList<>();
             //先检查数据库中是否有数据，若有则读取数据库中的数据
-            mMusicDatas = mPresenter.getMusicBasicInfoFromDB();
+            mMusicDatas.addAll(mPresenter.getMusicBasicInfoFromDB());
 
             //如果返回数据为空，从SD卡读取数据
             if (mMusicDatas.size() == 0){
@@ -191,12 +191,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         initBitmap = FastBlurUtil.doBlur(initBitmap, blurRadius, false);
         mIvBg.setScaleType(ImageView.ScaleType.CENTER_CROP);
         mIvBg.setImageBitmap(initBitmap);
-
-
-//        Glide.with(this)
-//                .load(R.drawable.pic_main_bg)
-//                .into(mIvBg);
-
     }
 
     @Override
@@ -229,6 +223,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         void replaceBackStageMusicList(ArrayList<Long> musicInfoList, int position);//修改后台播放列表，传入musicId,当前播放顺序
         int getMusicPlayTimeStamp();                        //获取播放进度，返回毫秒
         long getPlayingMusicId();           //获取当前播放的音乐id，查询数据，便于显示
+        int getPlayPosition();              //获取播放位置position
+        boolean isPlayingMusic();           //获取音乐播放状态，播放或者暂停
     }
 
     /**
@@ -431,6 +427,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             @Override
             public void play() {
                 refreshPlayPauseView(true);
+                if (mServiceDataTrans == null){
+                    return;
+                }
                 mServiceDataTrans.playOrPause();
                 showToast(mTabLayout, "播放");
             }
@@ -438,6 +437,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             @Override
             public void pause() {
                 refreshPlayPauseView(false);
+                if (mServiceDataTrans == null){
+                    return;
+                }
                 mServiceDataTrans.playOrPause();
                 showToast(mTabLayout, "暂停");
             }

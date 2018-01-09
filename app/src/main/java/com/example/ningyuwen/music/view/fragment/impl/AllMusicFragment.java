@@ -38,7 +38,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
 
     private static final String TAG = "test22";
     private BroadcastReceiver receiver;
-    private List<MusicData> mMusicDatas;
+    private List<MusicData> mAllMusicDatas;
     private RecyclerView mRvAllMusicInfo;
     private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
     private AllMusicInfoAdapter mAdapter;   //adapter
@@ -90,9 +90,9 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     }
 
     private void showMusicInfo() {
-        Log.i("test", "showMusicInfo: " + mMusicDatas.size());
+        Log.i("test", "showMusicInfo: " + mAllMusicDatas.size());
         mRvAllMusicInfo.setLayoutManager(new LinearLayoutManager(getContext()));
-        mAdapter = new AllMusicInfoAdapter(getActivity(), mMusicDatas);
+        mAdapter = new AllMusicInfoAdapter(getActivity(), mAllMusicDatas);
         mRvAllMusicInfo.setAdapter(mAdapter);
         mAdapter.addItemClickListener(this);
     }
@@ -112,7 +112,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     @Override
     public void playMusic(int position) {
         ((MainActivity)getActivity()).showToast(mRvAllMusicInfo, "音乐名： "
-                + mMusicDatas.get(position).getMusicName());
+                + mAllMusicDatas.get(position).getMusicName());
         ((MainActivity)getActivity()).playMusicOnBackstage(position);
 
     }
@@ -124,19 +124,19 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     @Override
     public void setIsLove(int position) {
         Intent intent = new Intent("SetMyLove");
-        if (mMusicDatas.get(position).isLove()){
+        if (mAllMusicDatas.get(position).isLove()){
             //之前是喜愛，在我喜愛的頁面刪除
             ((MainActivity)getActivity()).setIsLoveToDB(
-                    mMusicDatas.get(position).getpId(), false);
+                    mAllMusicDatas.get(position).getpId(), false);
             intent.putExtra("status", "delete");
-            intent.putExtra("pid", mMusicDatas.get(position).getpId());
+            intent.putExtra("pid", mAllMusicDatas.get(position).getpId());
             getActivity().sendBroadcast(intent);
         }else {
             //之前不喜愛，在我喜愛的頁面添加
             ((MainActivity)getActivity()).setIsLoveToDB(
-                    mMusicDatas.get(position).getpId(), true);
+                    mAllMusicDatas.get(position).getpId(), true);
             intent.putExtra("status", "add");
-            intent.putExtra("pid", mMusicDatas.get(position).getpId());
+            intent.putExtra("pid", mAllMusicDatas.get(position).getpId());
             getActivity().sendBroadcast(intent);
         }
     }
@@ -148,7 +148,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     @Override
     public void longClickMusicItem(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("歌曲:" + mMusicDatas.get(position).getMusicName());
+        builder.setTitle("歌曲:" + mAllMusicDatas.get(position).getMusicName());
         String[] items = {"播放", "收藏到歌单", "分享音乐", "剪辑歌曲"};
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
@@ -199,11 +199,11 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     @Override
     public void refreshAllMusic() {
         Log.i(TAG, "refreshAllMusic: 刷新列表AllMusic");
-        if (mMusicDatas == null){
-            mMusicDatas = new ArrayList<>();
+        if (mAllMusicDatas == null){
+            mAllMusicDatas = new ArrayList<>();
         }
-        mMusicDatas.clear();
-        mMusicDatas = ((MainActivity)getActivity()).getMusicDatas();
+        mAllMusicDatas.clear();
+        mAllMusicDatas = ((MainActivity)getActivity()).getMusicDatas();
         showMusicInfo();
     }
 
@@ -212,9 +212,9 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
      */
     @Override
     public void refreshAllMusicDislike(MusicData musicData) {
-        for (int i = 0;i < mMusicDatas.size();i++){
-            if (Objects.equals(mMusicDatas.get(i).getpId(), musicData.getpId())){
-                mMusicDatas.set(i, musicData);
+        for (int i = 0; i < mAllMusicDatas.size(); i++){
+            if (Objects.equals(mAllMusicDatas.get(i).getpId(), musicData.getpId())){
+                mAllMusicDatas.set(i, musicData);
                 break;
             }
         }
