@@ -485,7 +485,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             public void onClick(DialogInterface dialog, int which) {
                 if(which==5){
                     //跳转自定义时间
-                }else {
+                }else if(which!=-1){
                     alert_finish = which;
                 }
             }
