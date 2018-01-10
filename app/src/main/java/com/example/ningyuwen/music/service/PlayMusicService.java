@@ -222,6 +222,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         MusicData getPlayMusicData(long pid);   //获取MusicData,展示通知栏时需要获取专辑图片,音乐名和专辑名
         int getPositionFromDataOnPid(long pid);  //根据pid查询歌曲在歌单中的位置，第一次进入app时需要用pid查询到mPosition
         void refreshPlayPauseAnimation(boolean play);   //更新主页面的播放暂停动画
+        void sendCompleteMsgToRefreshPop(int position);     //歌曲播放完成，向Activity发送通知，更新PopupWindow
     }
 
     /**
@@ -255,6 +256,9 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                     mPosition = (mPosition + 1) % mMusicIds.size();
                     refreshNotification();  //通知栏
                     playMusic(mPosition, 0);
+                    //这一首音乐播放完成，开始播放下一曲，刷新MainActivity或者PlayActivity
+                    //这里用来刷新PopupWindow的信息
+                    mServiceDataToActivity.sendCompleteMsgToRefreshPop(mPosition);
                 }
             });
 

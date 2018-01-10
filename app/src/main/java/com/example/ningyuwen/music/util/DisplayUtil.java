@@ -26,7 +26,7 @@ public class DisplayUtil {
 
     /*唱盘比例*/
     public static final float SCALE_DISC_SIZE = (float) (813.0 / BASE_SCREEN_WIDTH);
-    public static final float SCALE_DISC_MARGIN_TOP = (float) (190 / BASE_SCREEN_HEIGHT);
+    public static final float SCALE_DISC_MARGIN_TOP = (float) (60 / BASE_SCREEN_HEIGHT);
 
     /*专辑图片比例*/
     public static final float SCALE_MUSIC_PIC_SIZE = (float) (533.0 / BASE_SCREEN_WIDTH);

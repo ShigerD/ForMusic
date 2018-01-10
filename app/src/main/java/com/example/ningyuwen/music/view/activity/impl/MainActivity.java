@@ -13,6 +13,8 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,9 +27,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -51,6 +57,8 @@ import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.ClassifyMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
+import com.example.ningyuwen.music.view.widget.PlayMusicDialogFragment;
+import com.example.ningyuwen.music.view.widget.PlayMusicPopupWindow;
 import com.freedom.lauzy.playpauseviewlib.PlayPauseView;
 
 import java.util.ArrayList;
@@ -92,6 +100,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
     private PlayPauseView mPlayPauseView;   //播放暂停按钮
     private BroadcastReceiver mReceiver;
+    private PlayMusicPopupWindow mPlayMusicPopupWindow;  //播放页面
+    private PlayMusicDialogFragment mPlayMusicDialogFragment;      //改为dialog
+    private CardView mMainCardView; //cardview
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -375,7 +386,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mIvBg = (ImageView) findViewById(R.id.iv_main_activity_bg);
         mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
         mPlayPauseView = (PlayPauseView) findViewById(R.id.iv_music_pic);
-
+        mMainCardView = (CardView)findViewById(R.id.cv_show_state_lyric);
 
 
         findViewById(R.id.iv_bar_search).setOnClickListener(new View.OnClickListener() {
@@ -402,6 +413,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                 mDrawerMenu.openDrawer(GravityCompat.START);
             }
         });
+        mMainCardView.setOnClickListener(this);
 //        findViewById(R.id.iv_music_pic).setOnClickListener(this);
         //viewpager页码变化监听
         mMainViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -607,13 +619,32 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 //                break;
             case R.id.cv_show_state_lyric:
                 //cardview，显示歌词的位置，点击进入PlayActivity
-                Intent intent = new Intent(this, PlayActivity.class);
-                startActivity(intent);
-                overridePendingTransition(R.anim.activity_open,0);
+//                Intent intent = new Intent(this, PlayActivity.class);
+//                startActivity(intent);
+//                overridePendingTransition(R.anim.activity_open,0);
+
+                //改为启动popupwindow
+                if (mPlayMusicPopupWindow == null){
+                    initPopupWindow();
+                }
+                mPlayMusicPopupWindow.showAsDropDown(mIvBg);
+
+//                if (mPlayMusicDialogFragment == null){
+//                    initPopupWindow();
+//                }
+//                mPlayMusicDialogFragment.show(getSupportFragmentManager(), "");
                 break;
             default:
                 break;
         }
+    }
+
+    /**
+     * 初始化popupwindow
+     */
+    private void initPopupWindow() {
+        mPlayMusicPopupWindow = new PlayMusicPopupWindow(this);
+//        mPlayMusicDialogFragment = new PlayMusicDialogFragment(this);
     }
 
     /**

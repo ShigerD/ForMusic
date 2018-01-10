@@ -37,11 +37,6 @@ public class DiscViewFragment extends Fragment {
 
     private View mRootView; //根View
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     private int mScreenWidth, mScreenHeight;
     private ImageView mDiscView;
 
