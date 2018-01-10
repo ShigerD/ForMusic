@@ -53,6 +53,8 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
     public static List<MusicData> mMusicDatas;  //音乐信息,总的音乐数据,涵盖基本信息和记录信息
     public static MainActivity.IServiceDataTrans mServiceDataTrans;  //Activity和Service交互的接口
     public static List<Pair<Long, String>> mTimeAndLyric;   //歌词
+    public static boolean mShouldChangePlayingBg = false;
+    private IBaseActivityToPopup mIBaseActivityToPopup;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -341,7 +343,30 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
 //            refreshPlayPauseView(play);
             refreshPlayPauseView(play);
         }
+
+        /**
+         * 歌曲播放完成，向Activity发送通知，更新PopupWindow
+         * @param position 歌曲位置
+         */
+        @Override
+        public void sendCompleteMsgToRefreshPop(int position) {
+            mShouldChangePlayingBg = true;
+            if (mIBaseActivityToPopup != null) {
+                mIBaseActivityToPopup.refreshPopupBgAndDisc(position);
+            }
+        }
     };
+
+    public void setIBaseActivityToPopupListener(IBaseActivityToPopup listener){
+        mIBaseActivityToPopup = listener;
+    }
+
+    /**
+     * BaseActivity到popupwindow的数据传输
+     */
+    public interface IBaseActivityToPopup{
+        void refreshPopupBgAndDisc(int position);       //刷新PopupWindow的背景及Disc
+    }
 
     /**
      * BaseActivity数据修改之后通知子类修改数据,布局

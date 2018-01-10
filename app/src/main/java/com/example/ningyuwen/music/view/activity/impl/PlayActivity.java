@@ -1,11 +1,13 @@
 package com.example.ningyuwen.music.view.activity.impl;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,6 +16,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -179,6 +182,7 @@ public class PlayActivity extends BaseActivity<PlayPresenter> implements IPlayAc
     }
 
     private android.os.Handler myHandler;
+
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
@@ -247,8 +251,15 @@ public class PlayActivity extends BaseActivity<PlayPresenter> implements IPlayAc
             }
             switch (msg.what){
                 case 0:
+                    //显示背景图片
                     Bitmap bitmap = (Bitmap) msg.obj;
                     rootLayout.setBackground(new BitmapDrawable(bitmap));
+                    break;
+                case 1:
+                    //显示播放时间
+                    tvCurrentTime.setText(getTextFromTime(mServiceDataTrans.getMusicPlayTimeStamp()));
+                    musicSeekBar.setProgress(mServiceDataTrans.getMusicPlayTimeStamp()*100/mMusicData.getMusicTime());
+                    myHandler.sendEmptyMessageDelayed(1, 1000);
                     break;
                 default:
                     break;
@@ -271,8 +282,33 @@ public class PlayActivity extends BaseActivity<PlayPresenter> implements IPlayAc
             //正在播放，显示播放按钮
             ivPlayOrPause.setImageResource(R.drawable.ic_pause);
         }
-//        Glide.with(this).load(mMusicData.getMusicAlbumPicPath()).into(ivDiscBlackgound);
+        tvTotalTime.setText(getTextFromTime(mMusicData.getMusicTime()));
 
+        //启动一个线程，一直刷新，每秒种刷新一次
+        myHandler.sendEmptyMessageDelayed(1, 1000);
+    }
+
+    /**
+     * 获取分秒
+     * @param time time
+     * @return text 05：00
+     */
+    private String getTextFromTime(int time){
+        int minute = time/1000/60;
+        int second = time/1000 - minute*60;
+        String min = "";
+        String sec = "";
+        if (minute < 10){
+            min = String.valueOf("0" + minute);
+        }else {
+            min = String.valueOf(minute);
+        }
+        if (second < 10){
+            sec = String.valueOf("0" + second);
+        }else {
+            sec = String.valueOf(second);
+        }
+        return min + ":" + sec;
     }
 
     private static String TAG = "ning";
@@ -310,9 +346,20 @@ public class PlayActivity extends BaseActivity<PlayPresenter> implements IPlayAc
 
     }
 
+    /**
+     * 播放暂停的状态，从service传回来
+     * @param play  //bool
+     */
     @Override
     public void refreshPlayPauseView(boolean play) {
-
+        //播放或者暂停
+        if (play){
+            //暂停
+            ivPlayOrPause.setImageResource(R.drawable.ic_pause);
+        }else {
+            //播放
+            ivPlayOrPause.setImageResource(R.drawable.ic_play);
+        }
     }
 
     @Override
@@ -363,7 +410,8 @@ public class PlayActivity extends BaseActivity<PlayPresenter> implements IPlayAc
                 setPlayActivityBg();
                 break;
             case R.id.iv_back:
-                finish();
+//                finish();
+                startActivity(new Intent(PlayActivity.this, MainActivity.class));
                 break;
             case R.id.iv_play_type:
                 break;
@@ -374,17 +422,19 @@ public class PlayActivity extends BaseActivity<PlayPresenter> implements IPlayAc
         }
     }
 
-    class PlayingAdapter extends ViewPager{
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
 
-        public PlayingAdapter(@NonNull Context context) {
-            super(context);
-        }
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(PlayActivity.this, MainActivity.class));
+    }
 
-        public PlayingAdapter(@NonNull Context context, @Nullable AttributeSet attrs) {
-            super(context, attrs);
-        }
-
-
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return super.onKeyDown(keyCode, event);
     }
 
 }
