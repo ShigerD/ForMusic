@@ -245,6 +245,11 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             pid = 0;
         }
 
+//        if (currentTime == 0){
+//            //等于0,则发送消息更新，这样viewpager的onpageseleted不用执行太多事情
+//            mServiceDataToActivity.sendCompleteMsgToRefreshPop(mPosition);
+//        }
+
         try {
             mMediaPlayer.reset();// 把各项参数恢复到初始状态
             mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(mMusicIds.get(i)));
@@ -257,7 +262,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                     refreshNotification();  //通知栏
                     playMusic(mPosition, 0);
                     //这一首音乐播放完成，开始播放下一曲，刷新MainActivity或者PlayActivity
-                    //这里用来刷新PopupWindow的信息
+                    //这里用来刷新PopupWindow的信息,改为time为0,则发送消息过去
                     mServiceDataToActivity.sendCompleteMsgToRefreshPop(mPosition);
                 }
             });
@@ -388,6 +393,17 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             return true;
         }
         return false;
+    }
+
+    /**
+     * 计算好现在要开始播放的时间，并且将后台的正在播放的时间修改了
+     * @param time time 在PopupWindow里进行计算
+     * @return
+     */
+    @Override
+    public void changePlayingTime(int time) {
+        mCurrentTime = time;
+        playMusic(mPosition, mCurrentTime);
     }
 
     /**

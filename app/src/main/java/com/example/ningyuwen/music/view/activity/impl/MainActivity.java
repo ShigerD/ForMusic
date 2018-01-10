@@ -236,6 +236,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         long getPlayingMusicId();           //获取当前播放的音乐id，查询数据，便于显示
         int getPlayPosition();              //获取播放位置position
         boolean isPlayingMusic();           //获取音乐播放状态，播放或者暂停
+        void changePlayingTime(int time);    //计算好现在要开始播放的时间，并且将后台的正在播放的时间修改了
     }
 
     /**

@@ -351,7 +351,9 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
         @Override
         public void sendCompleteMsgToRefreshPop(int position) {
             mShouldChangePlayingBg = true;
-            mIBaseActivityToPopup.refreshPopupBgAndDisc(position);
+            if (mIBaseActivityToPopup != null) {
+                mIBaseActivityToPopup.refreshPopupBgAndDisc(position);
+            }
         }
     };
 

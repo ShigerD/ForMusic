@@ -18,6 +18,7 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,6 +79,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
     private ViewPager mViewPager;   //转盘
     private View mRootView;     //根布局
     private int mScreenWidth, mScreenHeight;
+    private boolean shouldPauseChangeProgress = false;
 
     public PlayMusicPopupWindow(Context context) {
         this(context, LayoutInflater.from(context)
@@ -166,6 +168,40 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         ivPlayOrPause.setOnClickListener(this);
         ivNext.setOnClickListener(this);
         ivPlayList.setOnClickListener(this);
+        musicSeekBar.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {
+
+            }
+        });
+
+        musicSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                //改变之后，修改播放时间,为了方便，此处只在改变之后修改
+                Log.i(TAG, "onProgressChanged: " + progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                //开始触摸，将handler中的progress变化先暂停
+                shouldPauseChangeProgress = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                //结束触摸，开始播放,在此处设置Service的播放
+                Log.i(TAG, "onProgressChanged22: " + seekBar.getProgress());
+                BaseActivity.mServiceDataTrans.changePlayingTime(mMusicData.getMusicTime()/100
+                        * seekBar.getProgress());
+                shouldPauseChangeProgress = false;
+            }
+        });
     }
 
     @Override
@@ -234,7 +270,9 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
                 case 1:
                     //显示播放时间
                     tvCurrentTime.setText(getTextFromTime(BaseActivity.mServiceDataTrans.getMusicPlayTimeStamp()));
-                    musicSeekBar.setProgress(BaseActivity.mServiceDataTrans.getMusicPlayTimeStamp() * 100 / mMusicData.getMusicTime());
+                    if (!shouldPauseChangeProgress){
+                        musicSeekBar.setProgress(BaseActivity.mServiceDataTrans.getMusicPlayTimeStamp() * 100 / mMusicData.getMusicTime());
+                    }
                     myHandler.sendEmptyMessageDelayed(1, 1000);
                     break;
                 default:
@@ -257,19 +295,58 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
      */
     private void setDiscData() {
         list = new ArrayList<RelativeLayout>();
-        for (int i = 0; i < BaseActivity.mMusicDatas.size(); i++) {
-            list.add(new RelativeLayout(mContext));
-        }
+//        for (int i = 0; i < BaseActivity.mMusicDatas.size(); i++) {
+//            list.add(new RelativeLayout(mContext));
+//        }
         PlayMusicDiscAdapter discAdapter = new PlayMusicDiscAdapter();
         mViewPager.setAdapter(discAdapter);
-        mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
+        final boolean[] isSlide = {false};
+        final int[] nowPosition = new int[1];    //记录当前位置
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+//                isSlide
+                Log.i(TAG, "onPageScrolled: 0 " + position);
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                nowPosition[0] = position;
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                switch (state) {
+                    case ViewPager.SCROLL_STATE_DRAGGING:
+                        //1 dragging（拖动），理解为：只要触发拖动/滑动事件时，则 state = ViewPager.SCROLL_STATE_DRAGGING
+                        isSlide[0] = true;
+                        break;
+                    case ViewPager.SCROLL_STATE_SETTLING:
+                        //2 settling(安放、定居、解决)，理解为：通过拖动/滑动，安放到了目标页，则 state = ViewPager.SCROLL_STATE_SETTLING
+//                        isSlide[0] = true;
+                        if (isSlide[0] && nowPosition[0] != mViewPager.getCurrentItem()){
+                            //下一曲，根据播放模式变化
+                            BaseActivity.mServiceDataTrans.playMusicFromClick(mViewPager.getCurrentItem());
+                            //修改背景图片
+                            initData();
+                            initUi();
+                            setPlayActivityBg();
+                            isSlide[0] = false;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        });
     }
 
     class PlayMusicDiscAdapter extends PagerAdapter {
 
         @Override
         public int getCount() {
-            return list.size();
+            return BaseActivity.mMusicDatas.size();
         }
 
         @Override
@@ -279,7 +356,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
 
         @Override
         public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-            ((ViewPager)container).removeView(list.get(position));
+            ((ViewPager)container).removeView((View) object);
         }
 
         ImageView imageViewFront;
@@ -289,8 +366,10 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         public Object instantiateItem(@NonNull ViewGroup container, int position) {
             View rootView = LayoutInflater.from(mContext).inflate(R.layout.layout_disc, null);
             imageViewFront = (ImageView)rootView.findViewById(R.id.ivDisc);
-            getDiscDrawable(BaseActivity.mMusicDatas.get(position).getMusicAlbumPicPath());
-            ((ViewPager)container).addView(rootView);
+            imageViewFront.setImageDrawable(getDiscDrawable(BaseActivity.mMusicDatas.get(position).getMusicAlbumPicPath()));
+//            Glide.with(mContext).load(BaseActivity.mMusicDatas.get(position).getMusicAlbumPicPath())
+//                    .error(R.drawable.bg_default_disc).centerCrop().into(imageViewFront);
+            container.addView(rootView);
             return rootView;
         }
 
@@ -310,60 +389,121 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             }
         };
 
-        /**
-         * 得到唱盘图片
-         * 唱盘图片由空心圆盘及音乐专辑图片“合成”得到
-         */
-        private void getDiscDrawable(final String musicPicRes) {
-            final Message message = handler.obtainMessage();
-            MusicApplication.getFixedThreadPool().execute(new Runnable() {
-                @Override
-                public void run() {
-                    int discSize = (int) (mScreenWidth * DisplayUtil.SCALE_DISC_SIZE);
-                    int musicPicSize = (int) (mScreenWidth * DisplayUtil.SCALE_MUSIC_PIC_SIZE);
-
-                    Bitmap bitmapDisc = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mContext.getResources(), R
-                            .drawable.ic_disc), discSize, discSize, false);
-//        Bitmap bitmapMusicPic = getMusicPicBitmap(musicPicSize,musicPicRes);
-
-                    Bitmap bitmapMusicPic = null;
-                    try {
-                        bitmapMusicPic = Glide.with(mContext).load(musicPicRes)
-                                .asBitmap().error(R.drawable.bg_default_disc).centerCrop().into(530,530).get();
-                        BitmapDrawable discDrawable = new BitmapDrawable(bitmapDisc);
-                        RoundedBitmapDrawable roundMusicDrawable = RoundedBitmapDrawableFactory.create
-                                (mContext.getResources(), bitmapMusicPic);
-
-                        //抗锯齿
-                        discDrawable.setAntiAlias(true);
-                        roundMusicDrawable.setAntiAlias(true);
-
-                        Drawable[] drawables = new Drawable[2];
-                        drawables[0] = roundMusicDrawable;
-                        drawables[1] = discDrawable;
-
-                        LayerDrawable layerDrawable = new LayerDrawable(drawables);
-                        int musicPicMargin = (int) ((DisplayUtil.SCALE_DISC_SIZE - DisplayUtil
-                                .SCALE_MUSIC_PIC_SIZE) * mScreenWidth / 2);
-                        //调整专辑图片的四周边距，让其显示在正中
-                        layerDrawable.setLayerInset(0, musicPicMargin, musicPicMargin, musicPicMargin,
-                                musicPicMargin);
-
-                        message.obj = layerDrawable;
-                        message.what = 0;
-                        message.sendToTarget();
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
-//                return layerDrawable;
-                }
-            });
-        }
-
         private class ViewHolder{
             ImageView imageViewBack;
             ImageView imageViewFront;
         }
+    }
+
+    /**
+     * 得到唱盘图片
+     * 唱盘图片由空心圆盘及音乐专辑图片“合成”得到
+     */
+    private Drawable getDiscDrawable(final String musicPicRes) {
+        int discSize = (int) (mScreenWidth * DisplayUtil.SCALE_DISC_SIZE);
+        int musicPicSize = (int) (mScreenWidth * DisplayUtil.SCALE_MUSIC_PIC_SIZE);
+
+        Bitmap bitmapDisc = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mContext.getResources(), R
+                .drawable.ic_disc), discSize, discSize, false);
+
+        Bitmap bitmapMusicPic = getMusicPicBitmap(musicPicSize,musicPicRes, false);
+        BitmapDrawable discDrawable = new BitmapDrawable(bitmapDisc);
+        RoundedBitmapDrawable roundMusicDrawable = RoundedBitmapDrawableFactory.create
+                (mContext.getResources(), bitmapMusicPic);
+
+        //抗锯齿
+        discDrawable.setAntiAlias(true);
+        roundMusicDrawable.setAntiAlias(true);
+
+        Drawable[] drawables = new Drawable[2];
+        drawables[0] = roundMusicDrawable;
+        drawables[1] = discDrawable;
+
+        LayerDrawable layerDrawable = new LayerDrawable(drawables);
+        int musicPicMargin = (int) ((DisplayUtil.SCALE_DISC_SIZE - DisplayUtil
+                .SCALE_MUSIC_PIC_SIZE) * mScreenWidth / 2);
+        //调整专辑图片的四周边距，让其显示在正中
+        layerDrawable.setLayerInset(0, musicPicMargin, musicPicMargin, musicPicMargin,
+                musicPicMargin);
+
+        return layerDrawable;
+
+//            final Message message = handler.obtainMessage();
+//            MusicApplication.getFixedThreadPool().execute(new Runnable() {
+//                @Override
+//                public void run() {
+//                    int discSize = (int) (mScreenWidth * DisplayUtil.SCALE_DISC_SIZE);
+//                    int musicPicSize = (int) (mScreenWidth * DisplayUtil.SCALE_MUSIC_PIC_SIZE);
+//
+//                    Bitmap bitmapDisc = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mContext.getResources(), R
+//                            .drawable.ic_disc), discSize, discSize, false);
+//
+//                    Bitmap bitmapMusicPic = null;
+//                    try {
+//                        bitmapMusicPic = Glide.with(mContext).load(musicPicRes)
+//                                .asBitmap().error(R.drawable.bg_default_disc).centerCrop().into(535,535).get();
+//                        BitmapDrawable discDrawable = new BitmapDrawable(bitmapDisc);
+//                        RoundedBitmapDrawable roundMusicDrawable = RoundedBitmapDrawableFactory.create
+//                                (mContext.getResources(), bitmapMusicPic);
+//
+//                        //抗锯齿
+//                        discDrawable.setAntiAlias(true);
+//                        roundMusicDrawable.setAntiAlias(true);
+//
+//                        Drawable[] drawables = new Drawable[2];
+//                        drawables[0] = roundMusicDrawable;
+//                        drawables[1] = discDrawable;
+//
+//                        LayerDrawable layerDrawable = new LayerDrawable(drawables);
+//                        int musicPicMargin = (int) ((DisplayUtil.SCALE_DISC_SIZE - DisplayUtil
+//                                .SCALE_MUSIC_PIC_SIZE) * mScreenWidth / 2);
+//                        //调整专辑图片的四周边距，让其显示在正中
+//                        layerDrawable.setLayerInset(0, musicPicMargin, musicPicMargin, musicPicMargin,
+//                                musicPicMargin);
+//
+//                        message.obj = layerDrawable;
+//                        message.what = 0;
+//                        message.sendToTarget();
+//                    } catch (InterruptedException | ExecutionException e) {
+//                        e.printStackTrace();
+//                    }
+////                return layerDrawable;
+//                }
+//            });
+    }
+
+    private Bitmap getMusicPicBitmap(int musicPicSize, String musicPicRes, boolean isPlayBg) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        if ("".equals(musicPicRes) || musicPicRes == null){
+            if (isPlayBg){
+                return Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mContext.getResources(),
+                        R.drawable.login_bg_night, options),
+                        musicPicSize, musicPicSize, true);
+            }
+            return Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mContext.getResources(),
+                    R.drawable.bg_default_disc, options),
+                    musicPicSize, musicPicSize, true);
+        }
+        options.inJustDecodeBounds = true;
+
+        BitmapFactory.decodeFile(musicPicRes, options);
+
+//            BitmapFactory.decodeResource(mContext.getResources(),R.drawable.play_plybar_bg,options);
+        int imageWidth = options.outWidth;
+
+        int sample = imageWidth / musicPicSize;
+        int dstSample = 1;
+        if (sample > dstSample) {
+            dstSample = sample;
+        }
+        options.inJustDecodeBounds = false;
+        //设置图片采样率
+        options.inSampleSize = dstSample;
+        //设置图片解码格式
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+
+        return Bitmap.createScaledBitmap(BitmapFactory.decodeFile(musicPicRes, options),
+                musicPicSize, musicPicSize, true);
     }
 
     /*得到唱盘背后半透明的圆形背景*/
@@ -410,29 +550,24 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             }
             //拿到初始图
             Bitmap initBitmap = null;
-            try {
-                initBitmap = Glide.with(mContext)
-                        .load(mMusicData.getMusicAlbumPicPath())
-                        .asBitmap().error(R.drawable.login_bg_night).centerCrop().into(540, 960).get();
-                //处理得到模糊效果的图
-                int scaleRatio = 10;
-                int blurRadius = 16;
-                initBitmap = Bitmap.createScaledBitmap(initBitmap,
-                        initBitmap.getWidth() / scaleRatio,
-                        initBitmap.getHeight() / scaleRatio,
-                        false);
-                initBitmap = FastBlurUtil.doBlur(initBitmap, blurRadius, false);
+            //                initBitmap = Glide.with(mContext)
+//                        .load(mMusicData.getMusicAlbumPicPath())
+//                        .asBitmap().error(R.drawable.login_bg_night).centerCrop().into(540, 960).get();
+            initBitmap = getMusicPicBitmap(200, mMusicData.getMusicAlbumPicPath(), true);
+            //处理得到模糊效果的图
+            int scaleRatio = 10;
+            int blurRadius = 16;
+            initBitmap = Bitmap.createScaledBitmap(initBitmap,
+                    initBitmap.getWidth() / scaleRatio,
+                    initBitmap.getHeight() / scaleRatio,
+                    false);
+            initBitmap = FastBlurUtil.doBlur(initBitmap, blurRadius, false);
 
-                Message message = myHandler.obtainMessage();
-                message.what = 0;
-                message.obj = initBitmap;
-                message.sendToTarget();
+            Message message = myHandler.obtainMessage();
+            message.what = 0;
+            message.obj = initBitmap;
+            message.sendToTarget();
 
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
         }
     };
 
@@ -456,6 +591,8 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         if (BaseActivity.mServiceDataTrans.isPlayingMusic()) {
             //正在播放，显示播放按钮
             ivPlayOrPause.setImageResource(R.drawable.ic_pause);
+        }else {
+            ivPlayOrPause.setImageResource(R.drawable.ic_play);
         }
         tvTotalTime.setText(getTextFromTime(mMusicData.getMusicTime()));
 
