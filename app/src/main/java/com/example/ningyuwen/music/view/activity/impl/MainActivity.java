@@ -175,6 +175,48 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         }
     };
 
+    @Override
+    /**
+     * 回调后执行
+     */
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode){
+            case 1:
+                if(resultCode == RESULT_OK){
+                    //得到返回的更换后的背景图片
+                    String returnBackImg = data.getStringExtra("backImg");
+
+                    //开始设置新的背景图
+                    Bitmap initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_main_bg));;
+                    switch(returnBackImg){
+                        case "pic_change_bg1":
+                            initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg1));
+                            break;
+                        case "pic_change_bg2":
+                            initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg2));
+                            break;
+                        case "pic_change_bg3":
+                            initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg3));
+                            break;
+                    }
+
+                    //处理得到模糊效果的图
+                    int scaleRatio = 5;
+                    int blurRadius = 8;
+                    initBitmap = Bitmap.createScaledBitmap(initBitmap,
+                            initBitmap.getWidth() / scaleRatio,
+                            initBitmap.getHeight() / scaleRatio,
+                            false);
+                    initBitmap = FastBlurUtil.doBlur(initBitmap, blurRadius, false);
+                    mIvBg.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    //把新的图片设置成背景
+                    mIvBg.setImageBitmap(initBitmap);
+                }
+        }
+
+    }
+
     /**
      * 设置背景
      */
@@ -451,6 +493,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                 switch (position){
                     case 0:
                         //主题换肤
+                        Intent intent = new Intent(MainActivity.this,ChangeBackActivity.class);
+                        startActivityForResult(intent,1);
                         break;
                     case 1:
                         //developer

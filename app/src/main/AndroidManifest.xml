@@ -7,8 +7,6 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
     <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <!-- bugly -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -25,7 +23,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.activity.impl.StartPageActivity"
+        <activity
+            android:name=".view.activity.impl.StartPageActivity"
             android:theme="@style/AppWelcome">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,14 +32,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".view.activity.impl.MainActivity"
-            android:launchMode="singleTask"/>
-        <activity android:name=".view.activity.impl.MusicSongListActivity"
-            android:theme="@style/translucentStatus"/>
-        <activity android:name=".view.activity.impl.PlayActivity"
-            android:launchMode="singleTask"/>
-
+        <activity
+            android:name=".view.activity.impl.MainActivity"
+            android:launchMode="singleTask" />
+        <activity
+            android:name=".view.activity.impl.MusicSongListActivity"
+            android:theme="@style/translucentStatus" />
+        <activity android:name=".view.activity.impl.PlayActivity" />
         <activity
             android:name="com.tencent.bugly.beta.ui.BetaActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|locale"
@@ -50,13 +48,12 @@
             android:theme="@style/Base.Theme.AppCompat"/>
         <!-- optional (needed if default theme has no action bar) -->
 
-        <activity android:name=".view.activity.impl.PlayingActivity"/>
+        <service
+            android:name=".service.PlayMusicService"
+            android:enabled="true"
+            android:exported="true" />
 
-        <service android:enabled="true"
-            android:exported="true"
-            android:name=".service.PlayMusicService"/>
-
-        <!--FileProvider来访问共享路径的文件-->
+        <!-- FileProvider来访问共享路径的文件 -->
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.fileProvider"
@@ -64,9 +61,11 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
 
+        <!--配置改变背景的那个activity-->
+        <activity android:name=".view.activity.impl.ChangeBackActivity"></activity>
     </application>
 
 </manifest>
