@@ -44,13 +44,16 @@
                 android:layout_centerVertical="true"
                 tools:ignore="RtlHardcoded" />
 
+
             <ImageView
                 android:id="@+id/iv_bar_search"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
-                android:src="@mipmap/ic_menu_open"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/ic_search"
+                android:paddingTop="5dp"
                 android:layout_centerVertical="true"
-                android:layout_alignParentEnd="true"/>
+                android:layout_alignParentEnd="true" />
 
         </RelativeLayout>
 
