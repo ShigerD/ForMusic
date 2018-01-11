@@ -31,13 +31,17 @@ import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -52,13 +56,14 @@ import com.example.ningyuwen.music.util.FastBlurUtil;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.i.IMainActivity;
 import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
+import com.example.ningyuwen.music.view.adapter.AllMusicInfoAdapter;
 import com.example.ningyuwen.music.view.adapter.MainFragmentAdapter;
 import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.ClassifyMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
-import com.example.ningyuwen.music.view.widget.PlayMusicDialogFragment;
 import com.example.ningyuwen.music.view.widget.PlayMusicPopupWindow;
+import com.example.ningyuwen.music.view.widget.SearchMusicPopWindow;
 import com.freedom.lauzy.playpauseviewlib.PlayPauseView;
 
 import java.util.ArrayList;
@@ -66,6 +71,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static com.example.ningyuwen.music.R.layout.support_simple_spinner_dropdown_item;
 
 /**
  * 主页面，音乐播放，扫描音乐等
@@ -101,8 +108,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private PlayPauseView mPlayPauseView;   //播放暂停按钮
     private BroadcastReceiver mReceiver;
     private PlayMusicPopupWindow mPlayMusicPopupWindow;  //播放页面
-    private PlayMusicDialogFragment mPlayMusicDialogFragment;      //改为dialog
     private CardView mMainCardView; //cardview
+
+    private ImageView mbtn_Search;
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -429,7 +437,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mIvBg = (ImageView) findViewById(R.id.iv_main_activity_bg);
         mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
         mPlayPauseView = (PlayPauseView) findViewById(R.id.iv_music_pic);
-        mMainCardView = (CardView)findViewById(R.id.cv_show_state_lyric);
+
+        mMainCardView = (CardView)findViewById(R.id.cv_show_state_lyric) ;
+        mbtn_Search = findViewById(R.id.iv_bar_search);
 
 
         findViewById(R.id.iv_bar_search).setOnClickListener(new View.OnClickListener() {
@@ -520,6 +530,30 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                         //exit
                         break;
                 }
+            }
+        });
+
+        mbtn_Search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                View contentview = LayoutInflater.from(MainActivity.this).
+                        inflate(R.layout.layout_popsearch,null);
+                SearchMusicPopWindow popupWindow = new SearchMusicPopWindow(MainActivity.this,
+                        contentview,850,900,true);
+//                ListView list = contentview.findViewById(R.id.search_list);
+//                list.setAdapter(new ArrayAdapter<String>(MainActivity.this,
+//                        android.R.layout.simple_expandable_list_item_1,popupWindow.HotMusicdata));
+                popupWindow.showAtLocation(LayoutInflater.from(MainActivity.this).
+                        inflate(R.layout.activity_main,null), Gravity.CENTER_VERTICAL,0,0);
+//                MusicApplication.getFixedThreadPool().execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        //重新导入音乐数据，查看权限并扫描SD卡
+////                        getReadPermissionAndGetInfoFromSD();
+//                        //发广播，更新四个fragment里面的数据
+////                        sendBroadcast(new Intent("RefreshMusicData"));
+//                    }
+//                });
             }
         });
     }
