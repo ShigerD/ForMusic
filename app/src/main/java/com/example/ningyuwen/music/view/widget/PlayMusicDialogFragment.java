@@ -15,9 +15,6 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.PagerAdapter;
@@ -40,7 +37,6 @@ import com.example.ningyuwen.music.util.DisplayUtil;
 import com.example.ningyuwen.music.util.FastBlurUtil;
 import com.example.ningyuwen.music.view.activity.impl.BaseActivity;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
-import com.example.ningyuwen.music.view.fragment.impl.DiscViewFragment;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -261,7 +257,7 @@ public class PlayMusicDialogFragment extends DialogFragment {
 
             RelativeLayout relativeLayout = list.get(position);
             ImageView imageViewFront = new ImageView(mContext);
-            imageViewFront.setImageResource(R.drawable.ic_play);
+            imageViewFront.setImageResource(R.drawable.ic_pause);
 //            imageViewFront.setLayoutParams();
             relativeLayout.addView(imageViewFront);
             ((ViewPager)container).addView(relativeLayout);
@@ -492,7 +488,7 @@ public class PlayMusicDialogFragment extends DialogFragment {
         tvMusicPlayer.setText(mMusicData.getMusicPlayer());
         if (BaseActivity.mServiceDataTrans.isPlayingMusic()) {
             //正在播放，显示播放按钮
-            ivPlayOrPause.setImageResource(R.drawable.ic_pause);
+            ivPlayOrPause.setImageResource(R.drawable.ic_play);
         }
         tvTotalTime.setText(getTextFromTime(mMusicData.getMusicTime()));
 
@@ -540,10 +536,10 @@ public class PlayMusicDialogFragment extends DialogFragment {
                 //播放或者暂停
                 if (BaseActivity.mServiceDataTrans.isPlayingMusic()) {
                     //暂停
-                    ivPlayOrPause.setImageResource(R.drawable.ic_play);
+                    ivPlayOrPause.setImageResource(R.drawable.ic_pause);
                 } else {
                     //播放
-                    ivPlayOrPause.setImageResource(R.drawable.ic_pause);
+                    ivPlayOrPause.setImageResource(R.drawable.ic_play);
                 }
                 BaseActivity.mServiceDataTrans.playOrPause();
                 break;

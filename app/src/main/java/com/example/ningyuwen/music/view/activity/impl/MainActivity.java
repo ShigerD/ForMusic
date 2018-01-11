@@ -902,6 +902,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         super.onDestroy();
         unbindService(mServiceConnection);
         unregisterReceiver(mReceiver);
+        MusicApplication.getDiscSingleThreadPool().shutdownNow();
+        MusicApplication.getFixedThreadPool().shutdownNow();
+        MusicApplication.getSingleThreadPool().shutdownNow();
     }
 
     /**
