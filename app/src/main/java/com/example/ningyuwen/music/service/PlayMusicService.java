@@ -28,6 +28,7 @@ import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * 后台服务，用于播放音乐
@@ -55,7 +56,34 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     @Override
     public void onCreate() {
         super.onCreate();
-//        mMediaPlayer = new MediaPlayer();
+        mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                Log.i(TAG, "onCompletion: " + mediaPlayer.getCurrentPosition() + " " + mMediaPlayer.getCurrentPosition());
+                if (mediaPlayer.getCurrentPosition() < 60000){
+                    return;
+                }
+                //随机播放还是单曲播放，列表循环的区别主要体现在播放完成时的下一曲 和 手动切换歌曲
+                if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_LIST){
+                    //列表循环
+                    mPosition = (mPosition + 1) % mMusicIds.size();
+                }else if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_SINGLE){
+                    //单曲循环
+                    //好像不用改变
+                }else if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_RANDOM){
+                    //随机播放
+                    mPosition = new Random().nextInt(mMusicIds.size()) % (mMusicIds.size() + 1);
+                }
+
+                refreshNotification();  //通知栏
+                playMusic(0);
+                //这一首音乐播放完成，开始播放下一曲，刷新MainActivity或者PlayActivity
+                //这里用来刷新PopupWindow的信息,改为time为0,则发送消息过去
+                mServiceDataToActivity.sendCompleteMsgToRefreshPop(mPosition);
+            }
+        });
+        handler.sendEmptyMessage(1);
 
         setBroadCastReceiver();
 
@@ -64,6 +92,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         nowPlayMusicName = getSharedPreferences("notes", MODE_PRIVATE).getString("lastPlayMusicName","");
         nowPlayMusicAlbum = getSharedPreferences("notes", MODE_PRIVATE).getString("lastPlayMusicAlbum","");
         nowPlayAlbumPic = getSharedPreferences("notes", MODE_PRIVATE).getString("lastPlayMusicPicPath","");
+        StaticFinalUtil.SERVICE_PLAY_TYPE_NOW = getSharedPreferences("notes",MODE_PRIVATE).getInt("playType", StaticFinalUtil.SERVICE_PLAY_TYPE_LIST);
 
         showCustomView(false);
     }
@@ -153,7 +182,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 }
                 mPosition = (mPosition + 1) % mMusicIds.size();     //下一曲
                 refreshNotification();
-                playMusic(mPosition, 0);
+                playMusic(0);
             }
         }
     }
@@ -221,11 +250,6 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             if (msg.what == 1) {
                 if(mMediaPlayer != null) {
                     mCurrentTime = mMediaPlayer.getCurrentPosition(); // 获取当前音乐播放的位置
-
-//                    Intent intent = new Intent();
-//                    intent.setAction(MUSIC_CURRENT);
-//                    intent.putExtra("currentTime", currentTime);
-//                    sendBroadcast(intent); // 给PlayerActivity发送广播
                     handler.sendEmptyMessageDelayed(1, 1000);
                 }
 
@@ -252,7 +276,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      * 播放音乐
      * @param currentTime 当前时间
      */
-    private void playMusic(int i, int currentTime) {
+    private void playMusic(int currentTime) {
         //存储记录，方便下一次进入的开始播放次序
         long id = mMusicIds.get(mPosition);
         getSharedPreferences("notes", MODE_PRIVATE).edit()
@@ -264,52 +288,23 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         //这里是个问题，第一次进入app，获取不到mPosition，需要根据pid查询得到mPosition
         if (pid != 0) {
             mPosition = mServiceDataToActivity.getPositionFromDataOnPid(pid);
-            i = mPosition;
+//            i = mPosition;
             pid = 0;
         }
-        if (mMediaPlayer == null){
-            try {
-                mMediaPlayer = new MediaPlayer();
-                mMediaPlayer.reset();// 把各项参数恢复到初始状态
-                mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(mMusicIds.get(i)));
-                mMediaPlayer.prepare(); // 进行缓冲
+        try {
+            mMediaPlayer.reset();// 把各项参数恢复到初始状态
+            mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(mMusicIds.get(mPosition)));
+            mMediaPlayer.prepare(); // 进行缓冲
 //                mMediaPlayer.setOnPreparedListener(new PreparedListener(currentTime));// 注册一个监听器
-                mMediaPlayer.start();
-                mMediaPlayer.seekTo(currentTime);
-                mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mediaPlayer) {
-                        Log.i(TAG, "onCompletion: " + mediaPlayer.getCurrentPosition() + " " + mMediaPlayer.getCurrentPosition());
-                        if (mediaPlayer.getCurrentPosition() < 60000){
-                            return;
-                        }
-                        mPosition = (mPosition + 1) % mMusicIds.size();
-                        refreshNotification();  //通知栏
-                        playMusic(mPosition, 0);
-                        //这一首音乐播放完成，开始播放下一曲，刷新MainActivity或者PlayActivity
-                        //这里用来刷新PopupWindow的信息,改为time为0,则发送消息过去
-                        mServiceDataToActivity.sendCompleteMsgToRefreshPop(mPosition);
-                    }
-                });
-                handler.sendEmptyMessage(1);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }else {
-            try {
-                mMediaPlayer.reset();
-                mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(mMusicIds.get(i)));
-                mMediaPlayer.prepare(); // 进行缓冲
-                mMediaPlayer.start();
-                mMediaPlayer.seekTo(currentTime);
-//                mMediaPlayer.setOnPreparedListener(new PreparedListener(currentTime));// 注册一个监听器
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            mMediaPlayer.start();
+            mMediaPlayer.seekTo(currentTime);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         //在playMusic之后再读取歌词文件，因为所有播放音乐的最后一步都是在这里实现的，所以只用写一份代码
-        mServiceDataToActivity.showLyricAtActivity(mMusicIds.get(i));
+        mServiceDataToActivity.showLyricAtActivity(mMusicIds.get(mPosition));
     }
 
     /**
@@ -338,7 +333,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         pid = 0;
         //播放音乐,更新通知栏
         refreshNotification();  //通知栏
-        playMusic(mPosition, 0);
+        playMusic(0);
     }
 
     /**
@@ -374,7 +369,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             mServiceDataToActivity.refreshPlayPauseAnimation(false);
         }else {
             showCustomView(true);
-            playMusic(mPosition, mCurrentTime);
+            playMusic(mCurrentTime);
             //通知MainActivity更新播放暂停动画
             mServiceDataToActivity.refreshPlayPauseAnimation(true);
         }
@@ -393,7 +388,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         mMusicIds.clear();
         mMusicIds = musicInfoList;   //pid
         mPosition = position;       //position
-        playMusic(mPosition, 0);
+        playMusic(0);
     }
 
     /**
@@ -439,7 +434,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     @Override
     public void changePlayingTime(int time) {
         mCurrentTime = time;
-        playMusic(mPosition, mCurrentTime);
+        playMusic(mCurrentTime);
     }
 
     /**

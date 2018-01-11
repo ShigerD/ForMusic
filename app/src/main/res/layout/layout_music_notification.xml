@@ -65,7 +65,7 @@
             android:textSize="16sp"
             android:singleLine="true"
             android:ellipsize="end"
-            android:textColor="@color/white" />
+            android:textColor="#000000" />
 
         <TextView
             android:id="@+id/album_name"
@@ -75,7 +75,7 @@
             android:textSize="14sp"
             android:singleLine="true"
             android:ellipsize="end"
-            android:textColor="@color/white" />
+            android:textColor="#87000000" />
 
     </LinearLayout>
 
