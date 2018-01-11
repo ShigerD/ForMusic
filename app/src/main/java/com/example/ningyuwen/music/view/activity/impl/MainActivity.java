@@ -62,7 +62,6 @@ import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.ClassifyMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
-import com.example.ningyuwen.music.view.widget.PlayMusicDialogFragment;
 import com.example.ningyuwen.music.view.widget.PlayMusicPopupWindow;
 import com.example.ningyuwen.music.view.widget.SearchMusicPopWindow;
 import com.freedom.lauzy.playpauseviewlib.PlayPauseView;
@@ -109,7 +108,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private PlayPauseView mPlayPauseView;   //播放暂停按钮
     private BroadcastReceiver mReceiver;
     private PlayMusicPopupWindow mPlayMusicPopupWindow;  //播放页面
-    private PlayMusicDialogFragment mPlayMusicDialogFragment;      //改为dialog
     private CardView mMainCardView; //cardview
 
     private ImageView mbtn_Search;
