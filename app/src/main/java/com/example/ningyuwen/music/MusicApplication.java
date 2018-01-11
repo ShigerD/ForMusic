@@ -9,6 +9,7 @@ import com.tencent.bugly.Bugly;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.File;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -34,7 +35,8 @@ public class MusicApplication extends Application {
     //现在使用newFixedThreadPool类型的线程池，线程一直存在，线程数为3,当线程池中没有空闲线程时，进入线程队列等待
     //MusicApplication.getFixedThreadPool().execute(Runnable);
     private static ExecutorService fixedThreadPool;   //线程总数为3
-    private static ExecutorService singleThreadPool;  //线程总数为1
+    private static ExecutorService singleThreadPool;  //线程总数为1   显示歌词在使用
+    private static ExecutorService mDiscSingleThreadPool;   //线程总数为1    播放页面的旋转动画使用
 
     @Override
     public void onCreate() {
@@ -86,6 +88,13 @@ public class MusicApplication extends Application {
         }
         singleThreadPool = Executors.newSingleThreadExecutor();
         return singleThreadPool;
+    }
+
+    public static ExecutorService getDiscSingleThreadPool(){
+        if (mDiscSingleThreadPool == null || mDiscSingleThreadPool.isShutdown()){
+            mDiscSingleThreadPool = Executors.newSingleThreadExecutor();
+        }
+        return mDiscSingleThreadPool;
     }
 
     public static void exitApp(){

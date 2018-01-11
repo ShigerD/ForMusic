@@ -1,6 +1,5 @@
 package com.example.ningyuwen.music.view.activity.impl;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -8,13 +7,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PersistableBundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -280,7 +277,7 @@ public class PlayActivity extends BaseActivity<PlayPresenter> implements IPlayAc
         tvMusicPlayer.setText(mMusicData.getMusicPlayer());
         if (mServiceDataTrans.isPlayingMusic()){
             //正在播放，显示播放按钮
-            ivPlayOrPause.setImageResource(R.drawable.ic_pause);
+            ivPlayOrPause.setImageResource(R.drawable.ic_play);
         }
         tvTotalTime.setText(getTextFromTime(mMusicData.getMusicTime()));
 
@@ -355,10 +352,10 @@ public class PlayActivity extends BaseActivity<PlayPresenter> implements IPlayAc
         //播放或者暂停
         if (play){
             //暂停
-            ivPlayOrPause.setImageResource(R.drawable.ic_pause);
+            ivPlayOrPause.setImageResource(R.drawable.ic_play);
         }else {
             //播放
-            ivPlayOrPause.setImageResource(R.drawable.ic_play);
+            ivPlayOrPause.setImageResource(R.drawable.ic_pause);
         }
     }
 
@@ -393,10 +390,10 @@ public class PlayActivity extends BaseActivity<PlayPresenter> implements IPlayAc
                 //播放或者暂停
                 if (mServiceDataTrans.isPlayingMusic()){
                     //暂停
-                    ivPlayOrPause.setImageResource(R.drawable.ic_play);
+                    ivPlayOrPause.setImageResource(R.drawable.ic_pause);
                 }else {
                     //播放
-                    ivPlayOrPause.setImageResource(R.drawable.ic_pause);
+                    ivPlayOrPause.setImageResource(R.drawable.ic_play);
                 }
                 mServiceDataTrans.playOrPause();
                 break;

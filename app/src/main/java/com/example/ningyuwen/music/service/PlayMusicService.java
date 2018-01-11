@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -25,6 +26,7 @@ import com.example.ningyuwen.music.util.DensityUtil;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -53,7 +55,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     @Override
     public void onCreate() {
         super.onCreate();
-        mMediaPlayer = new MediaPlayer();
+//        mMediaPlayer = new MediaPlayer();
 
         setBroadCastReceiver();
 
@@ -160,6 +162,24 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      * 更新通知栏，用于在用户点击音乐列表之后的播放 和 点击通知栏的播放
      */
     private void refreshNotification(){
+//        MusicApplication.getFixedThreadPool().execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                MusicData musicData = mServiceDataToActivity.getPlayMusicData(mMusicIds.get(mPosition));
+//                if (musicData == null){
+//                    return;
+//                }
+//                nowPlayMusicName = musicData.getMusicName();
+//                nowPlayMusicAlbum = musicData.getMusicAlbum();
+//                nowPlayAlbumPic = musicData.getMusicAlbumPicPath();
+//
+//                Message message = handler.obtainMessage();
+//                message.what = StaticFinalUtil.HANDLER_SHOW_CUSTOM;
+//                message.obj = true;
+//                message.sendToTarget();
+//            }
+//        });
+
         MusicData musicData = mServiceDataToActivity.getPlayMusicData(mMusicIds.get(mPosition));
         if (musicData == null){
             return;
@@ -209,6 +229,9 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                     handler.sendEmptyMessageDelayed(1, 1000);
                 }
 
+            }else if (msg.what == StaticFinalUtil.HANDLER_SHOW_CUSTOM){
+                //显示通知栏
+                showCustomView((boolean)msg.obj);
             }
         }
     };
@@ -244,32 +267,45 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             i = mPosition;
             pid = 0;
         }
-
-//        if (currentTime == 0){
-//            //等于0,则发送消息更新，这样viewpager的onpageseleted不用执行太多事情
-//            mServiceDataToActivity.sendCompleteMsgToRefreshPop(mPosition);
-//        }
-
-        try {
-            mMediaPlayer.reset();// 把各项参数恢复到初始状态
-            mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(mMusicIds.get(i)));
-            mMediaPlayer.prepare(); // 进行缓冲
-            mMediaPlayer.setOnPreparedListener(new PreparedListener(currentTime));// 注册一个监听器
-            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mediaPlayer) {
-                    mPosition = (mPosition + 1) % mMusicIds.size();
-                    refreshNotification();  //通知栏
-                    playMusic(mPosition, 0);
-                    //这一首音乐播放完成，开始播放下一曲，刷新MainActivity或者PlayActivity
-                    //这里用来刷新PopupWindow的信息,改为time为0,则发送消息过去
-                    mServiceDataToActivity.sendCompleteMsgToRefreshPop(mPosition);
-                }
-            });
-
-            handler.sendEmptyMessage(1);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (mMediaPlayer == null){
+            try {
+                mMediaPlayer = new MediaPlayer();
+                mMediaPlayer.reset();// 把各项参数恢复到初始状态
+                mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(mMusicIds.get(i)));
+                mMediaPlayer.prepare(); // 进行缓冲
+//                mMediaPlayer.setOnPreparedListener(new PreparedListener(currentTime));// 注册一个监听器
+                mMediaPlayer.start();
+                mMediaPlayer.seekTo(currentTime);
+                mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mediaPlayer) {
+                        Log.i(TAG, "onCompletion: " + mediaPlayer.getCurrentPosition() + " " + mMediaPlayer.getCurrentPosition());
+                        if (mediaPlayer.getCurrentPosition() < 60000){
+                            return;
+                        }
+                        mPosition = (mPosition + 1) % mMusicIds.size();
+                        refreshNotification();  //通知栏
+                        playMusic(mPosition, 0);
+                        //这一首音乐播放完成，开始播放下一曲，刷新MainActivity或者PlayActivity
+                        //这里用来刷新PopupWindow的信息,改为time为0,则发送消息过去
+                        mServiceDataToActivity.sendCompleteMsgToRefreshPop(mPosition);
+                    }
+                });
+                handler.sendEmptyMessage(1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }else {
+            try {
+                mMediaPlayer.reset();
+                mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(mMusicIds.get(i)));
+                mMediaPlayer.prepare(); // 进行缓冲
+                mMediaPlayer.start();
+                mMediaPlayer.seekTo(currentTime);
+//                mMediaPlayer.setOnPreparedListener(new PreparedListener(currentTime));// 注册一个监听器
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         //在playMusic之后再读取歌词文件，因为所有播放音乐的最后一步都是在这里实现的，所以只用写一份代码
