@@ -17,7 +17,9 @@ import android.view.ViewGroup;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
+import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
+import com.example.ningyuwen.music.view.activity.impl.BaseActivity;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.example.ningyuwen.music.view.adapter.MyLoveMusicAdapter;
 import com.example.ningyuwen.music.view.fragment.i.IMyLoveMusicFragment;
@@ -138,12 +140,64 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
     /**
      * 我喜爱的音乐列表属于 所有音乐列表，但是此处的position不同于所有音乐列表的poisition
      * 暂时不写这个，后面确定：播放我喜爱的音乐时，后台播放列表的音乐数据
+     * 2018.01.12确定，点击其中的音乐播放时，只播放我喜爱的音乐歌单
      * @param position position
      */
     @Override
     public void playMusic(int position) {
-        ((MainActivity)mContext).showToast(mRvMyLoveMusic, "音乐位置： " + position);
-        ((MainActivity)mContext).playMusicOnBackstage(position);
+        if (BaseActivity.MUSIC_LIST_PLAY_NOW == StaticFinalUtil.MUSIC_LIST_PLAY_MYLOVE){
+            //当前歌单是我喜爱的音乐，则不切换
+            ((MainActivity) mContext).showToast(mRvMyLoveMusic, "音乐名： "
+                    + mMyLoveMusicDatas.get(position).getMusicName());
+            ((MainActivity) mContext).playMusicOnBackstage(position);
+        }else {
+            //切换歌单
+            BaseActivity.MUSIC_LIST_PLAY_NOW = StaticFinalUtil.MUSIC_LIST_PLAY_MYLOVE;  //切换到我喜爱的歌单
+            if (mMyLoveMusicDatas.size() == 0){
+                return;
+            }
+            ((MainActivity)mContext).showToast(mRvMyLoveMusic, "开始播放歌单：《我喜爱的音乐》");
+            //修改BaseActivity中的mMusicDatas数据
+            if (BaseActivity.mMusicDatas == null){
+                BaseActivity.mMusicDatas = new ArrayList<>();
+            }
+            BaseActivity.mMusicDatas.clear();
+            //this.mMusicDatas已经是本歌单的数据了
+            BaseActivity.mMusicDatas.addAll(mMyLoveMusicDatas);
+            //向Service传递数据
+            ((MainActivity)mContext).initServiceData();
+            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
+            //刷新播放页面
+            mContext.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+        }
+
+
+//        int index = ((MainActivity)mContext).getPositionFromPid(mMyLoveMusicDatas.get(position).getpId());
+//        if (index == -1){
+//            //-1说明不存在于当前歌单，切换歌单处理
+//            //播放全部，删除之前的歌单信息，添加新的歌单信息，
+//            if (mMyLoveMusicDatas.size() == 0){
+//                return;
+//            }
+//            ((MainActivity)mContext).showToast(mRvMyLoveMusic, "开始播放歌单：《我喜爱的音乐》");
+//            //修改BaseActivity中的mMusicDatas数据
+//            if (BaseActivity.mMusicDatas == null){
+//                BaseActivity.mMusicDatas = new ArrayList<>();
+//            }
+//            BaseActivity.mMusicDatas.clear();
+//            //this.mMusicDatas已经是本歌单的数据了
+//            BaseActivity.mMusicDatas.addAll(mMyLoveMusicDatas);
+//            //向Service传递数据
+//            ((MainActivity)mContext).initServiceData();
+//            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
+//            //刷新播放页面
+//            mContext.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+//        }else {
+//            //存在，直接播放
+//            ((MainActivity) mContext).showToast(mRvMyLoveMusic, "音乐名： "
+//                    + mMyLoveMusicDatas.get(position).getMusicName());
+//            ((MainActivity) mContext).playMusicOnBackstage(position);
+//        }
     }
 
     /**

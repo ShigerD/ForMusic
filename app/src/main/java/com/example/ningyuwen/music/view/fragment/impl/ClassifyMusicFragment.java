@@ -96,7 +96,7 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
     @Override
     public void showClassifyMusicInfo() {
         List<ClassifyMusicPlayer> musicPlayers = ((MainActivity)mContext).getClassifyMusicPlayerInfo();
-        mDatas = ((MainActivity)mContext).getClassifyMusicInfo(musicPlayers);
+        mDatas.addAll(((MainActivity)mContext).getClassifyMusicInfo(musicPlayers));
         if (musicPlayers == null || mDatas == null){
             ((MainActivity)mContext).showToast(mElClassifyMusic, "没有音乐文件");
             return;

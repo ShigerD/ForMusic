@@ -7,4 +7,6 @@
     <color name="white">#FFFFFF</color>
     <color name="gray">#D6D6D6</color>
     <color name="white_text">#fafafa</color>
+    <color name="gray_background">#efefef</color>
+    <color name="white_item">#fefefe</color>
 </resources>

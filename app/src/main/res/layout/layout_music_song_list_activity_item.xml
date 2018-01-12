@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:id="@+id/rl_item_all_music"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white_item">
+
+    <ImageView
+        android:id="@+id/iv_play_state"
+        android:layout_width="50dp"
+        android:layout_marginStart="10dp"
+        android:layout_height="50dp"
+        android:padding="5dp"
+        android:foregroundGravity="center"
+        android:src="@mipmap/ic_menu_open" />
+
+    <ImageView
+        android:id="@+id/iv_is_love"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="5dp"
+        android:visibility="gone"
+        android:src="@mipmap/ic_not_love"
+        android:padding="5dp"/>
+
+    <TextView
+        android:id="@+id/tv_music_name"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:textSize="20sp"
+        android:textColor="#87000000"
+        android:layout_marginStart="5dp"
+        android:layout_toEndOf="@id/iv_play_state"
+        android:layout_toStartOf="@id/iv_is_love"
+        android:foregroundGravity="center"
+        android:gravity="center_vertical"/>
+
+</RelativeLayout>

@@ -1,9 +1,10 @@
 package com.example.ningyuwen.music.view.widget;
 
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -21,10 +22,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
@@ -41,8 +38,6 @@ import com.example.ningyuwen.music.view.activity.impl.BaseActivity;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -79,6 +74,8 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
     private boolean isPlaying = false;  //正在播放
     private boolean isSliding = false;    //在滑动
     private MusicSongListPopupWindow mMusicSongListPopupWindow;  //歌单popup
+    private BroadcastReceiver mReceiver;
+    private PlayMusicDiscAdapter mAdapter;   //viewpager的adapter
 
     public PlayMusicPopupWindow(Context context) {
         this(context, LayoutInflater.from(context)
@@ -94,6 +91,27 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         initPopupWindow();
     }
 
+    private void setBroadCastReceiver(){
+        mReceiver = new ServiceReceiver();//----注册广播
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST);
+        mContext.registerReceiver(mReceiver, intentFilter);
+    }
+
+    class ServiceReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST.equals(action)){
+                //更换了歌单
+                if (mAdapter != null){
+                    mAdapter.notifyDataSetChanged();
+                    mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
+                }
+            }
+        }
+    }
 
     public void setContentView(Context context, View contentView) {
         super.setContentView(contentView);
@@ -103,6 +121,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
     }
 
     private void initPopupWindow() {
+        setBroadCastReceiver();
         findViews();
         initView();
         setListener();
@@ -405,8 +424,8 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
 //        for (int i = 0; i < BaseActivity.mMusicDatas.size(); i++) {
 //            list.add(new RelativeLayout(mContext));
 //        }
-        PlayMusicDiscAdapter discAdapter = new PlayMusicDiscAdapter();
-        mViewPager.setAdapter(discAdapter);
+        mAdapter = new PlayMusicDiscAdapter();
+        mViewPager.setAdapter(mAdapter);
         final boolean[] isSlide = {false};
         final int[] nowPosition = new int[1];    //记录当前位置
         final Message[] message = new Message[1];    //消息，去旋转imageview

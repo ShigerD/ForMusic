@@ -80,7 +80,7 @@ public class MusicSongListPopupWindow extends PopupWindow implements
     @Override
     public void showAtLocation(View parent, int gravity, int x, int y) {
         super.showAtLocation(parent, gravity, x, y);
-
+        adapter.notifyDataSetChanged();
     }
 
     /**

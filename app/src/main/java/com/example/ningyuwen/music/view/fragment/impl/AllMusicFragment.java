@@ -19,7 +19,9 @@ import android.view.ViewGroup;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
+import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
+import com.example.ningyuwen.music.view.activity.impl.BaseActivity;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.example.ningyuwen.music.view.adapter.AllMusicInfoAdapter;
 import com.example.ningyuwen.music.view.widget.AddToPlaylistDialog;
@@ -30,6 +32,9 @@ import java.util.Objects;
 
 /**
  * 所有歌曲页面
+ * 2018.01.12做以下修改：
+ * 因为歌单的切换是一件麻烦事，为了简单起见，所有fragment点击事件都加上判断，点击的音乐是否存在于当前歌单中，
+ * 若存在，直接播放，不存在，切换歌单
  * Created by ningyuwen on 17-9-26.
  */
 
@@ -109,13 +114,64 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
 
     /**
      * 接口回调, 播放音乐
+     * 2018.01.12新做的修改在此处进行，播放音乐时做判断
      * @param position position
      */
     @Override
     public void playMusic(int position) {
-        ((MainActivity)mContext).showToast(mRvAllMusicInfo, "音乐名： "
-                + mAllMusicDatas.get(position).getMusicName());
-        ((MainActivity)mContext).playMusicOnBackstage(position);
+        if (BaseActivity.MUSIC_LIST_PLAY_NOW == StaticFinalUtil.MUSIC_LIST_PLAY_ALL_MUSIC){
+            //当前歌单是所有音乐，则不切换
+            ((MainActivity) mContext).showToast(mRvAllMusicInfo, "音乐名： "
+                    + mAllMusicDatas.get(position).getMusicName());
+            ((MainActivity) mContext).playMusicOnBackstage(position);
+        }else {
+            //切换歌单
+            BaseActivity.MUSIC_LIST_PLAY_NOW = StaticFinalUtil.MUSIC_LIST_PLAY_ALL_MUSIC;   //切换歌单
+            if (mAllMusicDatas.size() == 0){
+                return;
+            }
+            ((MainActivity)mContext).showToast(mRvAllMusicInfo, "开始播放歌单：《所有音乐》");
+            //修改BaseActivity中的mMusicDatas数据
+            if (BaseActivity.mMusicDatas == null){
+                BaseActivity.mMusicDatas = new ArrayList<>();
+            }
+            BaseActivity.mMusicDatas.clear();
+            //this.mMusicDatas已经是本歌单的数据了
+            BaseActivity.mMusicDatas.addAll(mAllMusicDatas);
+            //向Service传递数据
+            ((MainActivity)mContext).initServiceData();
+            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
+            //刷新播放页面
+            mContext.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+        }
+
+
+
+//        int index = ((MainActivity)mContext).getPositionFromPid(mAllMusicDatas.get(position).getpId());
+//        if (index == -1){
+//            //-1说明不存在于当前歌单，切换歌单处理
+//            //播放全部，删除之前的歌单信息，添加新的歌单信息，
+//            if (mAllMusicDatas.size() == 0){
+//                return;
+//            }
+//            ((MainActivity)mContext).showToast(mRvAllMusicInfo, "开始播放歌单：《所有音乐》");
+//            //修改BaseActivity中的mMusicDatas数据
+//            if (BaseActivity.mMusicDatas == null){
+//                BaseActivity.mMusicDatas = new ArrayList<>();
+//            }
+//            BaseActivity.mMusicDatas.clear();
+//            //this.mMusicDatas已经是本歌单的数据了
+//            BaseActivity.mMusicDatas.addAll(mAllMusicDatas);
+//            //向Service传递数据
+//            ((MainActivity)mContext).initServiceData();
+//            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
+//            //刷新播放页面
+//            mContext.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+//        }else {
+//            ((MainActivity) mContext).showToast(mRvAllMusicInfo, "音乐名： "
+//                    + mAllMusicDatas.get(position).getMusicName());
+//            ((MainActivity) mContext).playMusicOnBackstage(position);
+//        }
 
     }
 
@@ -206,7 +262,8 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
         }
         mAllMusicDatas.clear();
         if (((MainActivity)mContext) != null) {
-            mAllMusicDatas = ((MainActivity)mContext).getMusicDatas();
+//            mAllMusicDatas = ((MainActivity)mContext).getMusicDatas();
+            mAllMusicDatas.addAll(((MainActivity)mContext).getMusicDatas());
             showMusicInfo();
         }
     }

@@ -55,6 +55,7 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
     public static List<Pair<Long, String>> mTimeAndLyric;   //歌词
     public static boolean mShouldChangePlayingBg = false;
     private IBaseActivityToPopup mIBaseActivityToPopup;
+    public static int MUSIC_LIST_PLAY_NOW = StaticFinalUtil.MUSIC_LIST_PLAY_ALL_MUSIC;   //初始化播放歌单为所有音乐
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -385,7 +386,7 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
                 return i;
             }
         }
-        return 0;
+        return -1;
     }
 
     /**
@@ -424,7 +425,7 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
     /**
      * 初始化Service的数据，使用接口回调
      */
-    private void initServiceData() throws NullPointerException{
+    public void initServiceData() throws NullPointerException{
         if (mMusicDatas == null){
             return;
         }

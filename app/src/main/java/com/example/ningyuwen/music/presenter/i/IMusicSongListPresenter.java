@@ -12,4 +12,5 @@ import java.util.List;
 
 public interface IMusicSongListPresenter {
     List<MusicData> getSongListInfoFromDB(long musicListId);                           //从数据库获取歌单数据
+//    List<MusicData> getMusicDataFromMusicListPid(long musicListId);     //从数据库
 }

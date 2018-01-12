@@ -226,6 +226,9 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 //下一曲,更新通知栏,第一次进入时点击下一曲，需要判断pid
                 if (pid != 0){
                     mPosition = mServiceDataToActivity.getPositionFromDataOnPid(pid);   //上一次关闭时的位置
+                    if (mPosition == -1){
+                        mPosition = 0;
+                    }
                     pid = 0;
                 }
                 mPosition = (mPosition + 1) % mMusicIds.size();     //下一曲
@@ -347,6 +350,9 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         if (pid != 0) {
             mPosition = mServiceDataToActivity.getPositionFromDataOnPid(pid);
 //            i = mPosition;
+            if (mPosition == -1){
+                mPosition = 0;
+            }
             pid = 0;
         }
         try {
@@ -370,7 +376,10 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      */
     @Override
     public void initServiceData(ArrayList<Long> musicId) {
-        mMusicIds = new ArrayList<>();
+        if (mMusicIds == null) {
+            mMusicIds = new ArrayList<>();
+        }
+        mMusicIds.clear();
         mMusicIds.addAll(musicId);
     }
 
