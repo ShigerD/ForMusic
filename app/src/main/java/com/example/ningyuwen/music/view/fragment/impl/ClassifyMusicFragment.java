@@ -41,6 +41,7 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
     private int mGroupPosition = -1;  //记录当前播放的音乐人
     private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
     private View classifyMusicFragmentView;     //根布局
+    private Context mContext;
 
     @Nullable
     @Override
@@ -59,6 +60,7 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = getActivity();
         createBroadcastReceiver();
     }
 
@@ -77,14 +79,14 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
         };
 
         IntentFilter filter = new IntentFilter();
-        getActivity().registerReceiver(receiver, filter);
+        mContext.registerReceiver(receiver, filter);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         if (receiver != null) {
-            getActivity().unregisterReceiver(receiver);
+            mContext.unregisterReceiver(receiver);
         }
     }
 
@@ -93,10 +95,10 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
      */
     @Override
     public void showClassifyMusicInfo() {
-        List<ClassifyMusicPlayer> musicPlayers = ((MainActivity)getActivity()).getClassifyMusicPlayerInfo();
-        mDatas = ((MainActivity)getActivity()).getClassifyMusicInfo(musicPlayers);
+        List<ClassifyMusicPlayer> musicPlayers = ((MainActivity)mContext).getClassifyMusicPlayerInfo();
+        mDatas = ((MainActivity)mContext).getClassifyMusicInfo(musicPlayers);
         if (musicPlayers == null || mDatas == null){
-            ((MainActivity)getActivity()).showToast(mElClassifyMusic, "没有音乐文件");
+            ((MainActivity)mContext).showToast(mElClassifyMusic, "没有音乐文件");
             return;
         }
         mAdapter = new ClassifyMusicAdapter(getContext(), musicPlayers, mDatas);
@@ -121,14 +123,14 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
                     for (int i = 0;i < mDatas.get(groupPosition).size();i++){
                         musicId.add(mDatas.get(groupPosition).get(i).getpId());
                     }
-                    ((MainActivity)getActivity()).replaceMusicList(musicId, childPosition);
+                    ((MainActivity)mContext).replaceMusicList(musicId, childPosition);
 
                     return true;
                 }else {
                     //相等，重新播放这首歌曲，提高效率，不替换播放列表
                     Intent intent = new Intent("PlayMusic");
                     intent.putExtra("palyPosition", childPosition);
-                    getActivity().sendBroadcast(intent);
+                    mContext.sendBroadcast(intent);
                 }
                 return false;
             }

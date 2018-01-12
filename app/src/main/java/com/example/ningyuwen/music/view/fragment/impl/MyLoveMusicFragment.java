@@ -39,6 +39,7 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
     private MyLoveMusicAdapter mAdapter;
     private static boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
     private View allMusicFragmentView;      //根布局
+    private Context mContext;
 
     @Nullable
     @Override
@@ -66,6 +67,7 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = getActivity();
         createBroadcastReceiver();
     }
 
@@ -92,7 +94,7 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
                         }
                     }else if ("add".equals(intent.getStringExtra("status"))){
                         //添加
-                        MusicData musicData = ((MainActivity)getActivity()).getDataFromPid(
+                        MusicData musicData = ((MainActivity)mContext).getDataFromPid(
                                 intent.getLongExtra("pid", 0));
                         if (musicData == null){
                             return;
@@ -105,14 +107,14 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetMyLove");
-        getActivity().registerReceiver(receiver, filter);
+        mContext.registerReceiver(receiver, filter);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         if (receiver != null) {
-            getActivity().unregisterReceiver(receiver);
+            mContext.unregisterReceiver(receiver);
         }
         if (mMyLoveMusicDatas != null){
             mMyLoveMusicDatas.clear();
@@ -127,8 +129,8 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
     public void showMyLoveMusicInfo() {
         mRvMyLoveMusic.setLayoutManager(new LinearLayoutManager(getContext()));
         mMyLoveMusicDatas.clear();
-        mMyLoveMusicDatas.addAll(((MainActivity)getActivity()).getMyLoveMusicData());
-        mAdapter = new MyLoveMusicAdapter(getActivity(), mMyLoveMusicDatas);
+        mMyLoveMusicDatas.addAll(((MainActivity)mContext).getMyLoveMusicData());
+        mAdapter = new MyLoveMusicAdapter(mContext, mMyLoveMusicDatas);
         mRvMyLoveMusic.setAdapter(mAdapter);
         mAdapter.addItemClickListener(this);
     }
@@ -140,8 +142,8 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
      */
     @Override
     public void playMusic(int position) {
-        ((MainActivity)getActivity()).showToast(mRvMyLoveMusic, "音乐位置： " + position);
-        ((MainActivity)getActivity()).playMusicOnBackstage(position);
+        ((MainActivity)mContext).showToast(mRvMyLoveMusic, "音乐位置： " + position);
+        ((MainActivity)mContext).playMusicOnBackstage(position);
     }
 
     /**
@@ -151,7 +153,7 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
     @Override
     public void setNotLove(int position) {
         //通知AllMusicFragment更新，将这首音乐变为不喜欢
-        ((MainActivity)getActivity()).updateLoveMusic(mMyLoveMusicDatas.get(position));
+        ((MainActivity)mContext).updateLoveMusic(mMyLoveMusicDatas.get(position));
 
         mMyLoveMusicDatas.remove(position);
         mAdapter.notifyDataSetChanged();
@@ -168,7 +170,7 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
             mMyLoveMusicDatas = new ArrayList<>();
         }
         mMyLoveMusicDatas.clear();
-        mMyLoveMusicDatas.addAll(((MainActivity)getActivity()).getMyLoveMusicData());
+        mMyLoveMusicDatas.addAll(((MainActivity)mContext).getMyLoveMusicData());
         mAdapter.notifyDataSetChanged();
     }
 

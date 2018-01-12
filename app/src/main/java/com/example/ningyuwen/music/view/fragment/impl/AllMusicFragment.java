@@ -44,6 +44,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     private AllMusicInfoAdapter mAdapter;   //adapter
     private static boolean shouldRefresh = false;   //是否需要刷新
     private View allMusicFragmentView;      //根布局
+    private Context mContext;
 
     @Nullable
     @Override
@@ -59,6 +60,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = getActivity();
         createBroadcastReceiver();
     }
 
@@ -86,13 +88,13 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
         };
 
         IntentFilter filter = new IntentFilter();
-        getActivity().registerReceiver(receiver, filter);
+        mContext.registerReceiver(receiver, filter);
     }
 
     private void showMusicInfo() {
         Log.i("test", "showMusicInfo: " + mAllMusicDatas.size());
         mRvAllMusicInfo.setLayoutManager(new LinearLayoutManager(getContext()));
-        mAdapter = new AllMusicInfoAdapter(getActivity(), mAllMusicDatas);
+        mAdapter = new AllMusicInfoAdapter(mContext, mAllMusicDatas);
         mRvAllMusicInfo.setAdapter(mAdapter);
         mAdapter.addItemClickListener(this);
     }
@@ -101,7 +103,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     public void onDestroy() {
         super.onDestroy();
         if (receiver != null) {
-            getActivity().unregisterReceiver(receiver);
+            mContext.unregisterReceiver(receiver);
         }
     }
 
@@ -111,9 +113,9 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
      */
     @Override
     public void playMusic(int position) {
-        ((MainActivity)getActivity()).showToast(mRvAllMusicInfo, "音乐名： "
+        ((MainActivity)mContext).showToast(mRvAllMusicInfo, "音乐名： "
                 + mAllMusicDatas.get(position).getMusicName());
-        ((MainActivity)getActivity()).playMusicOnBackstage(position);
+        ((MainActivity)mContext).playMusicOnBackstage(position);
 
     }
 
@@ -126,18 +128,18 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
         Intent intent = new Intent("SetMyLove");
         if (mAllMusicDatas.get(position).isLove()){
             //之前是喜愛，在我喜愛的頁面刪除
-            ((MainActivity)getActivity()).setIsLoveToDB(
+            ((MainActivity)mContext).setIsLoveToDB(
                     mAllMusicDatas.get(position).getpId(), false);
             intent.putExtra("status", "delete");
             intent.putExtra("pid", mAllMusicDatas.get(position).getpId());
-            getActivity().sendBroadcast(intent);
+            mContext.sendBroadcast(intent);
         }else {
             //之前不喜愛，在我喜愛的頁面添加
-            ((MainActivity)getActivity()).setIsLoveToDB(
+            ((MainActivity)mContext).setIsLoveToDB(
                     mAllMusicDatas.get(position).getpId(), true);
             intent.putExtra("status", "add");
             intent.putExtra("pid", mAllMusicDatas.get(position).getpId());
-            getActivity().sendBroadcast(intent);
+            mContext.sendBroadcast(intent);
         }
     }
 
@@ -160,14 +162,14 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
                         break;
                     case 1:
                         //收藏到歌单
-                        final AddToPlaylistDialog mAddToPlaylistDialog = new AddToPlaylistDialog(getActivity());
+                        final AddToPlaylistDialog mAddToPlaylistDialog = new AddToPlaylistDialog(mContext);
                         mAddToPlaylistDialog.setTitle("收藏到歌单");
                         mAddToPlaylistDialog.setThisMusicPid(mAdapter.getItem(position).getpId());
                         //设置监听回调，将音乐添加到歌单中
                         mAddToPlaylistDialog.setListener(new AddToPlaylistDialog.AddItemClickListener() {
                             @Override
                             public void addMusicToSongList(long musicId, long songListId) {
-                                ((MainActivity)getActivity()).addMusicToSongList(musicId, songListId);
+                                ((MainActivity)mContext).addMusicToSongList(musicId, songListId);
                                 mAddToPlaylistDialog.dismiss();
                             }
                         });
@@ -179,11 +181,11 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
 //                        break;
                     case 2:
                         //分享音乐
-                        ((MainActivity)getActivity()).showToast(mRvAllMusicInfo, "功能暂未开放");
+                        ((MainActivity)mContext).showToast(mRvAllMusicInfo, "功能暂未开放");
                         break;
                     case 3:
                         //剪辑歌曲
-                        ((MainActivity)getActivity()).showToast(mRvAllMusicInfo, "功能暂未开放");
+                        ((MainActivity)mContext).showToast(mRvAllMusicInfo, "功能暂未开放");
                         break;
                     default:
                         break;
@@ -203,8 +205,10 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
             mAllMusicDatas = new ArrayList<>();
         }
         mAllMusicDatas.clear();
-        mAllMusicDatas = ((MainActivity)getActivity()).getMusicDatas();
-        showMusicInfo();
+        if (((MainActivity)mContext) != null) {
+            mAllMusicDatas = ((MainActivity)mContext).getMusicDatas();
+            showMusicInfo();
+        }
     }
 
     /**

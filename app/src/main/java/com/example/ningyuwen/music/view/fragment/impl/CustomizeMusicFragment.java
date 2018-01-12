@@ -56,6 +56,7 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
     private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
     private View customizeMusicFragment;    //根布局
     private MusicPopupWindow mPopupWindow;   //显示歌单三个点的点击事件
+    private Context mContext;
 
     @Nullable
     @Override
@@ -74,6 +75,7 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = getActivity();
         createBroadcastReceiver();
     }
 
@@ -92,14 +94,14 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
         };
 
         IntentFilter filter = new IntentFilter();
-        getActivity().registerReceiver(receiver, filter);
+        mContext.registerReceiver(receiver, filter);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         if (receiver != null) {
-            getActivity().unregisterReceiver(receiver);
+            mContext.unregisterReceiver(receiver);
         }
     }
 
@@ -110,8 +112,8 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
     @Override
     public void showCustomizeMusicInfo() {
         mRvCustomizeMusic.setLayoutManager(new LinearLayoutManager(getContext()));
-        mSongListInfos = ((MainActivity)getActivity()).getSongListInfo();
-        mAdapter = new CustomizeMusicAdapter(getActivity(), mSongListInfos, false);
+        mSongListInfos = ((MainActivity)mContext).getSongListInfo();
+        mAdapter = new CustomizeMusicAdapter(mContext, mSongListInfos, false);
         mRvCustomizeMusic.setAdapter(mAdapter);
         mAdapter.addItemClickListener(this);
     }
@@ -122,11 +124,8 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
      */
     @Override
     public void jumpSongList(SongListInfo info) {
-//        Dialog dialog = new Dialog(getActivity());
-//        dialog.setTitle("歌曲列表");
-//        dialog.show();
 
-        startActivity(new Intent(getActivity(), MusicSongListActivity.class)
+        startActivity(new Intent(mContext, MusicSongListActivity.class)
                 .putExtra("name", info.getName())
                 .putExtra("picUrl",info.getSonglistImgUrl())
                 .putExtra("number",info.getNumber())
@@ -140,7 +139,7 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
      */
     @Override
     public void addSongList(int position) {
-        View view = from(getActivity()).inflate(R.layout.layout_add_songlist, null);
+        View view = from(mContext).inflate(R.layout.layout_add_songlist, null);
         final EditText et = (EditText) view.findViewById(R.id.et_song_list);
         final TextView tv = (TextView) view.findViewById(R.id.tv_cha_number);
 
@@ -176,21 +175,21 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
             public void onClick(DialogInterface dialogInterface, int i) {
                 //判断数据库中是否存在名字相同的歌单，存在则不能添加
                 if ("".equals(et.getText().toString())){
-                    ((MainActivity)getActivity()).showToast(mRvCustomizeMusic, "歌单名不能为空");
+                    ((MainActivity)mContext).showToast(mRvCustomizeMusic, "歌单名不能为空");
                     return;
                 }
-                if (((MainActivity)getActivity()).existSongListName(et.getText().toString())){
-                    ((MainActivity)getActivity()).showToast(mRvCustomizeMusic, "歌单已存在");
+                if (((MainActivity)mContext).existSongListName(et.getText().toString())){
+                    ((MainActivity)mContext).showToast(mRvCustomizeMusic, "歌单已存在");
                     return;
                 }
-                ((MainActivity)getActivity()).showToast(mRvCustomizeMusic, "添加成功");
+                ((MainActivity)mContext).showToast(mRvCustomizeMusic, "添加成功");
                 SongListInfo info = new SongListInfo();
                 info.setName(et.getText().toString());
                 info.setNumber(0);
                 mSongListInfos.add(info);
                 mAdapter.notifyDataSetChanged();
                 //存储到数据库
-                ((MainActivity)getActivity()).addSongListToDB(info);
+                ((MainActivity)mContext).addSongListToDB(info);
             }
         });
 
@@ -204,7 +203,7 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
     @Override
     public void showPopupWindow(String listName) {
         if (mPopupWindow == null){
-            mPopupWindow = new MusicPopupWindow(LayoutInflater.from(getActivity())
+            mPopupWindow = new MusicPopupWindow(LayoutInflater.from(mContext)
                     .inflate(R.layout.layout_music_popup_window, null),
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     600, true);
@@ -220,7 +219,7 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
         }
         mPopupWindow.setTitle(listName);
 //        mPopupWindow.showAsDropDown(mRvCustomizeMusic, Gravity.BOTTOM, 0, 0);
-        mPopupWindow.showAtLocation(((MainActivity)getActivity()).findViewById(R.id.iv_main_activity_bg),
+        mPopupWindow.showAtLocation(((MainActivity)mContext).findViewById(R.id.iv_main_activity_bg),
                 Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
     }
 
@@ -234,7 +233,7 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
             mSongListInfos = new ArrayList<>();
         }
         mSongListInfos.clear();
-        mSongListInfos.addAll(((MainActivity)getActivity()).getSongListInfo());
+        mSongListInfos.addAll(((MainActivity)mContext).getSongListInfo());
         mAdapter.notifyDataSetChanged();
     }
 

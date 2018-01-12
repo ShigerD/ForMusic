@@ -42,6 +42,7 @@ import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * 将播放页面的activity改为popupwindow
@@ -120,7 +121,9 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             setPlayActivityBg();
             BaseActivity.mShouldChangePlayingBg = false;
         }
-        mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
+        if (BaseActivity.mServiceDataTrans != null) {
+            mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
+        }
 
         super.showAsDropDown(anchor);
     }
@@ -205,7 +208,8 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         switch (v.getId()) {
             case R.id.ivLast:
                 //上一曲，根据播放模式变化
-                BaseActivity.mServiceDataTrans.playMusicFromClick(BaseActivity.mServiceDataTrans.getPlayPosition() - 1);
+                BaseActivity.mServiceDataTrans.playMusicFromClick(
+                        calculatePlayPosition(BaseActivity.mServiceDataTrans.getPlayPosition(), false));
                 mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
                 initData();
                 initUi(true);
@@ -226,7 +230,9 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
                 break;
             case R.id.ivNext:
                 //下一曲，根据播放模式变化
-                BaseActivity.mServiceDataTrans.playMusicFromClick(BaseActivity.mServiceDataTrans.getPlayPosition() + 1);
+                //播放下一曲时，判断当前播放状态，给出播放位置
+                BaseActivity.mServiceDataTrans.playMusicFromClick(
+                        calculatePlayPosition(BaseActivity.mServiceDataTrans.getPlayPosition(), true));
                 //修改背景图片
                 mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
                 initData();
@@ -234,12 +240,59 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
                 setPlayActivityBg();
                 break;
             case R.id.iv_play_type:
+                //切换播放模式,三种模式，单曲循环，列表循环，随机播放
+                //默认为列表循环
+//                int type = mContext.getSharedPreferences("notes", Context.MODE_PRIVATE)
+//                        .getInt("playType", StaticFinalUtil.SERVICE_PLAY_TYPE_LIST);
+                if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_LIST){
+                    //如果是列表循环，变为单曲循环
+                    StaticFinalUtil.SERVICE_PLAY_TYPE_NOW = StaticFinalUtil.SERVICE_PLAY_TYPE_SINGLE;
+                    mContext.getSharedPreferences("notes", Context.MODE_PRIVATE).edit()
+                            .putInt("playType", StaticFinalUtil.SERVICE_PLAY_TYPE_SINGLE).apply();
+                    ivPlayType.setImageResource(R.drawable.play_icn_one_prs);
+                }else if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_SINGLE){
+                    //如果是单曲循环，变为随机播放
+                    StaticFinalUtil.SERVICE_PLAY_TYPE_NOW = StaticFinalUtil.SERVICE_PLAY_TYPE_RANDOM;
+                    mContext.getSharedPreferences("notes", Context.MODE_PRIVATE).edit()
+                            .putInt("playType", StaticFinalUtil.SERVICE_PLAY_TYPE_RANDOM).apply();
+                    ivPlayType.setImageResource(R.drawable.play_icn_shuffle);
+                }else if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_RANDOM){
+                    //如果是随机播放，变为列表循环
+                    StaticFinalUtil.SERVICE_PLAY_TYPE_NOW = StaticFinalUtil.SERVICE_PLAY_TYPE_LIST;
+                    mContext.getSharedPreferences("notes", Context.MODE_PRIVATE).edit()
+                            .putInt("playType", StaticFinalUtil.SERVICE_PLAY_TYPE_LIST).apply();
+                    ivPlayType.setImageResource(R.drawable.play_icn_loop_prs);
+                }
                 break;
             case R.id.iv_play_list:
+                //显示当前歌单
+
                 break;
             default:
                 break;
         }
+    }
+
+    /**
+     * 点击上一曲或者下一曲时生成播放的Position
+     * @param position 当前播放的位置
+     * @param isNext 是否是点击了下一曲
+     * @return 给出需要播放的position
+     */
+    private int calculatePlayPosition(int position, boolean isNext) {
+        if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_LIST ||
+                StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_SINGLE){
+            //列表循环，加一或减一 还有单曲循环
+            if (isNext){
+                return position + 1;
+            }else {
+                return position - 1;
+            }
+        } else if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_RANDOM){
+            return new Random().nextInt(BaseActivity.mMusicDatas.size())
+                    % (BaseActivity.mMusicDatas.size() + 1);
+        }
+        return 0;
     }
 
     /**
@@ -295,7 +348,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             Message message;
             while (true){
                 try {
-                    Thread.sleep(25);
+                    Thread.sleep(20);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -313,20 +366,10 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         }
     }
 
-    Runnable runnable1 = new Runnable() {
-        @Override
-        public void run() {
-            setDiscData();
-        }
-    };
-
-    private List<RelativeLayout> list;
-
     /**
      * ViewPager中只放三条，滑动一个添加一个，删除一个
      */
     private void setDiscData() {
-        list = new ArrayList<RelativeLayout>();
 //        for (int i = 0; i < BaseActivity.mMusicDatas.size(); i++) {
 //            list.add(new RelativeLayout(mContext));
 //        }
@@ -517,6 +560,17 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             }
         });
 
+        /**
+         * 初始化播放状态
+         */
+        if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_LIST){
+            ivPlayType.setImageResource(R.drawable.play_icn_loop_prs);
+        }else if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_SINGLE){
+            ivPlayType.setImageResource(R.drawable.play_icn_one_prs);
+        }else if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_RANDOM){
+            ivPlayType.setImageResource(R.drawable.play_icn_shuffle);
+        }
+
     }
 
     /**
@@ -605,6 +659,9 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
      * @return text 05：00
      */
     private String getTextFromTime(int time) {
+        if (time < 0){
+            return "";
+        }
         int minute = time / 1000 / 60;
         int second = time / 1000 - minute * 60;
         String min = "";
