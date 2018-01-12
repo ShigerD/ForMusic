@@ -15,6 +15,12 @@
         android:textColor="#87000000"
         android:layout_marginLeft="10dp"/>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_below="@id/tv_playlist_name"
+        android:background="@color/gray"/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_music_list_pop"
         android:layout_below="@id/tv_playlist_name"

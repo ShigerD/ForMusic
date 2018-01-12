@@ -17,6 +17,7 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +50,8 @@ import java.util.Random;
  * Created by ningyuwen on 18-1-10.
  */
 
-public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickListener {
+public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickListener,
+        MusicSongListPopupWindow.IMusicSongPopToPlayPop {
 
     TextView tvMusicName;
     TextView tvMusicPlayer;
@@ -76,6 +78,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
     private boolean shouldPauseChangeProgress = false;
     private boolean isPlaying = false;  //正在播放
     private boolean isSliding = false;    //在滑动
+    private MusicSongListPopupWindow mMusicSongListPopupWindow;  //歌单popup
 
     public PlayMusicPopupWindow(Context context) {
         this(context, LayoutInflater.from(context)
@@ -266,11 +269,24 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
                 break;
             case R.id.iv_play_list:
                 //显示当前歌单
-
+                //再弹出一个popupwindow
+                if (mMusicSongListPopupWindow == null){
+                    initMusicSongListPop();
+                }
+                mMusicSongListPopupWindow.showAtLocation(((MainActivity)mContext).findViewById(R.id.iv_main_activity_bg),
+                        Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
                 break;
             default:
                 break;
         }
+    }
+
+    /**
+     * 初始化歌单popup
+     */
+    private void initMusicSongListPop() {
+        mMusicSongListPopupWindow = new MusicSongListPopupWindow(mContext);
+        mMusicSongListPopupWindow.setPopupWindowListener(this);
     }
 
     /**
@@ -293,6 +309,22 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
                     % (BaseActivity.mMusicDatas.size() + 1);
         }
         return 0;
+    }
+
+    /**
+     * 点击事件，传给popupwindow,切换音乐
+     * @param position position
+     */
+    @Override
+    public void setPlayMusicPosition(int position) {
+        //下一曲，根据播放模式变化
+        //播放下一曲时，判断当前播放状态，给出播放位置
+        BaseActivity.mServiceDataTrans.playMusicFromClick(position);
+        //修改背景图片
+        mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
+        initData();
+        initUi(true);
+        setPlayActivityBg();
     }
 
     /**
