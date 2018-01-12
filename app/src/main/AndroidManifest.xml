@@ -55,6 +55,8 @@
 
         <activity android:name=".view.activity.impl.PlayingActivity"/>
 
+        <activity android:name=".view.activity.impl.ChangeBackActivity"></activity>
+
         <service android:enabled="true"
             android:exported="true"
             android:name=".service.PlayMusicService"/>

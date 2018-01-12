@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -200,6 +201,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
      */
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        SharedPreferences preferences = getSharedPreferences("backImg",Context.MODE_PRIVATE);
         switch(requestCode){
             case 1:
                 if(resultCode == RESULT_OK){
@@ -211,12 +214,15 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                     switch(returnBackImg){
                         case "pic_change_bg1":
                             initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg1));
+                            preferences.edit().putInt("backImgId",1).apply();
                             break;
                         case "pic_change_bg2":
                             initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg2));
+                            preferences.edit().putInt("backImgId",2).apply();
                             break;
                         case "pic_change_bg3":
                             initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg3));
+                            preferences.edit().putInt("backImgId",3).apply();
                             break;
                     }
 
@@ -240,8 +246,25 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
      * 设置背景
      */
     private void setMainActivityBg() {
-        //拿到初始图
+        //拿到初始图（先从preferences中判断是否更改过背景图片）
+        SharedPreferences preferences = getSharedPreferences("backImg",Context.MODE_PRIVATE);
+        int imgId = preferences.getInt("backImgId",0);
+
         Bitmap initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_main_bg));
+        switch(imgId){
+            case 0:
+                break;
+            case 1:
+                initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg1));
+                break;
+            case 2:
+                initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg2));
+                break;
+            case 3:
+                initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg3));
+                break;
+        }
+
         //处理得到模糊效果的图
         int scaleRatio = 5;
         int blurRadius = 8;
