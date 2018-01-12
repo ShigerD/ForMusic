@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
@@ -16,13 +17,13 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
-import com.example.ningyuwen.music.util.DensityUtil;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
@@ -35,12 +36,14 @@ import java.util.Random;
  * Created by ningyuwen on 17-9-26.
  */
 
-public class PlayMusicService extends Service implements MainActivity.IServiceDataTrans {
+public class PlayMusicService extends Service implements MainActivity.IServiceDataTrans, AudioManager.OnAudioFocusChangeListener {
     private String TAG = "testni";
     private MediaPlayer mMediaPlayer; // 媒体播放器对象
     private ArrayList<Long> mMusicIds;
     private byte mPlayStatus = 0;   // 0:列表循环  1:列表播放一次  2：随即播放  3：单曲循环
     private BroadcastReceiver mReceiver;
+    private AudioManager mAudioManager;//来电监听器
+    private int mReveivNoice;//监控返回值
     private int mCurrentTime;        //当前播放进度
     private int mPosition;
     private MyBinder myBinder = new MyBinder();             //MyBinder获取PlayMusicService
@@ -57,6 +60,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     public void onCreate() {
         super.onCreate();
         mMediaPlayer = new MediaPlayer();
+        mMusicIds = new ArrayList<>();
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
@@ -89,6 +93,9 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         handler.sendEmptyMessage(1);
 
         setBroadCastReceiver();
+        //接听电话监听
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        mReveivNoice = mAudioManager.requestAudioFocus(this,AudioManager.STREAM_MUSIC,AudioManager.AUDIOFOCUS_GAIN);
 
         pid = getSharedPreferences("notes", MODE_PRIVATE).getLong("lastTimePlayPid", 0);
 
@@ -155,6 +162,44 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     }
 
     /**
+     * 监控在声音焦点监听器
+     * @param focusChange 表示音频获取焦点的状态
+     */
+    @Override
+    public void onAudioFocusChange(int focusChange) {
+        Log.e("moneychange", "onAudioFocusChange: "+focusChange  );
+        switch (focusChange){
+            case AudioManager.AUDIOFOCUS_GAIN://已经获得了音频焦点
+                Log.e("moneychange1", "onAudioFocusChange: "+focusChange  );
+                if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
+                    showCustomView(true);
+                    playMusic(mCurrentTime);
+                    //通知MainActivity更新播放暂停动画
+                    mServiceDataToActivity.refreshPlayPauseAnimation(true);
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS://已经失去音频焦点很长时间
+                Log.e("moneychange2", "onAudioFocusChange: "+focusChange  );
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT://暂时失去，很快会重新获得，可保持资源，可能很快会重新获得(电话拨打和接听)
+                Log.e("moneychange3", "onAudioFocusChange: "+focusChange  );
+                if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.pause();
+                    showCustomView(false);
+                    //通知MainActivity更新播放暂停动画
+                    mServiceDataToActivity.refreshPlayPauseAnimation(false);
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK://暂时失去，但是可以小声播放（短信）
+                Log.e("moneychange4", "onAudioFocusChange: "+focusChange  );
+                mMediaPlayer.setVolume(0.1f, 0.1f);
+                break;
+
+        }
+
+    }
+
+    /**
      * 广播接收器
      */
     public class ServiceReceiver extends BroadcastReceiver {
@@ -186,6 +231,15 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 mPosition = (mPosition + 1) % mMusicIds.size();     //下一曲
                 refreshNotification();
                 playMusic(0);
+            }
+//监听电话拨打和接听
+            Log.e("moneyReceiver", "onReceive: "+action );
+            if(action.equals(Intent.ACTION_NEW_OUTGOING_CALL)||action.equals(Service.TELEPHONY_SERVICE)){
+                playOrPause();
+            }
+            //监听拔掉耳机
+            if(action.equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)){
+                playOrPause();
             }
         }
     }
@@ -237,6 +291,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         intentFilter.addAction(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_CLOSE);
         intentFilter.addAction(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_PLAY);
         intentFilter.addAction(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_NEXT);
+        intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         registerReceiver(mReceiver, intentFilter);
     }
 
