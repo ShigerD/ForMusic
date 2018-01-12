@@ -15,6 +15,6 @@ public class StaticFinalUtil {
     public static final int SERVICE_PLAY_TYPE_LIST = 1006;  //列表循环
     public static final int SERVICE_PLAY_TYPE_SINGLE = 1007;  //单曲循环
     public static final int SERVICE_PLAY_TYPE_RANDOM = 1008;  //随机播放
-    public static int SERVICE_PLAY_TYPE_NOW = 1009;  //随机播放
+    public static int SERVICE_PLAY_TYPE_NOW = 1009;  //当前播放模式
 
 }

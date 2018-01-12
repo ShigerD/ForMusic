@@ -60,8 +60,11 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.i(TAG, "onCompletion: " + mediaPlayer.getCurrentPosition() + " " + mMediaPlayer.getCurrentPosition());
-                if (mediaPlayer.getCurrentPosition() < 60000){
+                Log.i(TAG, "onCompletion: " + mediaPlayer.getCurrentPosition() + " "
+                        + mMediaPlayer.getCurrentPosition() + " " + mServiceDataToActivity
+                        .getPlayMusicData(mMusicIds.get(mPosition)).getMusicTime());
+                if (mediaPlayer.getCurrentPosition() < mServiceDataToActivity.getPlayMusicData(
+                        mMusicIds.get(mPosition)).getMusicTime()-5000){
                     return;
                 }
                 //随机播放还是单曲播放，列表循环的区别主要体现在播放完成时的下一曲 和 手动切换歌曲

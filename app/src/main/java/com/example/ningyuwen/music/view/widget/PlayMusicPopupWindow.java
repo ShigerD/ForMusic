@@ -121,7 +121,9 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             setPlayActivityBg();
             BaseActivity.mShouldChangePlayingBg = false;
         }
-        mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
+        if (BaseActivity.mServiceDataTrans != null) {
+            mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
+        }
 
         super.showAsDropDown(anchor);
     }
@@ -364,20 +366,10 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         }
     }
 
-    Runnable runnable1 = new Runnable() {
-        @Override
-        public void run() {
-            setDiscData();
-        }
-    };
-
-    private List<RelativeLayout> list;
-
     /**
      * ViewPager中只放三条，滑动一个添加一个，删除一个
      */
     private void setDiscData() {
-        list = new ArrayList<RelativeLayout>();
 //        for (int i = 0; i < BaseActivity.mMusicDatas.size(); i++) {
 //            list.add(new RelativeLayout(mContext));
 //        }

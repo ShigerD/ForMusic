@@ -270,7 +270,6 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
     public void startPlayMusicService(){
         Intent intent = new Intent(BaseActivity.this, PlayMusicService.class);
         bindService(intent, mServiceConnection,  Context.BIND_AUTO_CREATE);
-
     }
 
     /**
