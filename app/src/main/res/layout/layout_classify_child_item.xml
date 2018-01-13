@@ -25,9 +25,12 @@
         android:layout_height="35dp"
         android:gravity="center_vertical"
         android:textSize="18sp"
+        android:textColor="@color/white_item"
         android:layout_marginStart="5dp"
-        android:lines="1"
+        android:background="?android:selectableItemBackground"
+        android:ellipsize="marquee"
         android:layout_toStartOf="@id/item_is_love"
-        android:layout_toEndOf="@id/item_play_status"/>
+        android:layout_toEndOf="@id/item_play_status"
+        android:singleLine="true" />
 
 </RelativeLayout>

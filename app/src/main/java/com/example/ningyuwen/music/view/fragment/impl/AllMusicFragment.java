@@ -140,7 +140,8 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
             BaseActivity.mMusicDatas.addAll(mAllMusicDatas);
             //向Service传递数据
             ((MainActivity)mContext).initServiceData();
-            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
+//            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
+            ((MainActivity)mContext).playMusicOnBackstage(position);
             //刷新播放页面
             mContext.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
         }

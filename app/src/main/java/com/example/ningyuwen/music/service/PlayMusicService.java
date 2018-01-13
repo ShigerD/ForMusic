@@ -453,8 +453,9 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             mMusicIds = new ArrayList<>();
         }
         mMusicIds.clear();
-        mMusicIds = musicInfoList;   //pid
+        mMusicIds.addAll(musicInfoList);   //pid
         mPosition = position;       //position
+        refreshNotification();
         playMusic(0);
     }
 

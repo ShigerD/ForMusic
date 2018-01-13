@@ -166,7 +166,8 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
             BaseActivity.mMusicDatas.addAll(mMyLoveMusicDatas);
             //向Service传递数据
             ((MainActivity)mContext).initServiceData();
-            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
+            ((MainActivity)mContext).playMusicOnBackstage(position);
+//            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
             //刷新播放页面
             mContext.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
         }

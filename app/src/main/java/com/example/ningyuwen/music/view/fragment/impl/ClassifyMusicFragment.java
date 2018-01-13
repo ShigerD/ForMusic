@@ -17,7 +17,9 @@ import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
+import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
+import com.example.ningyuwen.music.view.activity.impl.BaseActivity;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.example.ningyuwen.music.view.adapter.ClassifyMusicAdapter;
 import com.example.ningyuwen.music.view.fragment.i.IClassifyMusicFragment;
@@ -114,23 +116,45 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 //点击了其中一条，则将对应的音乐人的所有音乐替换后台播放列表
+                //点击其中一首开始播放，将后台音乐播放列表替换为此音乐人的歌曲
+
+                //如果之前不是播放歌手分类的歌单，那么将mGroupPosition置为-1,重新判断时，就可以切换歌单了
+                if (BaseActivity.MUSIC_LIST_PLAY_NOW != StaticFinalUtil.MUSIC_LIST_PLAY_CLASSIFY_PLAYER){
+                    mGroupPosition = -1;
+                }
                 if (groupPosition != mGroupPosition) {
                     mGroupPosition = groupPosition;
 
                     //如果不等，则说明换了音乐人，发送广播，替换音乐列表
                     //如果不等，则说明换了音乐人，不再使用广播发送，使用接口回调
-                    ArrayList<Long> musicId = new ArrayList<>();
-                    for (int i = 0;i < mDatas.get(groupPosition).size();i++){
-                        musicId.add(mDatas.get(groupPosition).get(i).getpId());
+                    BaseActivity.MUSIC_LIST_PLAY_NOW = StaticFinalUtil.MUSIC_LIST_PLAY_CLASSIFY_PLAYER;  //切换到歌手分类歌单
+                    if (BaseActivity.mMusicDatas == null){
+                        BaseActivity.mMusicDatas = new ArrayList<>();
                     }
-                    ((MainActivity)mContext).replaceMusicList(musicId, childPosition);
+                    BaseActivity.mMusicDatas.clear();
+                    //this.mMusicDatas已经是本歌单的数据了
+                    BaseActivity.mMusicDatas.addAll(mDatas.get(groupPosition));
+                    //向Service传递数据
+                    ((MainActivity)mContext).initServiceData();
+                    ((MainActivity)mContext).playMusicOnBackstage(childPosition);
+                    mContext.sendBroadcast(new Intent().setAction(
+                            StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST).putExtra("position",childPosition));
 
+
+//                    ArrayList<Long> musicId = new ArrayList<>();
+//                    for (int i = 0;i < mDatas.get(groupPosition).size();i++){
+//                        musicId.add(mDatas.get(groupPosition).get(i).getpId());
+//                    }
+//                    ((MainActivity)mContext).replaceMusicList(musicId, childPosition);
                     return true;
                 }else {
                     //相等，重新播放这首歌曲，提高效率，不替换播放列表
-                    Intent intent = new Intent("PlayMusic");
-                    intent.putExtra("palyPosition", childPosition);
-                    mContext.sendBroadcast(intent);
+                    ((MainActivity)mContext).playMusicOnBackstage(childPosition);
+//                    BaseActivity.mServiceDataTrans.playMusicFromClick(childPosition);
+
+//                    Intent intent = new Intent("PlayMusic");
+//                    intent.putExtra("palyPosition", childPosition);
+//                    mContext.sendBroadcast(intent);
                 }
                 return false;
             }

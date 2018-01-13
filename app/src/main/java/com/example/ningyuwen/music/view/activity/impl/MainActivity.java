@@ -285,6 +285,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         Log.i(TAG, "showLyricAtActivity: " + lyric);
         if ("".equals(lyric)){
             mTvMusicLyric.setText("暂无歌词");
+            MusicApplication.getSingleThreadPool().shutdownNow();
             return;
         }
 

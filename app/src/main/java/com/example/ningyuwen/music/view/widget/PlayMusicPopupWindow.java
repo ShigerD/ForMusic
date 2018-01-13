@@ -38,6 +38,8 @@ import com.example.ningyuwen.music.view.activity.impl.BaseActivity;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -106,8 +108,15 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             if (StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST.equals(action)){
                 //更换了歌单
                 if (mAdapter != null){
-                    mAdapter.notifyDataSetChanged();
-                    mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
+                    mViewPager.removeAllViews();
+                    setDiscData();
+
+//                    List<String> picPathList = new ArrayList<>();
+//                    for (int i = 0;i < BaseActivity.mMusicDatas.size();i++){
+//                        picPathList.add(BaseActivity.mMusicDatas.get(i).getMusicAlbumPicPath());
+//                    }
+//                    mAdapter.setPicPathList(picPathList);
+                    mViewPager.setCurrentItem(intent.getIntExtra("position",0));
                 }
             }
         }
@@ -146,7 +155,6 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         if (BaseActivity.mServiceDataTrans != null) {
             mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
         }
-
         super.showAsDropDown(anchor);
     }
 
@@ -424,7 +432,11 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
 //        for (int i = 0; i < BaseActivity.mMusicDatas.size(); i++) {
 //            list.add(new RelativeLayout(mContext));
 //        }
-        mAdapter = new PlayMusicDiscAdapter();
+        List<String> picPathList = new ArrayList<>();
+        for (int i = 0;i < BaseActivity.mMusicDatas.size();i++){
+            picPathList.add(BaseActivity.mMusicDatas.get(i).getMusicAlbumPicPath());
+        }
+        mAdapter = new PlayMusicDiscAdapter(picPathList);
         mViewPager.setAdapter(mAdapter);
         final boolean[] isSlide = {false};
         final int[] nowPosition = new int[1];    //记录当前位置
@@ -473,6 +485,13 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
 
     class PlayMusicDiscAdapter extends PagerAdapter {
 
+        private List<String> mAlbumPicPath;
+
+        public PlayMusicDiscAdapter(List<String> albumPicPath) {
+//            super();
+            mAlbumPicPath = albumPicPath;
+        }
+
         @Override
         public int getCount() {
             return BaseActivity.mMusicDatas.size();
@@ -488,6 +507,11 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             ((ViewPager)container).removeView((View) object);
         }
 
+        public void setPicPathList(List<String> albumPicPath){
+            mAlbumPicPath = albumPicPath;
+            notifyDataSetChanged();
+        }
+
         ImageView imageViewFront;
 
         @NonNull
@@ -495,7 +519,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         public Object instantiateItem(@NonNull ViewGroup container, int position) {
             View rootView = LayoutInflater.from(mContext).inflate(R.layout.layout_disc, null);
             imageViewFront = (ImageView)rootView.findViewById(R.id.ivDisc);
-            imageViewFront.setImageDrawable(getDiscDrawable(BaseActivity.mMusicDatas.get(position).getMusicAlbumPicPath()));
+            imageViewFront.setImageDrawable(getDiscDrawable(mAlbumPicPath.get(position)));
             imageViewFront.setId(position);
             container.addView(rootView);
             return rootView;
