@@ -598,7 +598,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mSearchList = contentView.findViewById(R.id.search_list);
         final SearchMusicPopWindow musicResult = new SearchMusicPopWindow(MainActivity.this,contentView,
                 900,400,true);
-        final java.util.List<MusicBasicInfo>[] searchResult = new List[]{new ArrayList<>()};
+        final java.util.List[] searchResult = new List[]{new ArrayList<>()};
         final SearchResultAdapter adapter = new SearchResultAdapter(searchResult[0],MainActivity.this);
         mSearchList.setAdapter(adapter);
 

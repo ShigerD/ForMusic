@@ -35,6 +35,6 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:layout_marginEnd="12dp"
-        android:background="@mipmap/ic_love" />
+        android:background="@mipmap/ic_not_love" />
 
 </RelativeLayout>
