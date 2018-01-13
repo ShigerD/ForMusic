@@ -21,6 +21,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
@@ -271,6 +272,45 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                     mServiceDataToActivity.refreshPlayPauseAnimation(false);
                 }
             }
+            //接收耳机插拔广播
+            if ("android.intent.action.HEADSET_PLUG".equals(action)){
+                //
+                if (intent.hasExtra("state")){
+                    if (intent.getIntExtra("state", 0) == 0){
+//                        Toast.makeText(context, "headset not connected", Toast.LENGTH_SHORT).show();
+                        try {
+                            if (mMediaPlayer != null) {
+                                if (mMediaPlayer.isPlaying()) {
+                                    //在播放，则暂停
+                                    mMediaPlayer.pause();
+                                    showCustomView(false);
+                                    //通知MainActivity更新播放暂停动画
+                                    mServiceDataToActivity.refreshPlayPauseAnimation(false);
+                                }
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                    else if (intent.getIntExtra("state", 0) == 1){
+//                        Toast.makeText(context, "headset connected", Toast.LENGTH_SHORT).show();
+                        try {
+                            if (mMediaPlayer != null) {
+                                if (!mMediaPlayer.isPlaying()) {
+                                    //没有播放，则开始播放
+                                    mPlayMusicStartTime = System.currentTimeMillis();
+                                    playMusic(mCurrentTime);
+                                    showCustomView(true);
+                                    //通知MainActivity更新播放暂停动画
+                                    mServiceDataToActivity.refreshPlayPauseAnimation(true);
+                                }
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -322,6 +362,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         intentFilter.addAction(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_PLAY);
         intentFilter.addAction(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_NEXT);
         intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        intentFilter.addAction("android.intent.action.HEADSET_PLUG");
         registerReceiver(mReceiver, intentFilter);
     }
 
