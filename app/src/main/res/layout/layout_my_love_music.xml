@@ -20,7 +20,7 @@
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="5dp"
         android:src="@mipmap/ic_not_love"
-        android:padding="5dp"/>
+        android:padding="8dp"/>
 
     <TextView
         android:id="@+id/tv_music_name"

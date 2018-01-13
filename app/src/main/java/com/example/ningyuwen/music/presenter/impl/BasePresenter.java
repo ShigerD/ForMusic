@@ -33,6 +33,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,11 +76,16 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
      */
     @Override
     public List<MusicData> getMusicBasicInfoFromDB() {
-        List<MusicBasicInfo> musicBasicInfoList = mDaoSession.getMusicBasicInfoDao().loadAll();
-        if (musicBasicInfoList == null || musicBasicInfoList.size() == 0){
+        //按照播放次数排序,查询时先从记录表查询，然后拼接上基本表
+        List<MusicRecordInfo> musicRecordInfos = mDaoSession.getMusicRecordInfoDao()
+                .queryBuilder().orderAsc(MusicRecordInfoDao.Properties.MusicPlayTimes).list();
+
+//        List<MusicBasicInfo> musicBasicInfoList = mDaoSession.getMusicBasicInfoDao().loadAll();
+        if (musicRecordInfos == null || musicRecordInfos.size() == 0){
             return new ArrayList<>();
         }
-        return getMusicAllInfoFromBasic(musicBasicInfoList);
+        Collections.reverse(musicRecordInfos);
+        return getMusicAllInfoFromRecord(musicRecordInfos);
     }
 
     /**
@@ -540,5 +546,16 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
         }
         return uri.getPath();
     }
+
+    /**
+     * 将音乐播放次数加1
+     * @param pid 传入pid
+     */
+    public void setAddCountMusicPlayTime(long pid){
+        MusicRecordInfo info = mDaoSession.getMusicRecordInfoDao().load(pid);
+        info.setMusicPlayTimes(info.getMusicPlayTimes() + 1);   //加1
+        mDaoSession.getMusicRecordInfoDao().insertOrReplace(info);
+    }
+
 
 }

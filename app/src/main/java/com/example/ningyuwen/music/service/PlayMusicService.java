@@ -55,6 +55,9 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     private String nowPlayAlbumPic;             //专辑图片
     private long pid = 0;                           //此pid用于临时记录，第一次进入app时，数据未完全加载，但是有上一次播放结束时的pid
                                                 //本次进入暂时 mPosition=0,当开始播放时，判断pid是否不为0,不为0,则说明需要找到真正的mPosition
+    //记录一首音乐开始播放的时间，用于统计计数排序，当切换音乐时，用当前时间减去开始播放时间，如果时间大于音乐总长的2/3,则
+    //计数加1。，下一次打开app时，在allmusicFragment按照播放次数排序
+    private long mPlayMusicStartTime = 0;        //初始化为0
 
     @Override
     public void onCreate() {
@@ -71,6 +74,10 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                         mMusicIds.get(mPosition)).getMusicTime()-5000){
                     return;
                 }
+                //播放完成
+                calculateThisMusicIsAddCount(mPosition);
+                mPlayMusicStartTime = System.currentTimeMillis();
+
                 //随机播放还是单曲播放，列表循环的区别主要体现在播放完成时的下一曲 和 手动切换歌曲
                 if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_LIST){
                     //列表循环
@@ -105,6 +112,16 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         StaticFinalUtil.SERVICE_PLAY_TYPE_NOW = getSharedPreferences("notes",MODE_PRIVATE).getInt("playType", StaticFinalUtil.SERVICE_PLAY_TYPE_LIST);
 
         showCustomView(false);
+    }
+
+    /**
+     * 在切歌时判断此音乐是否需要计数加1
+     * 用现在的时间减去开始时间，播放总时间是否大于音乐总长度的 2/3来判定
+     * @param position 刚刚播放的那首音乐
+     */
+    private void calculateThisMusicIsAddCount(int position){
+        mServiceDataToActivity.calculateThisMusicIsAddCount((System.currentTimeMillis() - mPlayMusicStartTime),
+                mMusicIds.get(position), position);
     }
 
     private void showCustomView(boolean isPlay) {
@@ -173,6 +190,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 Log.e("moneychange1", "onAudioFocusChange: "+focusChange  );
                 if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
                     showCustomView(true);
+                    mPlayMusicStartTime = System.currentTimeMillis();
                     playMusic(mCurrentTime);
                     //通知MainActivity更新播放暂停动画
                     mServiceDataToActivity.refreshPlayPauseAnimation(true);
@@ -223,6 +241,10 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 //播放按钮变为暂停
                 playOrPause();
             } else if (action.equals(NOTIFICATION_ITEM_BUTTON_NEXT)) {//----通知栏下一首按钮响应事件
+                //下一曲切歌,计算是否加1
+                calculateThisMusicIsAddCount(mPosition);
+                mPlayMusicStartTime = System.currentTimeMillis();
+
                 //下一曲,更新通知栏,第一次进入时点击下一曲，需要判断pid
                 if (pid != 0){
                     mPosition = mServiceDataToActivity.getPositionFromDataOnPid(pid);   //上一次关闭时的位置
@@ -235,14 +257,19 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 refreshNotification();
                 playMusic(0);
             }
-//监听电话拨打和接听
+            //监听电话拨打和接听
             Log.e("moneyReceiver", "onReceive: "+action );
             if(action.equals(Intent.ACTION_NEW_OUTGOING_CALL)||action.equals(Service.TELEPHONY_SERVICE)){
                 playOrPause();
             }
             //监听拔掉耳机
             if(action.equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)){
-                playOrPause();
+                if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.pause();
+                    showCustomView(false);
+                    //通知MainActivity更新播放暂停动画
+                    mServiceDataToActivity.refreshPlayPauseAnimation(false);
+                }
             }
         }
     }
@@ -331,6 +358,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         int getPositionFromDataOnPid(long pid);  //根据pid查询歌曲在歌单中的位置，第一次进入app时需要用pid查询到mPosition
         void refreshPlayPauseAnimation(boolean play);   //更新主页面的播放暂停动画
         void sendCompleteMsgToRefreshPop(int position);     //歌曲播放完成，向Activity发送通知，更新PopupWindow
+        void calculateThisMusicIsAddCount(long playtime, long pid, int position);    //用于计数排序
     }
 
     /**
@@ -338,6 +366,10 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      * @param currentTime 当前时间
      */
     private void playMusic(int currentTime) {
+        if (mPlayMusicStartTime == 0){
+            mPlayMusicStartTime = System.currentTimeMillis();
+        }
+
         //存储记录，方便下一次进入的开始播放次序
         long id = mMusicIds.get(mPosition);
         getSharedPreferences("notes", MODE_PRIVATE).edit()
@@ -385,10 +417,16 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 
     /**
      * 用户点击播放，传入position
+     * 2018.01.13记录，因为音乐播放计数需求，还好所有音乐在播放之前都会调用此方法，
+     * 所以在这个方法中判断是否切歌
      * @param position i
      */
     @Override
     public void playMusicFromClick(int position) {
+        //点击切割
+        calculateThisMusicIsAddCount(mPosition);    //mPosition为之前的一首音乐
+        mPlayMusicStartTime = System.currentTimeMillis();
+
         if (position < 0){
             position = mMusicIds.size()-1;
         }
@@ -436,6 +474,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             mServiceDataToActivity.refreshPlayPauseAnimation(false);
         }else {
             showCustomView(true);
+            mPlayMusicStartTime = System.currentTimeMillis();
             playMusic(mCurrentTime);
             //通知MainActivity更新播放暂停动画
             mServiceDataToActivity.refreshPlayPauseAnimation(true);
@@ -449,6 +488,10 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      */
     @Override
     public void replaceBackStageMusicList(ArrayList<Long> musicInfoList, int position) {
+        //替换歌单切歌,切换歌单暂时不考虑加1
+//        calculateThisMusicIsAddCount(mPosition);
+        mPlayMusicStartTime = System.currentTimeMillis();
+
         if (mMusicIds == null){
             mMusicIds = new ArrayList<>();
         }
@@ -502,6 +545,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     @Override
     public void changePlayingTime(int time) {
         mCurrentTime = time;
+        mPlayMusicStartTime = System.currentTimeMillis();
         playMusic(mCurrentTime);
     }
 

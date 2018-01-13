@@ -41,7 +41,7 @@ public class MyLoveMusicAdapter extends RecyclerView.Adapter<MyLoveMusicAdapter.
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        Glide.with(mContext).load(getItem(position).getMusicAlbumPicPath()).into(holder.ivState);
+        Glide.with(mContext).load(getItem(position).getMusicAlbumPicPath()).error(R.drawable.back_add_playlist).into(holder.ivState);
         holder.tvMusicName.setText(getItem(position).getMusicName());
         holder.ivIsLove.setImageResource(R.mipmap.ic_love);
         setClickListener(holder, position);

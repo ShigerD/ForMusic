@@ -52,7 +52,7 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
         if (getItemCount() - 1 == position){
             holder.llAddPlayList.setVisibility(View.GONE);
             holder.tvAddPlayList.setVisibility(View.VISIBLE);
-            holder.ivCustomPic.setImageResource(R.mipmap.ic_add_playlist);
+            holder.ivCustomPic.setImageResource(R.drawable.ic_add_songlist);
             if (isDialog){
                 holder.tvAddPlayList.setTextColor(Color.parseColor("#000000"));
             }else {

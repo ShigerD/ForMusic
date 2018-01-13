@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.presenter.impl.BasePresenter;
@@ -353,6 +354,32 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
             if (mIBaseActivityToPopup != null) {
                 mIBaseActivityToPopup.refreshPopupBgAndDisc(position);
             }
+        }
+
+        /**
+         *
+         * @param playtime 这首音乐的播放时间
+         * @param pid 音乐id
+         * @param position 音乐在歌单中的位置
+         */
+        @Override
+        public void calculateThisMusicIsAddCount(final long playtime, final long pid, final int position) {
+            MusicApplication.getFixedThreadPool().execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (mMusicDatas == null || mMusicDatas.size() < position){
+                        return;
+                    }
+                    try {
+                        if (playtime >= mMusicDatas.get(position).getMusicTime() * 2 / 3) {
+                            //计数加一
+                            mPresenter.setAddCountMusicPlayTime(pid);
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     };
 

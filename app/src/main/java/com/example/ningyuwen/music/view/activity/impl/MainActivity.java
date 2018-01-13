@@ -95,13 +95,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private static ArrayList<Fragment> mFragments;
     private ImageView mIvBg;
     private TabLayout mTabLayout;
-    public static final String NOTIFICATION_CHANNEL_ID = "4655";
-    private List<Map<String, Object>> List = new ArrayList<>(); ;
-    private String[] item_name= {"主题换肤","关于开发者","计时关闭","退出"};
-    private int[] item_icon = {R.drawable.ic_backgroudstyle,
-            R.drawable.ic_aboutus,
-            R.drawable.ic_timer,
-            R.drawable.ic_exit};
     private int alert_finish = -1;
 
 
@@ -640,7 +633,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                         //取消定时关闭任务
                         mDialogAppCloseTime = 0;
                         MusicApplication.getCloseAppThreadPool().shutdownNow();
-                        showToast(mIvBg, "定时关闭任务以取消");
+                        showToast(mIvBg, "定时关闭任务已取消");
                         return;
                     }
                     mDialogCheckPosition = alert_finish;
