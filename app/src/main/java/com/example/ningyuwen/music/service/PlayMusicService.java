@@ -121,8 +121,12 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      * @param position 刚刚播放的那首音乐
      */
     private void calculateThisMusicIsAddCount(int position){
-        mServiceDataToActivity.calculateThisMusicIsAddCount((System.currentTimeMillis() - mPlayMusicStartTime),
-                mMusicIds.get(position), position);
+        try {
+            mServiceDataToActivity.calculateThisMusicIsAddCount((System.currentTimeMillis() - mPlayMusicStartTime),
+                    mMusicIds.get(position), position);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void showCustomView(boolean isPlay) {

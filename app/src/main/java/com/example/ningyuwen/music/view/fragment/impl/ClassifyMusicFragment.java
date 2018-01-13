@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
@@ -117,6 +118,10 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 //点击了其中一条，则将对应的音乐人的所有音乐替换后台播放列表
                 //点击其中一首开始播放，将后台音乐播放列表替换为此音乐人的歌曲
+
+                //修改为正在播放的图标
+//                ImageView imageView = v.findViewById(childPosition);
+//                imageView.setImageResource(R.drawable.ic_classify_play_state_play);
 
                 //如果之前不是播放歌手分类的歌单，那么将mGroupPosition置为-1,重新判断时，就可以切换歌单了
                 if (BaseActivity.MUSIC_LIST_PLAY_NOW != StaticFinalUtil.MUSIC_LIST_PLAY_CLASSIFY_PLAYER){

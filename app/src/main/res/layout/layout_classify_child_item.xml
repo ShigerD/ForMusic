@@ -9,14 +9,16 @@
         android:layout_width="40dp"
         android:layout_height="35dp"
         android:layout_marginStart="30dp"
-        android:src="@color/colorAccent"/>
+        android:padding="10dp"
+        android:src="@drawable/ic_classify_music_state"/>
 
     <ImageView
         android:id="@+id/item_is_love"
         android:layout_width="40dp"
         android:layout_height="35dp"
         android:layout_marginEnd="20dp"
-        android:src="@color/colorPrimary"
+        android:src="@mipmap/ic_not_love"
+        android:visibility="gone"
         android:layout_alignParentEnd="true"/>
 
     <TextView
