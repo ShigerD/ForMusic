@@ -29,6 +29,8 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.CardView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -57,6 +59,7 @@ import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
+import com.example.ningyuwen.music.presenter.impl.BasePresenter;
 import com.example.ningyuwen.music.presenter.impl.MainPresenter;
 import com.example.ningyuwen.music.util.FastBlurUtil;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
@@ -64,6 +67,7 @@ import com.example.ningyuwen.music.view.activity.i.IMainActivity;
 import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
 import com.example.ningyuwen.music.view.adapter.AllMusicInfoAdapter;
 import com.example.ningyuwen.music.view.adapter.MainFragmentAdapter;
+import com.example.ningyuwen.music.view.adapter.SearchResultAdapter;
 import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.ClassifyMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
@@ -95,6 +99,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private static ArrayList<Fragment> mFragments;
     private ImageView mIvBg;
     private TabLayout mTabLayout;
+    public static final String NOTIFICATION_CHANNEL_ID = "4655";
+    private List<Map<String, Object>> List = new ArrayList<>(); ;
     private int alert_finish = -1;
 
 
@@ -108,7 +114,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
     private ImageView mbtn_Search;
     private LinearLayout left;    //左边layout侧滑栏
-    private static MusicProgressDialog mMusicProgressDialog;    //progressbar的dialog
+    private EditText mSearchEdt;
+    private TextView mTextTitle;
+    private ListView mSearchList;
+    private static MusicProgressDialog mMusicProgressDialog;
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -481,6 +490,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
         mMainCardView = (RelativeLayout)findViewById(R.id.cv_show_state_lyric) ;
         mbtn_Search = findViewById(R.id.iv_bar_search);
+        mSearchEdt = findViewById(R.id.search_edt);
+        //mSearch.setBackground();设置背景色
+        mTextTitle = findViewById(R.id.tv_bar_prompt);
+
 
 
         findViewById(R.id.iv_bar_search).setOnClickListener(new View.OnClickListener() {
@@ -574,26 +587,112 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mbtn_Search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                View contentview = LayoutInflater.from(MainActivity.this).
-                        inflate(R.layout.layout_popsearch,null);
-                SearchMusicPopWindow popupWindow = new SearchMusicPopWindow(MainActivity.this,
-                        contentview,850,900,true);
-//                ListView list = contentview.findViewById(R.id.search_list);
-//                list.setAdapter(new ArrayAdapter<String>(MainActivity.this,
-//                        android.R.layout.simple_expandable_list_item_1,popupWindow.HotMusicdata));
-                popupWindow.showAtLocation(LayoutInflater.from(MainActivity.this).
-                        inflate(R.layout.activity_main,null), Gravity.CENTER_VERTICAL,0,0);
-//                MusicApplication.getFixedThreadPool().execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        //重新导入音乐数据，查看权限并扫描SD卡
-////                        getReadPermissionAndGetInfoFromSD();
-//                        //发广播，更新四个fragment里面的数据
-////                        sendBroadcast(new Intent("RefreshMusicData"));
-//                    }
-//                });
+                mSearchEdt.setVisibility(View.VISIBLE);
+                mSearchEdt.setFocusable(true);
+                mbtn_Search.setVisibility(View.GONE);
+                mTextTitle.setVisibility(View.GONE);
             }
         });
+
+        View contentView = LayoutInflater.from(MainActivity.this).inflate(R.layout.layout_popsearch,null);
+        mSearchList = contentView.findViewById(R.id.search_list);
+        final SearchMusicPopWindow musicResult = new SearchMusicPopWindow(MainActivity.this,contentView,
+                900,400,true);
+        final java.util.List<MusicBasicInfo>[] searchResult = new List[]{new ArrayList<>()};
+        final SearchResultAdapter adapter = new SearchResultAdapter(searchResult[0],MainActivity.this);
+        mSearchList.setAdapter(adapter);
+
+        mSearchEdt.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                Log.e(TAG, "beforeTextChanged: "+s);
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                Log.e(TAG, "onTextChanged: "+s);
+//                List<MusicBasicInfo> searchResult=mPresenter.searchMusic(String.valueOf(s));
+//                if(searchResult!=null&&searchResult.size()!=0){
+//                    View contentView = LayoutInflater.from(MainActivity.this).inflate(R.layout.layout_popsearch,null);
+//                    SearchMusicPopWindow musicResult = new SearchMusicPopWindow(MainActivity.this,contentView,
+//                    900,400,true);
+//                    SearchResultAdapter adapter = new SearchResultAdapter(searchResult);
+//                    mSearchList.setAdapter(adapter);
+//                    musicResult.showAsDropDown(mSearchEdt);
+//                }
+                searchResult[0] = new ArrayList<>();
+                searchResult[0] =mPresenter.searchMusic(String.valueOf(s));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                Log.e(TAG, "afterTextChanged: "+s);
+                Log.e(TAG, "searchResult: "+ searchResult[0]);
+                if(s!=null&&!s.equals("")) {
+                    if (searchResult[0] != null && searchResult[0].size() != 0) {
+                        adapter.setListData(searchResult[0]);
+                        Log.e(TAG, "adapter " + adapter);
+                        musicResult.showAsDropDown(mSearchEdt);
+//                        mSearchList = contentView.findViewById(R.id.search_list);
+//                        mSearchList.setAdapter(adapter);
+                    }
+                }
+
+            }
+        });
+
+//        mSearch.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+//            List<MusicData> searchMusic = mPresenter.getMusicBasicInfoFromDB();
+//            ArrayList<String> music_name = new ArrayList<String>();//歌名
+//            ArrayList<String> music_player = new ArrayList<String>();//演唱者
+//            int favourite = R.mipmap.ic_love;
+//            int unFavourite = R.mipmap.ic_not_love;
+//            List<Map<String,String>> result = new ArrayList<Map<String,String>>();
+//            View contentView = LayoutInflater.from(MainActivity.this).inflate(R.layout.layout_popsearch,null);
+//            SearchMusicPopWindow musicResult = new SearchMusicPopWindow(MainActivity.this,contentView,
+//                    900,400,true);
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                if(searchMusic.size()!=0){
+//                    int i =0;
+//                    while(searchMusic.get(i)!=null){
+//                        if((searchMusic.get(i).getMusicName().contains(newText)&&newText!=null)||
+//                                (searchMusic.get(i).getMusicPlayer().contains(newText)&&newText!=null)){
+//                            music_name.add(searchMusic.get(i).getMusicName());
+//                            music_player.add(searchMusic.get(i).getMusicPlayer());
+//                            Map<String,String> item = new HashMap<String,String>();
+//                            item.put("name",searchMusic.get(i).getMusicName());
+//                            item.put("player",searchMusic.get(i).getMusicPlayer());
+//                            if(searchMusic.get(i).isLove()){
+//                                item.put("like", String.valueOf(favourite));
+//                            }else item.put("like", String.valueOf(unFavourite));
+//                            result.add(item);
+//                            //输入了歌曲和演唱者的关键字
+//                        }
+//                        i++;
+//                        if(i==searchMusic.size())break;
+//                    }
+//
+//                    if(result!=null&&!newText.equals("")){
+//                        SimpleAdapter adapter = new SimpleAdapter(MainActivity.this,
+//                                result,
+//                                R.layout.item_search,
+//                                new String[] {"name","player","like"},
+//                                new int[]{R.id.search_music_name,R.id.search_music_player,R.id.search_islove});
+//
+//                    }
+//                    musicResult.showAsDropDown(mSearch);
+//                }
+//                return false;
+//            }
+//        });
     }
 
     private int mDialogCheckPosition = -1;      //定时关闭的位置
@@ -633,7 +732,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                         //取消定时关闭任务
                         mDialogAppCloseTime = 0;
                         MusicApplication.getCloseAppThreadPool().shutdownNow();
-                        showToast(mIvBg, "定时关闭任务已取消");
+                        showToast(mIvBg, "定时关闭任务以取消");
                         return;
                     }
                     mDialogCheckPosition = alert_finish;

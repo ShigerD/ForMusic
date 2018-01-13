@@ -134,4 +134,18 @@ public class MainPresenter extends BasePresenter<MainActivity>
         }
     }
 
+    @Override
+    public List<MusicData> getMusicBasicInfoFromDB() {
+        return super.getMusicBasicInfoFromDB();
+    }
+
+    public List<MusicBasicInfo> searchMusic(String musicInfo){
+        List<MusicBasicInfo> basicInfos = mDaoSession.getMusicBasicInfoDao().queryBuilder().where(MusicBasicInfoDao.Properties.
+                MusicName.like("%"+musicInfo+"%")).list();
+        if(basicInfos == null || basicInfos.size() == 0){
+            return new ArrayList<>();
+        }
+        return basicInfos;
+    }
+
 }

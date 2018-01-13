@@ -28,7 +28,6 @@ import java.util.Objects;
 
 public class SearchMusicPopWindow extends PopupWindow {
     private View mViewSearch;
-    private SearchView mSearchView;
     private Button btn_backButton;
     private ListView mListSearch;
 //    public List<String> HotMusicdata=new ArrayList<>();
@@ -45,10 +44,8 @@ public class SearchMusicPopWindow extends PopupWindow {
 
         mViewSearch = contentView;
         mViewSearch.findViewById(R.layout.layout_popsearch);
-        mSearchView = mViewSearch.findViewById(R.id.search_view);
         mListSearch = mViewSearch.findViewById(R.id.search_list);
 //        setMyAdapter();
-        mSearchView.setIconifiedByDefault(false);
 //        mListSearch.setAdapter(new ArrayAdapter<String>(context,
 //                android.R.layout.simple_expandable_list_item_1,list));
 
@@ -56,37 +53,37 @@ public class SearchMusicPopWindow extends PopupWindow {
     }
 
     private void setMusicNameListener() {
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                //newText得到的字符
-                list.clear();
-                if(SQL_music!=null){
-                    int i =0;
-                    while(SQL_music.get(i)!=null){
-                        if(SQL_music.get(i).getMusicName().contains(newText)&&!newText.equals("")){
-                            Log.e("musicname", "onQueryTextChange: "+SQL_music.get(i).getMusicName());
-                            list.add(SQL_music.get(i).getMusicName());
-                        }
-                        i++;
-                        if(i==SQL_music.size())break;
-                    }
-                    if (list!=null&&!newText.equals("")){
-                        Log.e("musicname", "onQueryTextChange: "+1);
-                        mListSearch.setAdapter(new ArrayAdapter<String>(mContext,
-                                android.R.layout.simple_expandable_list_item_1,list));
-                    }else return false;
-                }
-                return false;
-            }
-
-
-        });
+//        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                //newText得到的字符
+//                list.clear();
+//                if(SQL_music!=null){
+//                    int i =0;
+//                    while(SQL_music.get(i)!=null){
+//                        if(SQL_music.get(i).getMusicName().contains(newText)&&!newText.equals("")){
+//                            Log.e("musicname", "onQueryTextChange: "+SQL_music.get(i).getMusicName());
+//                            list.add(SQL_music.get(i).getMusicName());
+//                        }
+//                        i++;
+//                        if(i==SQL_music.size())break;
+//                    }
+//                    if (list!=null&&!newText.equals("")){
+//                        Log.e("musicname", "onQueryTextChange: "+1);
+//                        mListSearch.setAdapter(new ArrayAdapter<String>(mContext,
+//                                android.R.layout.simple_expandable_list_item_1,list));
+//                    }else return false;
+//                }
+//                return false;
+//            }
+//
+//
+//        });
     }
 
 
@@ -101,12 +98,16 @@ public class SearchMusicPopWindow extends PopupWindow {
 //        }
 //    }
 
-    @SuppressLint("ResourceType")
+//    @SuppressLint("ResourceType")
+//    @Override
+//    public void showAtLocation(View parent, int gravity, int x, int y) {
+//        super.showAtLocation(parent, gravity, x, y);
+//
+//    }
+
+
     @Override
-    public void showAtLocation(View parent, int gravity, int x, int y) {
-        super.showAtLocation(parent, gravity, x, y);
-        
+    public void showAsDropDown(View anchor) {
+        super.showAsDropDown(anchor);
     }
-
-
 }

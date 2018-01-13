@@ -46,6 +46,8 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     private List<MusicData> mAllMusicDatas;
     private RecyclerView mRvAllMusicInfo;
     private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
+
+
     private AllMusicInfoAdapter mAdapter;   //adapter
     private static boolean shouldRefresh = false;   //是否需要刷新
     private View allMusicFragmentView;      //根布局
@@ -288,4 +290,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
 
     }
 
+    public List<MusicData> getmAllMusicDatas() {
+        return mAllMusicDatas;
+    }
 }
