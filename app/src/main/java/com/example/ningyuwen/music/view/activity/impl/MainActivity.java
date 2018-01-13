@@ -110,7 +110,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private PlayPauseView mPlayPauseView;   //播放暂停按钮
     private BroadcastReceiver mReceiver;
     private PlayMusicPopupWindow mPlayMusicPopupWindow;  //播放页面
-    private CardView mMainCardView; //cardview
+    private RelativeLayout mMainCardView; //cardview
 
     private ImageView mbtn_Search;
     private LinearLayout left;    //左边layout侧滑栏
@@ -251,6 +251,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         //处理得到模糊效果的图
         int scaleRatio = 5;
         int blurRadius = 8;
+        assert initBitmap != null;
         initBitmap = Bitmap.createScaledBitmap(initBitmap,
                 initBitmap.getWidth() / scaleRatio,
                 initBitmap.getHeight() / scaleRatio,
@@ -480,7 +481,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
         mPlayPauseView = (PlayPauseView) findViewById(R.id.iv_music_pic);
 
-        mMainCardView = (CardView)findViewById(R.id.cv_show_state_lyric) ;
+        mMainCardView = (RelativeLayout)findViewById(R.id.cv_show_state_lyric) ;
         mbtn_Search = findViewById(R.id.iv_bar_search);
 
 
@@ -634,10 +635,12 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                         //取消定时关闭任务
                         mDialogAppCloseTime = 0;
                         MusicApplication.getCloseAppThreadPool().shutdownNow();
+                        showToast(mIvBg, "定时关闭任务以取消");
                         return;
                     }
                     mDialogCheckPosition = alert_finish;
                     mDialogAppCloseTime = System.currentTimeMillis() + num[alert_finish] * 1000;    //记录结束时间
+                    showToast(mIvBg, "软件将在" + choices[alert_finish] + "后关闭");
                     MusicApplication.getCloseAppThreadPool().execute(new Runnable() {
                         @Override
                         public void run() {

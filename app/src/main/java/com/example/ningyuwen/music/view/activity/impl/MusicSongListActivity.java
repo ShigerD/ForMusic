@@ -97,10 +97,10 @@ public class MusicSongListActivity extends BaseActivity<MusicSongListPresenter> 
             public void onClick(View v) {
                 //播放全部，删除之前的歌单信息，添加新的歌单信息，
                 //前提是本歌单中存在音乐.
-                BaseActivity.MUSIC_LIST_PLAY_NOW = StaticFinalUtil.HANDLER_SHOW_CUSTOM;
-                if (mMusicDatas.size() == 0){
+                if (mMusicDatas == null || mMusicDatas.size() == 0){
                     return;
                 }
+                BaseActivity.MUSIC_LIST_PLAY_NOW = StaticFinalUtil.HANDLER_SHOW_CUSTOM;
                 showToast(v, "开始播放歌单：《" + mSongListName + "》");
                 //修改BaseActivity中的mMusicDatas数据
                 if (BaseActivity.mMusicDatas == null){
