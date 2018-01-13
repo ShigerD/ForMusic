@@ -19,6 +19,12 @@ public class ChangeBackActivity extends AppCompatActivity implements IChangeBack
         ImageView backImg1 = findViewById(R.id.back1);
         ImageView backImg2 = findViewById(R.id.back2);
         ImageView backImg3 = findViewById(R.id.back3);
+        findViewById(R.id.iv_back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         backImg1.setOnClickListener(this);
         backImg2.setOnClickListener(this);

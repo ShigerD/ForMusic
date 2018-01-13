@@ -30,18 +30,23 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -90,10 +95,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private ImageView mIvBg;
     private TabLayout mTabLayout;
     public static final String NOTIFICATION_CHANNEL_ID = "4655";
-//    private CircleImageView mCircleUserHead;//用户原型头像
-//    private TextView mTextNickName;//用户昵称
-//    private TextView mTextSign;//用户签名
-    private ListView mListDrawer;//侧滑菜单item
     private List<Map<String, Object>> List = new ArrayList<>(); ;
     private String[] item_name= {"主题换肤","关于开发者","计时关闭","退出"};
     private int[] item_icon = {R.drawable.ic_backgroudstyle,
@@ -112,6 +113,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private CardView mMainCardView; //cardview
 
     private ImageView mbtn_Search;
+    private LinearLayout left;    //左边layout侧滑栏
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -131,37 +133,12 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         initPage();
         //默认第一页
         mMainViewPager.setCurrentItem(0);
-        //drawerlayout
-        initdrawer();
 
         //线程池，添加一个任务
         MusicApplication.getFixedThreadPool().execute(runnable);
 
 //        sendNotification();
         setBroadCastReceiver();
-    }
-
-    /**
-     * 设置ListView的adaptter
-     */
-    private void initdrawer() {
-//        List<Map<String, Object>> List = new ArrayList<>(); ;
-//        int resouces = R.layout.item_drawer;
-//        String[] from= {"主题换肤","关于开发者","计时关闭","退出"};
-//        int[] to = {R.drawable.ic_backgroudstyle,
-//                R.drawable.ic_aboutus,
-//                R.drawable.ic_timer,
-//                R.drawable.ic_exit};
-        for (int i = 0;i<item_name.length;i++){
-            Map<String,Object> item = new HashMap<String, Object>();
-            item.put("name",this.item_name[i]);//item text
-            item.put("icon",this.item_icon[i]);//item_image
-            this.List.add(item);
-        }
-        SimpleAdapter adapter = new SimpleAdapter(this,this.List,R.layout.item_drawer,
-                new String[] {"name","icon"},new int[] {R.id.drawerlist_text,R.id.drawerlist_icon});
-        mListDrawer.setAdapter(adapter);
-
     }
 
     /**
@@ -201,28 +178,29 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
      */
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        SharedPreferences preferences = getSharedPreferences("backImg",Context.MODE_PRIVATE);
         switch(requestCode){
             case 1:
                 if(resultCode == RESULT_OK){
                     //得到返回的更换后的背景图片
                     String returnBackImg = data.getStringExtra("backImg");
 
-                    //开始设置新的背景图
-                    Bitmap initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_main_bg));;
+                    Bitmap initBitmap = null;
                     switch(returnBackImg){
                         case "pic_change_bg1":
                             initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg1));
-                            preferences.edit().putInt("backImgId",1).apply();
+                            left.setBackgroundResource(R.drawable.pic_change_bg1);
                             break;
                         case "pic_change_bg2":
                             initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg2));
-                            preferences.edit().putInt("backImgId",2).apply();
+                            left.setBackgroundResource(R.drawable.pic_change_bg2);
                             break;
                         case "pic_change_bg3":
                             initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg3));
-                            preferences.edit().putInt("backImgId",3).apply();
+                            left.setBackgroundResource(R.drawable.pic_change_bg3);
+                            break;
+                        default:
+                            initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_main_bg));
+                            left.setBackgroundResource(R.drawable.pic_main_bg);
                             break;
                     }
 
@@ -250,18 +228,23 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         SharedPreferences preferences = getSharedPreferences("backImg",Context.MODE_PRIVATE);
         int imgId = preferences.getInt("backImgId",0);
 
-        Bitmap initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_main_bg));
+        Bitmap initBitmap = null;
         switch(imgId){
             case 0:
+                initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_main_bg));
+                left.setBackgroundResource(R.drawable.pic_main_bg);
                 break;
             case 1:
                 initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg1));
+                left.setBackgroundResource(R.drawable.pic_change_bg1);
                 break;
             case 2:
                 initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg2));
+                left.setBackgroundResource(R.drawable.pic_change_bg2);
                 break;
             case 3:
                 initBitmap = FastBlurUtil.drawableToBitmap(getResources().getDrawable(R.drawable.pic_change_bg3));
+                left.setBackgroundResource(R.drawable.pic_change_bg3);
                 break;
         }
 
@@ -450,10 +433,45 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
     private void findView() {
         mDrawerMenu = (DrawerLayout) findViewById(R.id.dr_main);              //侧滑菜单布局
+        left = (LinearLayout) findViewById(R.id.ll_drawer);
+        final RelativeLayout right = (RelativeLayout) findViewById(R.id.rl_main);
+        findViewById(R.id.rl_main).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(mDrawerMenu.isShown()){
+                    return left.dispatchTouchEvent(event);
+                }else{
+                    return false;
+                }
+            }
+        });
+        mDrawerMenu.setDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                //获取屏幕的宽高
+                WindowManager manager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+                Display display = manager.getDefaultDisplay();
+                //设置右面的布局位置  根据左面菜单的right作为右面布局的left   左面的right+屏幕的宽度（或者right的宽度这里是相等的）为右面布局的right
+                right.layout(left.getRight(), 0, left.getRight() + display.getWidth(), display.getHeight());
+            }
+            @Override
+            public void onDrawerOpened(View drawerView) {
+
+            }
+            @Override
+            public void onDrawerClosed(View drawerView) {
+
+            }
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
+
 //        mCircleUserHead = findViewById(R.id.ciecle_userHead);
 //        mTextNickName = findViewById(R.id.tv_nickName);
 //        mTextSign = findViewById(R.id.tv_userSign);
-        mListDrawer = findViewById(R.id.ls_drawer);
+//        mListDrawer = findViewById(R.id.ls_drawer);
 
         mTvMusicName = (TextView) findViewById(R.id.tv_music_name);
         mTvMusicLyric = (TextView) findViewById(R.id.tv_music_lyric);
@@ -488,6 +506,26 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             @Override
             public void onClick(View view) {
                 mDrawerMenu.openDrawer(GravityCompat.START);
+            }
+        });
+        findViewById(R.id.tv_close_app).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //关闭app
+                sendBroadcast(new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
+            }
+        });
+        findViewById(R.id.tv_close_app_time).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setTimerDialog();
+            }
+        });
+        findViewById(R.id.tv_change_kin).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(new Intent().setClass(MainActivity.this,
+                        ChangeBackActivity.class), 1);
             }
         });
         mMainCardView.setOnClickListener(this);
@@ -534,29 +572,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             }
         });
 
-        mListDrawer.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                switch (position){
-                    case 0:
-                        //主题换肤
-                        Intent intent = new Intent(MainActivity.this,ChangeBackActivity.class);
-                        startActivityForResult(intent,1);
-                        break;
-                    case 1:
-                        //developer
-                        break;
-                    case 2:
-                        //timer
-                        setTimerDialog();
-                        break;
-                    case 3:
-                        //exit
-                        break;
-                }
-            }
-        });
-
         mbtn_Search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -582,12 +597,15 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         });
     }
 
+    private int mDialogCheckPosition = -1;      //定时关闭的位置
+    private long mDialogAppCloseTime = 0;       //定时关闭结束时间
+
     /**
      * 定时关闭的弹窗
      */
     private void setTimerDialog() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        final String[] choices = {"5分钟","10分钟","15分钟","30分钟","60分钟","自定义"};
+        final String[] choices = {"5分钟","10分钟","15分钟","30分钟","60分钟","取消定时关闭任务"};
         final int[] num = {300,600,900,1800,3600};
 
         Intent intent = new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP);
@@ -595,41 +613,66 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                 0, intent, 0);
         final AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-
-        alert.setTitle("定时停止播放");
-        alert.setSingleChoiceItems(choices, -1, new DialogInterface.OnClickListener() {
+        alert.setSingleChoiceItems(choices, mDialogCheckPosition, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(which==5){
-                    //跳转自定义时间
-                }else if(which!=-1){
-                    alert_finish = which;
-                }
+                alert_finish = which;
             }
         });
-
-        alert.setNeutralButton("取消", new DialogInterface.OnClickListener() {
+        alert.setNegativeButton("取消", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
+                mDialogCheckPosition = -1;
             }
         });
-
         alert.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(alert_finish!=-1){
-                    am.setRepeating(AlarmManager.RTC_WAKEUP,
-                            System.currentTimeMillis(),
-                                num[alert_finish] * 1000,
-                            pi);
+                if(alert_finish != -1){
+                    if (alert_finish == 5){
+                        //取消定时关闭任务
+                        mDialogAppCloseTime = 0;
+                        MusicApplication.getCloseAppThreadPool().shutdownNow();
+                        return;
+                    }
+                    mDialogCheckPosition = alert_finish;
+                    mDialogAppCloseTime = System.currentTimeMillis() + num[alert_finish] * 1000;    //记录结束时间
+                    MusicApplication.getCloseAppThreadPool().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(num[alert_finish] * 1000);
+                                //关闭app
+                                sendBroadcast(new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                 }
                 dialog.dismiss();
             }
         });
+        final AlertDialog dialog = alert.create();
+        @SuppressLint("HandlerLeak") final Handler handler1 = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                switch (msg.what){
+                    case 0:
+                        if (dialog.isShowing()){
+                            //dislog在显示时，更新结束时间
+                            dialog.setTitle("剩余关闭App时间为：" + (mDialogAppCloseTime-System.currentTimeMillis())/1000 + "秒");
+                            sendEmptyMessageDelayed(0, 1000);
+                        }
+                        break;
+                }
+            }
+        };
 
-        AlertDialog Alert = alert.create();
-        Alert.show();
+        dialog.setTitle("定时停止播放");
+        dialog.show();
     }
 
     /**
@@ -929,6 +972,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         MusicApplication.getDiscSingleThreadPool().shutdownNow();
         MusicApplication.getFixedThreadPool().shutdownNow();
         MusicApplication.getSingleThreadPool().shutdownNow();
+        MusicApplication.getCloseAppThreadPool().shutdownNow();
     }
 
     /**

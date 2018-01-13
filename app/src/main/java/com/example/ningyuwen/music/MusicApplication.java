@@ -37,6 +37,7 @@ public class MusicApplication extends Application {
     private static ExecutorService fixedThreadPool;   //线程总数为3
     private static ExecutorService singleThreadPool;  //线程总数为1   显示歌词在使用
     private static ExecutorService mDiscSingleThreadPool;   //线程总数为1    播放页面的旋转动画使用
+    private static ExecutorService mSingleThreadPoolCloseApp;   //关闭app的线程池
 
     @Override
     public void onCreate() {
@@ -95,6 +96,18 @@ public class MusicApplication extends Application {
             mDiscSingleThreadPool = Executors.newSingleThreadExecutor();
         }
         return mDiscSingleThreadPool;
+    }
+
+    /**
+     * 关闭app,如果为空，直接新建，如果不为空，关闭之后再新建
+     * @return  线程池
+     */
+    public static ExecutorService getCloseAppThreadPool(){
+        if (mSingleThreadPoolCloseApp != null){
+            mSingleThreadPoolCloseApp.shutdownNow();
+        }
+        mSingleThreadPoolCloseApp = Executors.newSingleThreadExecutor();;
+        return mSingleThreadPoolCloseApp;
     }
 
     public static void exitApp(){
