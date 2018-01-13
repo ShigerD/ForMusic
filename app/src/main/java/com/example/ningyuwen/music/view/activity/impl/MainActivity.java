@@ -68,6 +68,7 @@ import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.ClassifyMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
+import com.example.ningyuwen.music.view.widget.MusicProgressDialog;
 import com.example.ningyuwen.music.view.widget.PlayMusicPopupWindow;
 import com.example.ningyuwen.music.view.widget.SearchMusicPopWindow;
 import com.freedom.lauzy.playpauseviewlib.PlayPauseView;
@@ -114,6 +115,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
     private ImageView mbtn_Search;
     private LinearLayout left;    //左边layout侧滑栏
+    private static MusicProgressDialog mMusicProgressDialog;    //progressbar的dialog
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -135,6 +137,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mMainViewPager.setCurrentItem(0);
 
         //线程池，添加一个任务
+        mMusicProgressDialog = new MusicProgressDialog(this);
+        mMusicProgressDialog.show();
         MusicApplication.getFixedThreadPool().execute(runnable);
 
 //        sendNotification();
@@ -411,6 +415,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                     break;
                 case StaticFinalUtil.HANDLER_REFRESH_MUSIC:
                     ((IMainActivityToFragment)mFragments.get(0)).refreshAllMusic();
+                    mMusicProgressDialog.dismiss();
 //                    ((IMainActivityToFragment)mFragments.get(1)).refreshAllMusic();
 //                    ((IMainActivityToFragment)mFragments.get(2)).refreshAllMusic();
 //                    ((IMainActivityToFragment)mFragments.get(3)).refreshAllMusic();

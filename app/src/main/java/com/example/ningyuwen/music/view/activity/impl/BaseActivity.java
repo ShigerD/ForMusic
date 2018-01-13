@@ -206,7 +206,6 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
      */
     public void getMusicInfoFromSD() {
         mMusicDatas.clear();
-
         //查询媒体数据库
         Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         //遍历媒体数据库

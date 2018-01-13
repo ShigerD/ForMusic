@@ -5,6 +5,7 @@ import android.util.Log;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
+import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.model.entity.music.MusicRecordInfo;
 import com.example.ningyuwen.music.presenter.i.IMainPresenter;
@@ -13,6 +14,7 @@ import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import java.util.ArrayList;
 import java.util.List;
 
+import greendao.gen.MusicBasicInfoDao;
 import greendao.gen.SongListInfoDao;
 
 /**
