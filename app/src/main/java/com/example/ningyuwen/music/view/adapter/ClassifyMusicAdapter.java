@@ -95,6 +95,7 @@ public class ClassifyMusicAdapter extends BaseExpandableListAdapter {
         }
         ChildViewHolder holder = new ChildViewHolder();
         holder.mIvPlayStatus = (ImageView) convertView.findViewById(R.id.item_play_status);
+//        holder.mIvPlayStatus.setId(childPosition);
 //        holder.mIvPlayStatus.setBackgroundResource(getChild(groupPosition,
 //                childPosition).getImageId());
         holder.mChildMusicName = (TextView) convertView.findViewById(R.id.item_music_name);
