@@ -28,6 +28,8 @@
         android:layout_height="50dp"
         android:textSize="20sp"
         android:textColor="#FFF"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:layout_marginStart="5dp"
         android:layout_toEndOf="@id/iv_play_state"
         android:layout_toStartOf="@id/iv_is_love"

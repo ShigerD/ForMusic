@@ -449,6 +449,15 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
     }
 
     /**
+     * 从数据库中取出数据，根据pid
+     * @param pid pid
+     * @return musicdata
+     */
+    public MusicData getDataFromPidFromDB(long pid){
+        return mPresenter.getMusicDataFromPid(mPresenter.getMusicDataUsePid(pid));
+    }
+
+    /**
      * 初始化Service的数据，使用接口回调
      */
     public void initServiceData() throws NullPointerException{
