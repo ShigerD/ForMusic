@@ -16,7 +16,7 @@
         android:id="@+id/group_name"
         android:layout_marginStart="30dp"
         android:layout_height="40dp"
-        android:textSize="22sp"
+        android:textSize="18sp"
         android:maxLines="1"
         android:ellipsize="end"
         android:layout_width="match_parent"

@@ -20,6 +20,7 @@ public class ChangeBackActivity extends AppCompatActivity implements IChangeBack
         ImageView backImg1 = findViewById(R.id.back1);
         ImageView backImg2 = findViewById(R.id.back2);
         ImageView backImg3 = findViewById(R.id.back3);
+        ImageView backImg4 = findViewById(R.id.back4);
         findViewById(R.id.iv_back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -30,6 +31,7 @@ public class ChangeBackActivity extends AppCompatActivity implements IChangeBack
         backImg1.setOnClickListener(this);
         backImg2.setOnClickListener(this);
         backImg3.setOnClickListener(this);
+        backImg4.setOnClickListener(this);
     }
 
     @Override
@@ -59,7 +61,14 @@ public class ChangeBackActivity extends AppCompatActivity implements IChangeBack
                 setResult(RESULT_OK,intent3);
                 finish();
                 break;
-
+            case R.id.back4:
+                //把背景设置成默认背景;
+                getSharedPreferences("backImg", Context.MODE_PRIVATE).edit().putInt("backImgId",0).apply();
+                Intent intent4 = new Intent();
+                intent4.putExtra("backImg","pic_main_bg");
+                setResult(RESULT_OK,intent4);
+                finish();
+                break;
         }
     }
 

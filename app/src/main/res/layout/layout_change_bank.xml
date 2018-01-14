@@ -85,6 +85,16 @@
                 android:src="@drawable/pic_change_bg3"
                 android:id="@+id/back3"/>
 
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="270dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="18dp"
+                android:layout_below="@id/back2"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/pic_main_bg"
+                android:id="@+id/back4"/>
+
         </RelativeLayout>
 
     </ScrollView>

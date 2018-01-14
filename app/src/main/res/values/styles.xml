@@ -18,7 +18,7 @@
 
     <!--解决启动页白屏-->
     <style name="AppWelcome" parent="AppTheme">
-        <item name="android:windowBackground">@drawable/pic_main_bg</item>
+        <item name="android:windowBackground">@drawable/pic_main_bg_start_page</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>

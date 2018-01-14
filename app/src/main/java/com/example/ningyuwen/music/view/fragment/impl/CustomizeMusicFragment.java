@@ -125,13 +125,15 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
      */
     @Override
     public void jumpSongList(SongListInfo info) {
-
-        startActivity(new Intent(mContext, MusicSongListActivity.class)
-                .putExtra("name", info.getName())
-                .putExtra("picUrl",info.getSonglistImgUrl())
-                .putExtra("number",info.getNumber())
-                .putExtra("id",info.getId()));
-
+        try {
+            startActivity(new Intent(mContext, MusicSongListActivity.class)
+                    .putExtra("name", info.getName())
+                    .putExtra("picUrl",info.getSonglistImgUrl())
+                    .putExtra("number",info.getNumber())
+                    .putExtra("id",info.getId()));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**

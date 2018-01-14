@@ -598,6 +598,13 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         playMusic(mCurrentTime);
     }
 
+    @Override
+    public void cancelNotification(boolean exit) {
+        if (mNotificationManager != null) {
+            mNotificationManager.cancel(1);
+        }
+    }
+
     /**
      * 返回MyBinder对象，在MainActivity中使用bindService之后监听连接成功可以获取IBinder对象，转为MyBinder类型，
      * 再获取PlayMusicService实例，赋值给 ServiceDataTrans
