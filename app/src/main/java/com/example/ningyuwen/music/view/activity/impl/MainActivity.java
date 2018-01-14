@@ -178,6 +178,15 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         }
     };
 
+    /**
+     * 隐藏edittext
+     * @param gone
+     */
+    public void setEditTextGone(int gone){
+        mSearchEdt.setVisibility(gone);
+        mbtn_Search.setVisibility(View.VISIBLE);
+    }
+
     @Override
     /**
      * 回调后执行
@@ -512,6 +521,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             }
         });
     }
+    boolean isclick = false;//监听搜索框
 
     private void setListener() {
         findViewById(R.id.iv_bar_slide).setOnClickListener(new View.OnClickListener() {
@@ -587,10 +597,23 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mbtn_Search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSearchEdt.setVisibility(View.VISIBLE);
-                mSearchEdt.setFocusable(true);
-                mbtn_Search.setVisibility(View.GONE);
-                mTextTitle.setVisibility(View.GONE);
+                ;
+                Log.e(TAG, "onClick: "+isclick);
+                if(isclick){
+                    mSearchEdt.clearFocus();
+                    mSearchEdt.setVisibility(View.GONE);
+                    mbtn_Search.setVisibility(View.VISIBLE);
+                    mTextTitle.setVisibility(View.VISIBLE);
+                    mbtn_Search.setBackgroundResource(R.drawable.ic_searchp);
+                    isclick = false;
+                }else {
+                    mSearchEdt.setVisibility(View.VISIBLE);
+                    mSearchEdt.setFocusable(true);
+                    mSearchEdt.requestFocus();
+                    mbtn_Search.setBackgroundResource(R.drawable.ic_close_app);
+                    mTextTitle.setVisibility(View.GONE);
+                    isclick = true;
+                }
             }
         });
 
@@ -613,6 +636,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 Log.e(TAG, "onTextChanged: "+s);
+                searchResult[0] = new ArrayList<>();
+                searchResult[0] =mPresenter.searchMusic(String.valueOf(s));
 //                List<MusicBasicInfo> searchResult=mPresenter.searchMusic(String.valueOf(s));
 //                if(searchResult!=null&&searchResult.size()!=0){
 //                    View contentView = LayoutInflater.from(MainActivity.this).inflate(R.layout.layout_popsearch,null);
@@ -651,56 +676,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             }
         });
 
-//        mSearch.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
-//            List<MusicData> searchMusic = mPresenter.getMusicBasicInfoFromDB();
-//            ArrayList<String> music_name = new ArrayList<String>();//歌名
-//            ArrayList<String> music_player = new ArrayList<String>();//演唱者
-//            int favourite = R.mipmap.ic_love;
-//            int unFavourite = R.mipmap.ic_not_love;
-//            List<Map<String,String>> result = new ArrayList<Map<String,String>>();
-//            View contentView = LayoutInflater.from(MainActivity.this).inflate(R.layout.layout_popsearch,null);
-//            SearchMusicPopWindow musicResult = new SearchMusicPopWindow(MainActivity.this,contentView,
-//                    900,400,true);
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String newText) {
-//                if(searchMusic.size()!=0){
-//                    int i =0;
-//                    while(searchMusic.get(i)!=null){
-//                        if((searchMusic.get(i).getMusicName().contains(newText)&&newText!=null)||
-//                                (searchMusic.get(i).getMusicPlayer().contains(newText)&&newText!=null)){
-//                            music_name.add(searchMusic.get(i).getMusicName());
-//                            music_player.add(searchMusic.get(i).getMusicPlayer());
-//                            Map<String,String> item = new HashMap<String,String>();
-//                            item.put("name",searchMusic.get(i).getMusicName());
-//                            item.put("player",searchMusic.get(i).getMusicPlayer());
-//                            if(searchMusic.get(i).isLove()){
-//                                item.put("like", String.valueOf(favourite));
-//                            }else item.put("like", String.valueOf(unFavourite));
-//                            result.add(item);
-//                            //输入了歌曲和演唱者的关键字
-//                        }
-//                        i++;
-//                        if(i==searchMusic.size())break;
-//                    }
-//
-//                    if(result!=null&&!newText.equals("")){
-//                        SimpleAdapter adapter = new SimpleAdapter(MainActivity.this,
-//                                result,
-//                                R.layout.item_search,
-//                                new String[] {"name","player","like"},
-//                                new int[]{R.id.search_music_name,R.id.search_music_player,R.id.search_islove});
-//
-//                    }
-//                    musicResult.showAsDropDown(mSearch);
-//                }
-//                return false;
-//            }
-//        });
+
+
     }
 
     /**

@@ -63,6 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_marginStart="5dp"
                 android:layout_height="56dp"
+                android:layout_marginEnd="42dp"
                 android:visibility="gone"
                 />
 

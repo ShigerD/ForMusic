@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
+import android.webkit.RenderProcessGoneDetail;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -109,5 +110,11 @@ public class SearchMusicPopWindow extends PopupWindow {
     @Override
     public void showAsDropDown(View anchor) {
         super.showAsDropDown(anchor);
+    }
+
+    @Override
+    public void dismiss() {
+        ((MainActivity)mContext).setEditTextGone(View.GONE);
+        super.dismiss();
     }
 }
