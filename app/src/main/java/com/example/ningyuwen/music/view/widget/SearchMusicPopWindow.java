@@ -112,9 +112,9 @@ public class SearchMusicPopWindow extends PopupWindow {
         super.showAsDropDown(anchor);
     }
 
-    @Override
-    public void dismiss() {
-        ((MainActivity)mContext).setEditTextGone(View.GONE);
-        super.dismiss();
-    }
+//    @Override
+//    public void dismiss() {
+//        ((MainActivity)mContext).setEditTextGone(View.GONE);
+//        super.dismiss();
+//    }
 }

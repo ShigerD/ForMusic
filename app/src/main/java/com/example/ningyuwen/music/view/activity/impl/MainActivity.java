@@ -14,8 +14,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,29 +27,21 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.CardView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
-import android.widget.SearchView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.example.ningyuwen.music.MusicApplication;
@@ -59,13 +50,11 @@ import com.example.ningyuwen.music.model.entity.classify.ClassifyMusicPlayer;
 import com.example.ningyuwen.music.model.entity.customize.SongListInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
-import com.example.ningyuwen.music.presenter.impl.BasePresenter;
 import com.example.ningyuwen.music.presenter.impl.MainPresenter;
 import com.example.ningyuwen.music.util.FastBlurUtil;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.i.IMainActivity;
 import com.example.ningyuwen.music.view.activity.i.IMainActivityToFragment;
-import com.example.ningyuwen.music.view.adapter.AllMusicInfoAdapter;
 import com.example.ningyuwen.music.view.adapter.MainFragmentAdapter;
 import com.example.ningyuwen.music.view.adapter.SearchResultAdapter;
 import com.example.ningyuwen.music.view.fragment.impl.AllMusicFragment;
@@ -78,12 +67,9 @@ import com.example.ningyuwen.music.view.widget.SearchMusicPopWindow;
 import com.freedom.lauzy.playpauseviewlib.PlayPauseView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static com.example.ningyuwen.music.R.layout.support_simple_spinner_dropdown_item;
 
 /**
  * 主页面，音乐播放，扫描音乐等
@@ -99,7 +85,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private static ArrayList<Fragment> mFragments;
     private ImageView mIvBg;
     private TabLayout mTabLayout;
-    public static final String NOTIFICATION_CHANNEL_ID = "4655";
+//    public static final String NOTIFICATION_CHANNEL_ID = "4655";
     private List<Map<String, Object>> List = new ArrayList<>(); ;
     private int alert_finish = -1;
 
@@ -178,14 +164,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         }
     };
 
-    /**
-     * 隐藏edittext
-     * @param gone
-     */
-    public void setEditTextGone(int gone){
-        mSearchEdt.setVisibility(gone);
-        mbtn_Search.setVisibility(View.VISIBLE);
-    }
 
     @Override
     /**
@@ -600,7 +578,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                 ;
                 Log.e(TAG, "onClick: "+isclick);
                 if(isclick){
-                    mSearchEdt.clearFocus();
                     mSearchEdt.setVisibility(View.GONE);
                     mbtn_Search.setVisibility(View.VISIBLE);
                     mTextTitle.setVisibility(View.VISIBLE);
@@ -610,6 +587,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                     mSearchEdt.setVisibility(View.VISIBLE);
                     mSearchEdt.setFocusable(true);
                     mSearchEdt.requestFocus();
+                    mSearchEdt.setFocusableInTouchMode(true);
                     mbtn_Search.setBackgroundResource(R.drawable.ic_close_app);
                     mTextTitle.setVisibility(View.GONE);
                     isclick = true;
@@ -621,6 +599,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mSearchList = contentView.findViewById(R.id.search_list);
         final SearchMusicPopWindow musicResult = new SearchMusicPopWindow(MainActivity.this,contentView,
                 900,400,true);
+        musicResult.setFocusable(true);
+        musicResult.setTouchable(true);
+        musicResult.setBackgroundDrawable(new BitmapDrawable());
+        musicResult.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
         final java.util.List[] searchResult = new List[]{new ArrayList<>()};
         final SearchResultAdapter adapter = new SearchResultAdapter(searchResult[0],MainActivity.this);
         mSearchList.setAdapter(adapter);
@@ -630,6 +612,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 Log.e(TAG, "beforeTextChanged: "+s);
+                mSearchEdt.requestFocus();
 
             }
 
@@ -672,6 +655,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 //                        mSearchList.setAdapter(adapter);
                     }
                 }
+                mSearchEdt.requestFocus();
 
             }
         });
