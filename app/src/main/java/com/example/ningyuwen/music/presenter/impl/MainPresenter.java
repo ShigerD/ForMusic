@@ -61,6 +61,22 @@ public class MainPresenter extends BasePresenter<MainActivity>
     }
 
     /**
+     * 删除歌单
+     * @param pid pid
+     */
+    public void deleteMusicListFromId(long pid){
+        mDaoSession.getSongListInfoDao().deleteByKey(pid);
+    }
+
+    /**
+     * 编辑歌单
+     * @param songListInfo songListInfo
+     */
+    public void editMusicListFromId(SongListInfo songListInfo){
+        mDaoSession.getSongListInfoDao().insertOrReplace(songListInfo);
+    }
+
+    /**
      * 通过基本信息获取全部信息
      * @param basicInfo basicinfo
      * @return

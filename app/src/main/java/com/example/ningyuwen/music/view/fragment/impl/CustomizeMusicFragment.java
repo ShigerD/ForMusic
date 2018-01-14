@@ -1,5 +1,6 @@
 package com.example.ningyuwen.music.view.fragment.impl;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -138,11 +139,14 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
      * @param position position
      */
     @Override
-    public void addSongList(int position) {
+    public void addSongList(final int position, final String title) {
         View view = from(mContext).inflate(R.layout.layout_add_songlist, null);
         final EditText et = (EditText) view.findViewById(R.id.et_song_list);
         final TextView tv = (TextView) view.findViewById(R.id.tv_cha_number);
-
+        et.setText(title);
+        if (title.length() > 0){
+            et.setSelection(title.length());
+        }
         et.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -173,6 +177,16 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                //判断是否为编辑歌单
+                if (title.length() > 0){
+                    //编辑歌单
+                    mSongListInfos.get(position).setName(et.getText().toString());
+                    mAdapter.notifyDataSetChanged();
+                    ((MainActivity)mContext).editMusicListFromId(mSongListInfos.get(position));
+                    mPopupWindow.dismiss();
+                    return;
+                }
+
                 //判断数据库中是否存在名字相同的歌单，存在则不能添加
                 if ("".equals(et.getText().toString())){
                     ((MainActivity)mContext).showToast(mRvCustomizeMusic, "歌单名不能为空");
@@ -201,27 +215,53 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
      * 显示PopupWindow
      */
     @Override
-    public void showPopupWindow(String listName) {
+    public void showPopupWindow(int position, String listName) {
         if (mPopupWindow == null){
             mPopupWindow = new MusicPopupWindow(LayoutInflater.from(mContext)
-                    .inflate(R.layout.layout_music_popup_window, null),
+                    .inflate(R.layout.layout_edit_music_list, null),
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    600, true);
-
-            mPopupWindow.setTitle(listName);
-
-//            View view = LayoutInflater.from(getActivity()).inflate(R.layout.layout_music_popup_window,
-//                    (ViewGroup) customizeMusicFragment, false);
-//            mPopupWindow.setContentView(view);
-//            mPopupWindow.setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
-//            mPopupWindow.setHeight(DensityUtil.dip2px(getActivity(), 200));
+                    400, true, iPopupToCustomFragment);
             mPopupWindow.setOutsideTouchable(true);
+
         }
+        mPopupWindow.setClickPosition(position);
         mPopupWindow.setTitle(listName);
-//        mPopupWindow.showAsDropDown(mRvCustomizeMusic, Gravity.BOTTOM, 0, 0);
         mPopupWindow.showAtLocation(((MainActivity)mContext).findViewById(R.id.iv_main_activity_bg),
                 Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
     }
+
+    MusicPopupWindow.IPopupToCustomFragment iPopupToCustomFragment = new MusicPopupWindow.IPopupToCustomFragment() {
+        @Override
+        public void editMusicList(int position, String title) {
+            addSongList(position, title);
+        }
+
+        @Override
+        public void deleteMusicList(final int position, String title) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setTitle("删除歌单");
+            builder.setMessage("确定删除歌单《" + title + "》吗？");
+            builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    mPopupWindow.dismiss();
+                }
+            });
+            builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    //删除歌单
+                    ((MainActivity)mContext).deleteMusicListFromId(mSongListInfos.get(position).getId());
+                    mSongListInfos.remove(position);
+                    mAdapter.notifyDataSetChanged();
+                    mPopupWindow.dismiss();
+                }
+            });
+            Dialog dialog = builder.create();
+            dialog.show();
+        }
+    };
 
     /**
      * 刷新音乐列表，初始化时通知几个Fragment获取相应数据

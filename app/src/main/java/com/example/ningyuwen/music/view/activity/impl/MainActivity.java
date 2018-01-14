@@ -821,6 +821,22 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         }
     }
 
+    /**
+     * 删除歌单
+     * @param pid pid
+     */
+    public void deleteMusicListFromId(long pid){
+        mPresenter.deleteMusicListFromId(pid);
+    }
+
+    /**
+     * 删除歌单
+     * @param songListInfo songListInfo
+     */
+    public void editMusicListFromId(SongListInfo songListInfo){
+        mPresenter.editMusicListFromId(songListInfo);
+    }
+
     @Override
     public void showMusicInfoAtActivity(int what) {
         Message message = handler.obtainMessage();

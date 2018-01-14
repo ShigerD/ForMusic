@@ -107,7 +107,7 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
         holder.flAddPlayList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.addSongList(position);
+                listener.addSongList(position, "");
             }
         });
         holder.ivStatusPlay.setOnClickListener(new View.OnClickListener() {
@@ -115,7 +115,7 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
             public void onClick(View v) {
 //                ((MainActivity)mContext).showToast(holder.ivStatusPlay, "暂未开放此功能");
                 //弹出popupwindow
-                listener.showPopupWindow(getItem(position).getName());
+                listener.showPopupWindow(position, getItem(position).getName());
             }
         });
     }
@@ -131,8 +131,8 @@ public class CustomizeMusicAdapter extends RecyclerView.Adapter<CustomizeMusicAd
 
     public interface AddItemClickListener{
         void jumpSongList(SongListInfo info);     //跳转到歌单页面
-        void addSongList(int position); //添加歌单
-        void showPopupWindow(String listName);
+        void addSongList(int position,String title); //添加歌单
+        void showPopupWindow(int position, String listName);
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {

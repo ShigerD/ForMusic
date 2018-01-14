@@ -101,12 +101,12 @@ public class AddToPlaylistDialog extends Dialog implements CustomizeMusicAdapter
     }
 
     @Override
-    public void addSongList(int position) {
+    public void addSongList(int position, String title) {
 
     }
 
     @Override
-    public void showPopupWindow(String listName) {
+    public void showPopupWindow(int position, String listName) {
 
     }
 }
