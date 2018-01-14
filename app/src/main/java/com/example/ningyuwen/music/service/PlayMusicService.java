@@ -23,6 +23,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
@@ -236,12 +237,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         public void onReceive(Context context, Intent intent) {
 
             String action = intent.getAction();
-            if (action.equals(NOTIFICATION_ITEM_BUTTON_CLOSE)) {//----通知栏播放按钮响应事件
-                //关闭进程
-                mNotificationManager.cancel(1);
-                sendBroadcast(new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
-                stopSelf();
-            } else if (action.equals(NOTIFICATION_ITEM_BUTTON_PLAY)) {//----通知栏播放按钮响应事件
+            if (action.equals(NOTIFICATION_ITEM_BUTTON_PLAY)) {//----通知栏播放按钮响应事件
                 //播放或暂停
                 //播放按钮变为暂停
                 playOrPause();
@@ -261,6 +257,13 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 mPosition = (mPosition + 1) % mMusicIds.size();     //下一曲
                 refreshNotification();
                 playMusic(0);
+            }else if (action.equals(NOTIFICATION_ITEM_BUTTON_CLOSE)){
+                //关闭进程
+                mNotificationManager.cancel(1);
+                stopSelf();
+                mServiceDataToActivity.exitApp();
+//                sendBroadcast(new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
+//                MusicApplication.exitApp();
             }
             //监听电话拨打和接听
             Log.e("moneyReceiver", "onReceive: "+action );
@@ -404,6 +407,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         void refreshPlayPauseAnimation(boolean play);   //更新主页面的播放暂停动画
         void sendCompleteMsgToRefreshPop(int position);     //歌曲播放完成，向Activity发送通知，更新PopupWindow
         void calculateThisMusicIsAddCount(long playtime, long pid, int position);    //用于计数排序
+        void exitApp();
     }
 
     /**

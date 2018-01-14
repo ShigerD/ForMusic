@@ -242,10 +242,14 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 //结束触摸，开始播放,在此处设置Service的播放
-                Log.i(TAG, "onProgressChanged22: " + seekBar.getProgress());
-                BaseActivity.mServiceDataTrans.changePlayingTime(mMusicData.getMusicTime()/100
-                        * seekBar.getProgress());
-                shouldPauseChangeProgress = false;
+                try {
+                    shouldPauseChangeProgress = false;
+                    Log.i(TAG, "onProgressChanged22: " + seekBar.getProgress());
+                    BaseActivity.mServiceDataTrans.changePlayingTime(mMusicData.getMusicTime() / 100
+                            * seekBar.getProgress());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -255,12 +259,16 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         switch (v.getId()) {
             case R.id.ivLast:
                 //上一曲，根据播放模式变化
-                BaseActivity.mServiceDataTrans.playMusicFromClick(
-                        calculatePlayPosition(BaseActivity.mServiceDataTrans.getPlayPosition(), false));
-                mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
-                initData();
-                initUi(true);
-                setPlayActivityBg();
+                try {
+                    BaseActivity.mServiceDataTrans.playMusicFromClick(
+                            calculatePlayPosition(BaseActivity.mServiceDataTrans.getPlayPosition(), false));
+                    mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
+                    initData();
+                    initUi(true);
+                    setPlayActivityBg();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 break;
             case R.id.ivPlayOrPause:
                 //播放或者暂停
@@ -278,13 +286,17 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             case R.id.ivNext:
                 //下一曲，根据播放模式变化
                 //播放下一曲时，判断当前播放状态，给出播放位置
-                BaseActivity.mServiceDataTrans.playMusicFromClick(
-                        calculatePlayPosition(BaseActivity.mServiceDataTrans.getPlayPosition(), true));
-                //修改背景图片
-                mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
-                initData();
-                initUi(true);
-                setPlayActivityBg();
+                try {
+                    BaseActivity.mServiceDataTrans.playMusicFromClick(
+                            calculatePlayPosition(BaseActivity.mServiceDataTrans.getPlayPosition(), true));
+                    //修改背景图片
+                    mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
+                    initData();
+                    initUi(true);
+                    setPlayActivityBg();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 break;
             case R.id.iv_play_type:
                 //切换播放模式,三种模式，单曲循环，列表循环，随机播放

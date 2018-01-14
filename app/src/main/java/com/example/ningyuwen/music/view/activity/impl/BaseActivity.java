@@ -381,6 +381,15 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
                 }
             });
         }
+
+        /**
+         * 关闭app
+         */
+        @Override
+        public void exitApp() {
+            finish();
+            System.exit(0);
+        }
     };
 
     public void setIBaseActivityToPopupListener(IBaseActivityToPopup listener){

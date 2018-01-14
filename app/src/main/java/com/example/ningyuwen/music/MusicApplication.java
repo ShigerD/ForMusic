@@ -2,8 +2,10 @@ package com.example.ningyuwen.music;
 
 import android.app.Application;
 import android.app.Notification;
+import android.content.Intent;
 import android.util.Log;
 
+import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.crashreport.CrashReport;
