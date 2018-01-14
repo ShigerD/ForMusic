@@ -44,6 +44,10 @@ public class MainPresenter extends BasePresenter<MainActivity>
         return songListInfoList;
     }
 
+    /**
+     * 添加歌单到数据库
+     * @param info 歌单信息
+     */
     @Override
     public void addSongListToDB(SongListInfo info) {
         mDaoSession.getSongListInfoDao().insertOrReplace(info);
@@ -74,31 +78,6 @@ public class MainPresenter extends BasePresenter<MainActivity>
      */
     public void editMusicListFromId(SongListInfo songListInfo){
         mDaoSession.getSongListInfoDao().insertOrReplace(songListInfo);
-    }
-
-    /**
-     * 通过基本信息获取全部信息
-     * @param basicInfo basicinfo
-     * @return
-     */
-    public MusicData getMusicDataFromPid(MusicBasicInfo basicInfo){
-        MusicRecordInfo recordInfo = mDaoSession.getMusicRecordInfoDao().load(basicInfo.getPId());
-        MusicData data = new MusicData();
-        data.setpId(basicInfo.getPId());
-        data.setMusicName(basicInfo.getMusicName());
-        data.setMusicPlayer(basicInfo.getMusicPlayer());
-        data.setMusicAlbum(basicInfo.getMusicAlbum());
-        data.setMusicFilePath(basicInfo.getMusicFilePath());
-        data.setMusicTime(basicInfo.getMusicTime());
-        data.setMusicFileSize(basicInfo.getMusicFileSize());
-        data.setMusicAlbumPicUrl(basicInfo.getMusicAlbumPicUrl());
-        data.setMusicAlbumPicPath(basicInfo.getMusicAlbumPicPath());
-
-        //加上记录信息
-        data.setMusicPlayTimes(recordInfo.getMusicPlayTimes());
-        data.setLove(recordInfo.getIsLove());
-        data.setMusicSongList(recordInfo.getMusicSongList());
-        return data;
     }
 
     /**

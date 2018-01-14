@@ -96,7 +96,7 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
                         }
                     }else if ("add".equals(intent.getStringExtra("status"))){
                         //添加
-                        MusicData musicData = ((MainActivity)mContext).getDataFromPid(
+                        MusicData musicData = ((MainActivity)mContext).getDataFromPidFromDB(
                                 intent.getLongExtra("pid", 0));
                         if (musicData == null){
                             return;

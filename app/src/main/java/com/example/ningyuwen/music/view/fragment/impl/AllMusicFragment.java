@@ -210,7 +210,8 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     public void longClickMusicItem(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("歌曲:" + mAllMusicDatas.get(position).getMusicName());
-        String[] items = {"播放", "收藏到歌单", "分享音乐", "剪辑歌曲"};
+        String[] items = {"播放", "收藏到歌单"};
+//        String[] items = {"播放", "收藏到歌单", "分享音乐", "剪辑歌曲"};
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

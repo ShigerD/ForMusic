@@ -181,6 +181,31 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
     }
 
     /**
+     * 通过基本信息获取全部信息
+     * @param basicInfo basicinfo
+     * @return MusicData
+     */
+    public MusicData getMusicDataFromPid(MusicBasicInfo basicInfo){
+        MusicRecordInfo recordInfo = mDaoSession.getMusicRecordInfoDao().load(basicInfo.getPId());
+        MusicData data = new MusicData();
+        data.setpId(basicInfo.getPId());
+        data.setMusicName(basicInfo.getMusicName());
+        data.setMusicPlayer(basicInfo.getMusicPlayer());
+        data.setMusicAlbum(basicInfo.getMusicAlbum());
+        data.setMusicFilePath(basicInfo.getMusicFilePath());
+        data.setMusicTime(basicInfo.getMusicTime());
+        data.setMusicFileSize(basicInfo.getMusicFileSize());
+        data.setMusicAlbumPicUrl(basicInfo.getMusicAlbumPicUrl());
+        data.setMusicAlbumPicPath(basicInfo.getMusicAlbumPicPath());
+
+        //加上记录信息
+        data.setMusicPlayTimes(recordInfo.getMusicPlayTimes());
+        data.setLove(recordInfo.getIsLove());
+        data.setMusicSongList(recordInfo.getMusicSongList());
+        return data;
+    }
+
+    /**
      * 获取歌词数据
      * @param musicBasicInfo long pid
      * @return string
