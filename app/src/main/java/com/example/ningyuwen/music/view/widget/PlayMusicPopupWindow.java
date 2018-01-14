@@ -314,6 +314,10 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
     private void initMusicSongListPop() {
         mMusicSongListPopupWindow = new MusicSongListPopupWindow(mContext);
         mMusicSongListPopupWindow.setPopupWindowListener(this);
+        mMusicSongListPopupWindow.setFocusable(true); //该值为false时，点击弹窗框外面window不会消失，即使设置了背景也无效，只能由dismiss()关闭
+        mMusicSongListPopupWindow.setOutsideTouchable(true); //只有该值设置为true时，外层点击才有效
+        mMusicSongListPopupWindow.update();
+        mMusicSongListPopupWindow.setBackgroundDrawable(new BitmapDrawable());//只有设置背景之后在focsable为true时点击弹出框外面才会消失，
     }
 
     /**

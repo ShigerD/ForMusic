@@ -9,11 +9,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.presenter.i.IMusicSongListPresenter;
+import com.example.ningyuwen.music.util.StaticFinalUtil;
+import com.example.ningyuwen.music.view.activity.impl.BaseActivity;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import com.example.ningyuwen.music.view.adapter.MusicSongListItemAdapter;
+
+import org.w3c.dom.Text;
 
 /**
  * 播放页面显示歌单的popupwindow
@@ -27,6 +32,7 @@ public class MusicSongListPopupWindow extends PopupWindow implements
     private MusicSongListItemAdapter adapter;   //adapter
     private Context mContext;
     private IMusicSongPopToPlayPop mIMusicPopListener;  //监听
+    private TextView mTvMusicListNmae;      //歌单名
 
     public MusicSongListPopupWindow(Context context) {
 //        super(context);
@@ -73,6 +79,7 @@ public class MusicSongListPopupWindow extends PopupWindow implements
     public void setContentView(View contentView) {
         super.setContentView(contentView);
         adapter = new MusicSongListItemAdapter(contentView.getContext());
+        mTvMusicListNmae = contentView.findViewById(R.id.tv_playlist_name);
         mRvSongList = contentView.findViewById(R.id.rv_music_list_pop);
         mRvSongList.setLayoutManager(new LinearLayoutManager(contentView.getContext()));
         mRvSongList.setAdapter(adapter);
@@ -82,6 +89,17 @@ public class MusicSongListPopupWindow extends PopupWindow implements
     @Override
     public void showAtLocation(View parent, int gravity, int x, int y) {
         super.showAtLocation(parent, gravity, x, y);
+        if (BaseActivity.MUSIC_LIST_PLAY_NOW == StaticFinalUtil.MUSIC_LIST_PLAY_ALL_MUSIC){
+            mTvMusicListNmae.setText("歌单：所有音乐");
+        }else if (BaseActivity.MUSIC_LIST_PLAY_NOW == StaticFinalUtil.MUSIC_LIST_PLAY_CISTOM_LIST){
+            mTvMusicListNmae.setText("歌单：自定歌单");
+        }else if (BaseActivity.MUSIC_LIST_PLAY_NOW == StaticFinalUtil.MUSIC_LIST_PLAY_MYLOVE){
+            mTvMusicListNmae.setText("歌单：我喜爱的");
+        }else if (BaseActivity.MUSIC_LIST_PLAY_NOW == StaticFinalUtil.MUSIC_LIST_PLAY_CLASSIFY_PLAYER){
+            mTvMusicListNmae.setText("歌单：歌手分类");
+        }else if (BaseActivity.MUSIC_LIST_PLAY_NOW == StaticFinalUtil.MUSIC_LIST_PLAY_SEARCH_MUSIC){
+            mTvMusicListNmae.setText("歌单：搜索音乐");
+        }
         adapter.notifyDataSetChanged();
     }
 

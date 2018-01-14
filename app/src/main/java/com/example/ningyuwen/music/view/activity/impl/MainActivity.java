@@ -256,6 +256,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
     @Override
     public void showLyricOnActivity(long pid) {
+        refreshPlayPauseView(true);
         MusicBasicInfo musicBasicInfo = mPresenter.getMusicDataUsePid(pid);
         mTvMusicName.setText(musicBasicInfo.getMusicName());   // 显示音乐名
         String lyric = mPresenter.getLyricFromDBUsePid(musicBasicInfo);   //获取歌词
@@ -923,6 +924,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
      */
     private void initPopupWindow() {
         mPlayMusicPopupWindow = new PlayMusicPopupWindow(this);
+        mPlayMusicPopupWindow.setFocusable(true); //该值为false时，点击弹窗框外面window不会消失，即使设置了背景也无效，只能由dismiss()关闭
+        mPlayMusicPopupWindow.setOutsideTouchable(true); //只有该值设置为true时，外层点击才有效
+        mPlayMusicPopupWindow.update();
+        mPlayMusicPopupWindow.setBackgroundDrawable(new BitmapDrawable());//只有设置背景之后在focsable为true时点击弹出框外面才会消失，
 //        mPlayMusicDialogFragment = new PlayMusicDialogFragment(this);
     }
 
