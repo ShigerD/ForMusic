@@ -31,6 +31,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -907,7 +908,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                 if (mPlayMusicPopupWindow == null){
                     initPopupWindow();
                 }
-                mPlayMusicPopupWindow.showAsDropDown(mIvBg);
+//                mPlayMusicPopupWindow.showAsDropDown(mMainCardView);
+                mPlayMusicPopupWindow.showAtLocation(mIvBg, Gravity.TOP, 0, 0);
 
 //                if (mPlayMusicDialogFragment == null){
 //                    initPopupWindow();

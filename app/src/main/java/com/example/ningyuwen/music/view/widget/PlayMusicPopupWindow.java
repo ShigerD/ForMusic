@@ -158,6 +158,23 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         super.showAsDropDown(anchor);
     }
 
+    @Override
+    public void showAtLocation(View parent, int gravity, int x, int y) {
+        //刷新一些数据
+        initData();
+        initUi(false);
+
+        //如果变了音乐,修改背景
+        if (BaseActivity.mShouldChangePlayingBg){
+            setPlayActivityBg();
+            BaseActivity.mShouldChangePlayingBg = false;
+        }
+        if (BaseActivity.mServiceDataTrans != null) {
+            mViewPager.setCurrentItem(BaseActivity.mServiceDataTrans.getPlayPosition());
+        }
+        super.showAtLocation(parent, gravity, x, y);
+    }
+
     BaseActivity.IBaseActivityToPopup mIBaseActivityToPopup = new BaseActivity.IBaseActivityToPopup() {
         @Override
         public void refreshPopupBgAndDisc(int position) {
@@ -313,6 +330,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
      */
     private void initMusicSongListPop() {
         mMusicSongListPopupWindow = new MusicSongListPopupWindow(mContext);
+        mMusicSongListPopupWindow.setTouchable(true);
         mMusicSongListPopupWindow.setPopupWindowListener(this);
         mMusicSongListPopupWindow.setFocusable(true); //该值为false时，点击弹窗框外面window不会消失，即使设置了背景也无效，只能由dismiss()关闭
         mMusicSongListPopupWindow.setOutsideTouchable(true); //只有该值设置为true时，外层点击才有效

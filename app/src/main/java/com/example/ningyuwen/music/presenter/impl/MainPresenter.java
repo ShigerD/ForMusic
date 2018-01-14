@@ -70,6 +70,7 @@ public class MainPresenter extends BasePresenter<MainActivity>
      */
     public void deleteMusicListFromId(long pid){
         mDaoSession.getSongListInfoDao().deleteByKey(pid);
+        //删除记录表中歌单id为pid的信息
     }
 
     /**
