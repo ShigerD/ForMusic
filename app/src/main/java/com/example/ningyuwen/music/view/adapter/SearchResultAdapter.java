@@ -6,11 +6,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
+import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.Inflater;
 
@@ -35,6 +38,13 @@ public class SearchResultAdapter extends BaseAdapter {
     public void setListData(List<MusicBasicInfo> list){
         this.list = list;
         notifyDataSetChanged();
+    }
+
+    public List<MusicBasicInfo> getListData(){
+        if (list != null){
+            return list;
+        }
+        return new ArrayList<>();
     }
 
     @Override
@@ -63,6 +73,7 @@ public class SearchResultAdapter extends BaseAdapter {
                 convertView = inflater.inflate(R.layout.item_search, null);
                 hoder.searchMusicName = convertView.findViewById(R.id.search_music_name);
                 hoder.searchMusicPlayer = convertView.findViewById(R.id.search_music_player);
+//                hoder.relativeLayout = convertView.findViewById(R.id.rl_item_search_music);
                 convertView.setTag(hoder);
             } else {
                 hoder = (ViewHolder) convertView.getTag();
@@ -71,10 +82,16 @@ public class SearchResultAdapter extends BaseAdapter {
             hoder.searchMusicName.setText(list.get(position).getMusicName());
             hoder.searchMusicPlayer.setText(list.get(position).getMusicPlayer());
 
+            final ViewHolder finalHoder = hoder;
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ClickPid = list.get(position).getPId();
+//                    ClickPid = list.get(position).getPId();
+//                    ((MainActivity)v.getContext()).showToast(finalHoder.searchMusicName, String.valueOf(position));
+
+                    //点击其中一首音乐
+                    ((MainActivity)v.getContext()).changeMusicListFromSearch(position, list);
+
                 }
             });
         }
@@ -84,6 +101,7 @@ public class SearchResultAdapter extends BaseAdapter {
     public final class ViewHolder{
         public TextView searchMusicName;
         public TextView searchMusicPlayer;
+        public RelativeLayout relativeLayout;
     }
 
 }

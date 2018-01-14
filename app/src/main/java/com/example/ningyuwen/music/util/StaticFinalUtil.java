@@ -25,6 +25,7 @@ public class StaticFinalUtil {
     public static final int MUSIC_LIST_PLAY_CISTOM_LIST = 1012;         //自定义歌单
     public static final int MUSIC_LIST_PLAY_MYLOVE = 1013;              //我喜爱的
     public static final int MUSIC_LIST_PLAY_CLASSIFY_PLAYER = 1014;     //歌手分类
+    public static final int MUSIC_LIST_PLAY_SEARCH_MUSIC = 1015;        //搜索音乐
 
 
 }

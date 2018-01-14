@@ -71,9 +71,9 @@ public class MusicPopupWindow extends PopupWindow {
     public void showAtLocation(View parent, int gravity, int x, int y) {
         super.showAtLocation(parent, gravity, x, y);
         ((TextView) mRootView.findViewById(R.id.tv_playlist_name)).setText("歌单：" + title);
-        RecyclerView recyclerView = (RecyclerView) mRootView.findViewById(R.id.rv_music_list_pop);
-        recyclerView.setLayoutManager(new LinearLayoutManager(parent.getContext()));
-        recyclerView.setAdapter(new SongListItemAdapter(parent.getContext(), 1));
+//        RecyclerView recyclerView = (RecyclerView) mRootView.findViewById(R.id.rv_music_list_pop);
+//        recyclerView.setLayoutManager(new LinearLayoutManager(parent.getContext()));
+//        recyclerView.setAdapter(new SongListItemAdapter(parent.getContext(), 1));
     }
 
     @Override

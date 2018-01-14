@@ -100,7 +100,7 @@ public class MusicSongListActivity extends BaseActivity<MusicSongListPresenter> 
                 if (mMusicDatas == null || mMusicDatas.size() == 0){
                     return;
                 }
-                BaseActivity.MUSIC_LIST_PLAY_NOW = StaticFinalUtil.HANDLER_SHOW_CUSTOM;
+                BaseActivity.MUSIC_LIST_PLAY_NOW = StaticFinalUtil.MUSIC_LIST_PLAY_CISTOM_LIST;
                 showToast(v, "开始播放歌单：《" + mSongListName + "》");
                 //修改BaseActivity中的mMusicDatas数据
                 if (BaseActivity.mMusicDatas == null){

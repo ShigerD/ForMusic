@@ -622,8 +622,16 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 //                    mSearchList.setAdapter(adapter);
 //                    musicResult.showAsDropDown(mSearchEdt);
 //                }
-                searchResult[0] = new ArrayList<>();
-                searchResult[0] =mPresenter.searchMusic(String.valueOf(s));
+
+                //不为空串
+                if (!"".equals(s.toString())) {
+                    searchResult[0] = new ArrayList<>();
+                    searchResult[0] = mPresenter.searchMusic(String.valueOf(s));
+                }else {
+                    if (searchResult[0] != null){
+                        searchResult[0].clear();
+                    }
+                }
             }
 
             @Override
@@ -693,6 +701,54 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 //                return false;
 //            }
 //        });
+    }
+
+    /**
+     * 搜索音乐后切换歌单
+     */
+    public void changeMusicListFromSearch(int position, List<MusicBasicInfo> basicInfos){
+        if (BaseActivity.MUSIC_LIST_PLAY_NOW == StaticFinalUtil.MUSIC_LIST_PLAY_SEARCH_MUSIC){
+            //搜索到的音乐如果不在播放列表，添加音乐进入播放列表，如果存在，直接播放
+            int index = getPositionFromPid(basicInfos.get(position).getPId());
+            if (index != -1){
+                //存在，直接播放，且不更换BaseActivity.mMusicDatas数据，不刷新播放页面
+                playMusicOnBackstage(index);
+                showToast(mIvBg, "开始播放：" + mMusicDatas.get(index).getMusicName());
+//                BaseActivity.mServiceDataTrans.playMusicFromClick(index);
+            }else {
+                //不存在，将音乐添加到歌单，然后播放
+                index = mServiceDataTrans.getPlayPosition();   //复用index
+                MusicData musicData = mPresenter.getMusicDataFromPid(basicInfos.get(position));
+                mMusicDatas.add(mMusicDatas.size() , musicData);
+                showToast(mIvBg, "开始播放：" + musicData.getMusicName());
+                //更新歌单，更新播放页面
+                //此处暂时为了简单处理，直接将后台播放列表删除，然后重新导入了
+                initServiceData();
+
+                //播放
+                playMusicOnBackstage(mMusicDatas.size() - 1);
+//                mServiceDataTrans.playMusicFromClick(mMusicDatas.size() - 1);
+                //发送广播刷新播放页面
+                sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+            }
+        }else {
+            //切换歌单
+            BaseActivity.MUSIC_LIST_PLAY_NOW = StaticFinalUtil.MUSIC_LIST_PLAY_SEARCH_MUSIC;   //切换歌单为搜索音乐
+            showToast(mIvBg, "开始播放歌单：《搜索音乐》");
+            //修改BaseActivity中的mMusicDatas数据
+            if (BaseActivity.mMusicDatas == null){
+                BaseActivity.mMusicDatas = new ArrayList<>();
+            }
+            BaseActivity.mMusicDatas.clear();
+            //this.mMusicDatas已经是本歌单的数据了
+            BaseActivity.mMusicDatas.addAll(mPresenter.getMusicAllInfoFromBasic(basicInfos));
+            //向Service传递数据
+            initServiceData();
+//            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
+            playMusicOnBackstage(position);
+            //刷新播放页面
+            sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+        }
     }
 
     private int mDialogCheckPosition = -1;      //定时关闭的位置
