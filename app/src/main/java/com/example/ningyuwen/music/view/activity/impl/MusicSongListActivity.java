@@ -40,7 +40,6 @@ public class MusicSongListActivity extends BaseActivity<MusicSongListPresenter> 
     private int mSongListNumber = 0;    //歌单中的歌曲总数
     private RecyclerView mRvSongListMusic;  //歌单中的音乐
     private TextView mTvPlayAllMusic;       //播放全部显示的音乐数目
-    private MusicSongListActivityAdapter mAdapter;   //adapter
     private List<MusicData> mMusicDatas;    //音乐数据
 
     @Override
@@ -61,23 +60,28 @@ public class MusicSongListActivity extends BaseActivity<MusicSongListPresenter> 
             mMusicDatas = new ArrayList<>();
             mRvSongListMusic.setLayoutManager(new LinearLayoutManager(this));
             mMusicDatas.addAll(mPresenter.getSongListInfoFromDB(pid));
-            mAdapter = new MusicSongListActivityAdapter(this, mMusicDatas);
+            MusicSongListActivityAdapter mAdapter = new MusicSongListActivityAdapter(this, mMusicDatas);
             mRvSongListMusic.setAdapter(mAdapter);
             mAdapter.setItemClickListener(this);
         }
     }
 
     private void findViews() {
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        try {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }
 //        mToolbar.setNavigationIcon(R.drawable.actionbar_back);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+
         //使用CollapsingToolbarLayout必须把title设置到CollapsingToolbarLayout上，设置到Toolbar上则不会显示
         CollapsingToolbarLayout mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar_layout);
         mCollapsingToolbarLayout.setTitle(mSongListName);

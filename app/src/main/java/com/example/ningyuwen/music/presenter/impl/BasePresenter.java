@@ -1,15 +1,12 @@
 package com.example.ningyuwen.music.presenter.impl;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Pair;
 
@@ -17,7 +14,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.ningyuwen.music.MusicApplication;
-import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.model.entity.music.MusicRecordInfo;
@@ -26,12 +22,9 @@ import com.example.ningyuwen.music.view.activity.impl.BaseActivity;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,7 +46,7 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
     V mView;    //Presenter所持有的Activity对象
     DaoSession mDaoSession;   //数据库session
 
-    public BasePresenter(V view){
+    BasePresenter(V view){
         mView = view;
         getDaoSession();
     }
@@ -62,12 +55,11 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
      * 获取daosession
      * @return mDaoSession
      */
-    private DaoSession getDaoSession() {
+    private void getDaoSession() {
         if (mDaoSession == null) {
 //            mDaoSession = ((MusicApplication) mView.getApplication()).getDaoSession();
             mDaoSession = MusicApplication.getApplication().getDaoSession();
         }
-        return mDaoSession;
     }
 
     /**
@@ -123,7 +115,7 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
      * @param recordInfos recordInfos
      * @return musicDataList
      */
-    public List<MusicData> getMusicAllInfoFromRecord(List<MusicRecordInfo> recordInfos) {
+    List<MusicData> getMusicAllInfoFromRecord(List<MusicRecordInfo> recordInfos) {
         List<MusicData> musicDataList = new ArrayList<>();
         for (int i = 0;i < recordInfos.size();i++){
             MusicData data = new MusicData();
@@ -213,7 +205,7 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
     @Override
     public String getLyricFromDBUsePid(MusicBasicInfo musicBasicInfo) {
         String lyricPath = musicBasicInfo.getMusicLyricPath();  //歌词文件路径
-        FileInputStream inputStream = null;
+        FileInputStream inputStream;
         try {
             inputStream = new FileInputStream(new File(lyricPath));
             byte[] buf = new byte[1024];
@@ -280,18 +272,17 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
      * 虾米音乐
      */
     private void getLyricFromXiami() throws IOException {
-        File neteaseFile = new File("/storage/emulated/0/xiami/lyrics");
-        if (neteaseFile.exists() && neteaseFile.canRead()){
+        File netEaseFile = new File("/storage/emulated/0/xiami/lyrics");
+        if (netEaseFile.exists() && netEaseFile.canRead()){
             //文件存在
-            File[] files = neteaseFile.listFiles();
-            FileInputStream in = null;
+            File[] files = netEaseFile.listFiles();
             for (File file:files){
                 try {
                     // read file content from file
                     StringBuilder sb= new StringBuilder("");
                     FileReader reader = new FileReader(file);
                     BufferedReader br = new BufferedReader(reader);
-                    String str = null;
+                    String str;
                     String musicName = "", musicPlayer = "";
 //                    String regx1 = "\\[\\d{2}:\\d{2}.\\d{3}\\]";
 //                    String regx = "\\[ti:\\]";
@@ -383,14 +374,21 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
                     .build();
             client.newCall(request).enqueue(new okhttp3.Callback() {
                 @Override
-                public void onFailure(okhttp3.Call call, IOException e) {
+                public void onFailure(@NonNull okhttp3.Call call, @NonNull IOException e) {
                     Log.i(TAG, "onFailure: 获取歌词失败");
                 }
 
                 @Override
-                public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
+                public void onResponse(@NonNull okhttp3.Call call, @NonNull okhttp3.Response response) throws IOException {
                     // 注：该回调是子线程，非主线程
-                    String string = response.body().string();
+                    String string;
+                    try {
+                        string = response.body().string();
+                    }catch (NullPointerException e){
+                        e.printStackTrace();
+                        return;
+                    }
+
 
                     //解析response中的歌曲名，然后存储对应的歌曲名的屈词路径
                     JSONObject jsonObject = (JSONObject) JSON.parse(string);
@@ -442,15 +440,15 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
             }else{
                 //有时间，解析
                 Pair<Long, String> pair;  //一个新的对象，存储时间和歌词
-                String[] str = strings[i].split("\\[|\\]");
+                String[] str = strings[i].split("\\[|]");
 
 //                Log.i(TAG, "analysisLyric: " + str[1].split("\\:|\\.")[0] + str[1].split("\\:|\\.")[1] +
 //                        str[1].split("\\:|\\.")[2]);
 
                 //歌词时间
-                long time = Long.parseLong(str[1].split("\\:|\\.")[0])*60*1000 +
-                        Long.parseLong(str[1].split("\\:|\\.")[1])*1000 +
-                        Long.parseLong(str[1].split("\\:|\\.")[2]);
+                long time = Long.parseLong(str[1].split("[:.]")[0])*60*1000 +
+                        Long.parseLong(str[1].split("[:.]")[1])*1000 +
+                        Long.parseLong(str[1].split("[:.]")[2]);
                 try {
                     Log.i(TAG, "analysisLyric: " + time + " " + str[2]);
                     pair = Pair.create(time, str[2]);
@@ -475,7 +473,7 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
     @Override
     public void addLrcPathAndMusicPicToDB(String musicName, String musicPlayer,
                                           String musicPicUrl, String lyricFilePath, String whichApp) {
-        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(
+        @SuppressLint("SdCardPath") SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(
                 "/data/data/com.example.ningyuwen.music/databases/music.db",null);
 
         Cursor cursor = db.rawQuery("select * from MUSIC_BASIC_INFO where MUSIC_NAME=?" +

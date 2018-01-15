@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -45,11 +46,11 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         if (allMusicFragmentView == null) {
             allMusicFragmentView = inflater.inflate(R.layout.fragment_love_music, container, false);
-            mRvMyLoveMusic = (RecyclerView) allMusicFragmentView.findViewById(R.id.rv_mylove_music);
+            mRvMyLoveMusic = allMusicFragmentView.findViewById(R.id.rv_mylove_music);
         }
 
         mMyLoveMusicDatas = new ArrayList<>();

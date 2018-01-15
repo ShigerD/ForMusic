@@ -1,5 +1,6 @@
 package com.example.ningyuwen.music.view.fragment.impl;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.BitmapDrawable;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -54,14 +56,13 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
     private RecyclerView mRvCustomizeMusic;   //RecyclerView 用于显示自定义歌单
     private CustomizeMusicAdapter mAdapter;   //adapter,歌单列表
     private List<SongListInfo> mSongListInfos; //歌单List
-    private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
     private View customizeMusicFragment;    //根布局
     private MusicPopupWindow mPopupWindow;   //显示歌单三个点的点击事件
     private Context mContext;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         if (customizeMusicFragment == null) {
             customizeMusicFragment = inflater.inflate(R.layout.fragment_customize_music, container, false);
@@ -121,7 +122,7 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
 
     /**
      * 跳转到歌单
-     * @param info
+     * @param info info歌单
      */
     @Override
     public void jumpSongList(SongListInfo info) {
@@ -142,9 +143,9 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
      */
     @Override
     public void addSongList(final int position, final String title) {
-        View view = from(mContext).inflate(R.layout.layout_add_songlist, null);
-        final EditText et = (EditText) view.findViewById(R.id.et_song_list);
-        final TextView tv = (TextView) view.findViewById(R.id.tv_cha_number);
+        @SuppressLint("InflateParams") View view = from(mContext).inflate(R.layout.layout_add_songlist, null);
+        final EditText et = view.findViewById(R.id.et_song_list);
+        final TextView tv = view.findViewById(R.id.tv_cha_number);
         et.setText(title);
         if (title.length() > 0){
             et.setSelection(title.length());
@@ -160,13 +161,14 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
 
             }
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 tv.setText(editable.toString().length() + "/20");
             }
         });
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setView(view);
         builder.setTitle("添加歌单");
 
@@ -216,6 +218,7 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
     /**
      * 显示PopupWindow
      */
+    @SuppressLint("InflateParams")
     @Override
     public void showPopupWindow(int position, String listName) {
         if (mPopupWindow == null){

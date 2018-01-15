@@ -42,7 +42,6 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
     private ClassifyMusicAdapter mAdapter;
     private List<List<MusicData>> mDatas;
     private int mGroupPosition = -1;  //记录当前播放的音乐人
-    private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
     private View classifyMusicFragmentView;     //根布局
     private Context mContext;
 
@@ -52,7 +51,7 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
         super.onCreateView(inflater, container, savedInstanceState);
         if (classifyMusicFragmentView == null) {
             classifyMusicFragmentView = inflater.inflate(R.layout.fragment_classify_music, container, false);
-            mElClassifyMusic = (ExpandableListView) classifyMusicFragmentView.findViewById(R.id.el_classify_music);
+            mElClassifyMusic = classifyMusicFragmentView.findViewById(R.id.el_classify_music);
         }
 
         mDatas = new ArrayList<>();

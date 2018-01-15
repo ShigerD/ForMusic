@@ -8,9 +8,8 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.example.ningyuwen.music.R;
-import com.example.ningyuwen.music.view.activity.i.IChangeBack;
 
-public class ChangeBackActivity extends AppCompatActivity implements IChangeBack , View.OnClickListener{
+public class ChangeBackActivity extends AppCompatActivity implements View.OnClickListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,10 +69,5 @@ public class ChangeBackActivity extends AppCompatActivity implements IChangeBack
                 finish();
                 break;
         }
-    }
-
-    @Override
-    public void ChangeBack() {
-
     }
 }

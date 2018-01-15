@@ -92,6 +92,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
 
     private TextView mTvMusicName;  //显示音乐名
+    @SuppressLint("StaticFieldLeak")
     private static TextView mTvMusicLyric; //显示音乐歌词
 
     private PlayPauseView mPlayPauseView;   //播放暂停按钮
@@ -103,7 +104,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private LinearLayout left;    //左边layout侧滑栏
     private EditText mSearchEdt;
     private TextView mTextTitle;
-    private ListView mSearchList;
     private static MusicProgressDialog mMusicProgressDialog;
 
 
@@ -165,11 +165,13 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         }
     };
 
-
-    @Override
     /**
      * 回调后执行
+     * @param requestCode 1
+     * @param resultCode 1
+     * @param data intent
      */
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch(requestCode){
@@ -290,12 +292,12 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         int getPlayPosition();              //获取播放位置position
         boolean isPlayingMusic();           //获取音乐播放状态，播放或者暂停
         void changePlayingTime(int time);    //计算好现在要开始播放的时间，并且将后台的正在播放的时间修改了
-        void cancelNotification(boolean exit);      //关闭状态栏
+        void cancelNotification();      //关闭状态栏
     }
 
-    /**
-     * handler
-     */
+//    /**
+//     * handler
+//     */
 //    private static class HandlerActivity extends Handler{
 //        private static HandlerActivity mHandlerActivity;  //Activity的handler实例
 //
@@ -430,34 +432,32 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     }
 
     private void findView() {
-        mDrawerMenu = (DrawerLayout) findViewById(R.id.dr_main);              //侧滑菜单布局
-        left = (LinearLayout) findViewById(R.id.ll_drawer);
-        final RelativeLayout right = (RelativeLayout) findViewById(R.id.rl_main);
+        mDrawerMenu = findViewById(R.id.dr_main);              //侧滑菜单布局
+        left = findViewById(R.id.ll_drawer);
+        final RelativeLayout right = findViewById(R.id.rl_main);
         findViewById(R.id.rl_main).setOnTouchListener(new View.OnTouchListener() {
+            @SuppressLint("ClickableViewAccessibility")
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if(mDrawerMenu.isShown()){
-                    return left.dispatchTouchEvent(event);
-                }else{
-                    return false;
-                }
+                return mDrawerMenu.isShown() && left.dispatchTouchEvent(event);
             }
         });
         mDrawerMenu.setDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
                 //获取屏幕的宽高
                 WindowManager manager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+                assert manager != null;
                 Display display = manager.getDefaultDisplay();
                 //设置右面的布局位置  根据左面菜单的right作为右面布局的left   左面的right+屏幕的宽度（或者right的宽度这里是相等的）为右面布局的right
                 right.layout(left.getRight(), 0, left.getRight() + display.getWidth(), display.getHeight());
             }
             @Override
-            public void onDrawerOpened(View drawerView) {
+            public void onDrawerOpened(@NonNull View drawerView) {
 
             }
             @Override
-            public void onDrawerClosed(View drawerView) {
+            public void onDrawerClosed(@NonNull View drawerView) {
 
             }
             @Override
@@ -471,14 +471,14 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 //        mTextSign = findViewById(R.id.tv_userSign);
 //        mListDrawer = findViewById(R.id.ls_drawer);
 
-        mTvMusicName = (TextView) findViewById(R.id.tv_music_name);
-        mTvMusicLyric = (TextView) findViewById(R.id.tv_music_lyric);
-        mMainViewPager = (ViewPager) findViewById(R.id.vp_main_page);         //主页面的viewpager
-        mIvBg = (ImageView) findViewById(R.id.iv_main_activity_bg);
-        mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
-        mPlayPauseView = (PlayPauseView) findViewById(R.id.iv_music_pic);
+        mTvMusicName = findViewById(R.id.tv_music_name);
+        mTvMusicLyric = findViewById(R.id.tv_music_lyric);
+        mMainViewPager = findViewById(R.id.vp_main_page);         //主页面的viewpager
+        mIvBg = findViewById(R.id.iv_main_activity_bg);
+        mTabLayout = findViewById(R.id.tab_layout);
+        mPlayPauseView = findViewById(R.id.iv_music_pic);
 
-        mMainCardView = (RelativeLayout)findViewById(R.id.cv_show_state_lyric) ;
+        mMainCardView = findViewById(R.id.cv_show_state_lyric);
         mbtn_Search = findViewById(R.id.iv_bar_search);
         mSearchEdt = findViewById(R.id.search_edt);
         //mSearch.setBackground();设置背景色
@@ -598,8 +598,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             }
         });
 
-        View contentView = LayoutInflater.from(MainActivity.this).inflate(R.layout.layout_popsearch,null);
-        mSearchList = contentView.findViewById(R.id.search_list);
+        @SuppressLint("InflateParams") View contentView = LayoutInflater.from(MainActivity.this).inflate(R.layout.layout_popsearch,null);
+        ListView mSearchList = contentView.findViewById(R.id.search_list);
         final SearchMusicPopWindow musicResult = new SearchMusicPopWindow(MainActivity.this,contentView,
                 900,400,true);
         musicResult.setFocusable(true);
@@ -649,7 +649,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             public void afterTextChanged(Editable s) {
                 Log.e(TAG, "afterTextChanged: "+s);
                 Log.e(TAG, "searchResult: "+ searchResult[0]);
-                if(s!=null&&!s.equals("")) {
+                if(s!=null && !"".equals(s.toString())) {
                     if (searchResult[0] != null && searchResult[0].size() != 0) {
                         adapter.setListData(searchResult[0]);
                         Log.e(TAG, "adapter " + adapter);
@@ -1145,7 +1145,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         super.onNewIntent(intent);
         if (StaticFinalUtil.RECEIVER_CLOSE_APP.equals(intent.getAction())){
             //关闭App
-            mServiceDataTrans.cancelNotification(true);
+            mServiceDataTrans.cancelNotification();
             finish();
             System.exit(0);
         }

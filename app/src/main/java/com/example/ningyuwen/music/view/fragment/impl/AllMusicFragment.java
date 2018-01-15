@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -45,7 +46,6 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     private BroadcastReceiver receiver;
     private List<MusicData> mAllMusicDatas;
     private RecyclerView mRvAllMusicInfo;
-    private boolean shouldRefreshList = false;  //判断是否需要刷新列表，在接收到广播时置为true
 
 
     private AllMusicInfoAdapter mAdapter;   //adapter
@@ -55,7 +55,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         if (allMusicFragmentView == null) {
             allMusicFragmentView = inflater.inflate(R.layout.fragment_all_music, container, false);
@@ -265,7 +265,7 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
             mAllMusicDatas = new ArrayList<>();
         }
         mAllMusicDatas.clear();
-        if (((MainActivity)mContext) != null) {
+        if (mContext != null) {
 //            mAllMusicDatas = ((MainActivity)mContext).getMusicDatas();
             mAllMusicDatas.addAll(((MainActivity)mContext).getMusicDatas());
             showMusicInfo();

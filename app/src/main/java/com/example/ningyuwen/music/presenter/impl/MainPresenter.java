@@ -29,11 +29,9 @@ public class MainPresenter extends BasePresenter<MainActivity>
         super(view);
     }
 
-    private String TAG = "ningywuen";
-
     /**
      * 获取歌单信息
-     * @return
+     * @return List
      */
     @Override
     public List<SongListInfo> getSongListInfoFromDB() {
@@ -145,6 +143,7 @@ public class MainPresenter extends BasePresenter<MainActivity>
 
         }catch (Exception e){
             e.printStackTrace();
+            String TAG = "ningywuen";
             Log.i(TAG, "run: 异常");
 
 //            //取出musicID  http://music.163.com/#/song?id=
@@ -161,12 +160,12 @@ public class MainPresenter extends BasePresenter<MainActivity>
     }
 
     public List<MusicBasicInfo> searchMusic(String musicInfo){
-        List<MusicBasicInfo> basicInfos = mDaoSession.getMusicBasicInfoDao().queryBuilder().where(MusicBasicInfoDao.Properties.
+        List<MusicBasicInfo> basicInfo = mDaoSession.getMusicBasicInfoDao().queryBuilder().where(MusicBasicInfoDao.Properties.
                 MusicName.like("%"+musicInfo+"%")).list();
-        if(basicInfos == null || basicInfos.size() == 0){
+        if(basicInfo == null || basicInfo.size() == 0){
             return new ArrayList<>();
         }
-        return basicInfos;
+        return basicInfo;
     }
 
 }

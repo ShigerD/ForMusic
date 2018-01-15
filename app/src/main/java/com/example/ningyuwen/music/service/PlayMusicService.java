@@ -14,22 +14,16 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 
-import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -42,10 +36,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     private String TAG = "testni";
     private MediaPlayer mMediaPlayer; // 媒体播放器对象
     private ArrayList<Long> mMusicIds;
-    private byte mPlayStatus = 0;   // 0:列表循环  1:列表播放一次  2：随即播放  3：单曲循环
     private BroadcastReceiver mReceiver;
-    private AudioManager mAudioManager;//来电监听器
-    private int mReveivNoice;//监控返回值
     private int mCurrentTime;        //当前播放进度
     private int mPosition;
     private MyBinder myBinder = new MyBinder();             //MyBinder获取PlayMusicService
@@ -84,9 +75,6 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_LIST){
                     //列表循环
                     mPosition = (mPosition + 1) % mMusicIds.size();
-                }else if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_SINGLE){
-                    //单曲循环
-                    //好像不用改变
                 }else if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_RANDOM){
                     //随机播放
                     mPosition = new Random().nextInt(mMusicIds.size()) % (mMusicIds.size() + 1);
@@ -103,8 +91,6 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 
         setBroadCastReceiver();
         //接听电话监听
-        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        mReveivNoice = mAudioManager.requestAudioFocus(this,AudioManager.STREAM_MUSIC,AudioManager.AUDIOFOCUS_GAIN);
 
         pid = getSharedPreferences("notes", MODE_PRIVATE).getLong("lastTimePlayPid", 0);
 
@@ -237,33 +223,39 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         public void onReceive(Context context, Intent intent) {
 
             String action = intent.getAction();
-            if (action.equals(NOTIFICATION_ITEM_BUTTON_PLAY)) {//----通知栏播放按钮响应事件
-                //播放或暂停
-                //播放按钮变为暂停
-                playOrPause();
-            } else if (action.equals(NOTIFICATION_ITEM_BUTTON_NEXT)) {//----通知栏下一首按钮响应事件
-                //下一曲切歌,计算是否加1
-                calculateThisMusicIsAddCount(mPosition);
-                mPlayMusicStartTime = System.currentTimeMillis();
+            assert action != null;
+            switch (action) {
+                case NOTIFICATION_ITEM_BUTTON_PLAY: //----通知栏播放按钮响应事件
+                    //播放或暂停
+                    //播放按钮变为暂停
+                    playOrPause();
+                    break;
+                case NOTIFICATION_ITEM_BUTTON_NEXT: //----通知栏下一首按钮响应事件
+                    //下一曲切歌,计算是否加1
+                    calculateThisMusicIsAddCount(mPosition);
+                    mPlayMusicStartTime = System.currentTimeMillis();
 
-                //下一曲,更新通知栏,第一次进入时点击下一曲，需要判断pid
-                if (pid != 0){
-                    mPosition = mServiceDataToActivity.getPositionFromDataOnPid(pid);   //上一次关闭时的位置
-                    if (mPosition == -1){
-                        mPosition = 0;
+                    //下一曲,更新通知栏,第一次进入时点击下一曲，需要判断pid
+                    if (pid != 0) {
+                        mPosition = mServiceDataToActivity.getPositionFromDataOnPid(pid);   //上一次关闭时的位置
+                        if (mPosition == -1) {
+                            mPosition = 0;
+                        }
+                        pid = 0;
                     }
-                    pid = 0;
-                }
-                mPosition = (mPosition + 1) % mMusicIds.size();     //下一曲
-                refreshNotification();
-                playMusic(0);
-            }else if (action.equals(NOTIFICATION_ITEM_BUTTON_CLOSE)){
-                //关闭进程
-                mNotificationManager.cancel(1);
-                stopSelf();
-                mServiceDataToActivity.exitApp();
+                    mPosition = (mPosition + 1) % mMusicIds.size();     //下一曲
+
+                    refreshNotification();
+                    playMusic(0);
+                    break;
+                case NOTIFICATION_ITEM_BUTTON_CLOSE:
+                    //关闭进程
+                    mNotificationManager.cancel(1);
+                    stopSelf();
+                    mServiceDataToActivity.exitApp();
 //                sendBroadcast(new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
 //                MusicApplication.exitApp();
+                    break;
             }
             //监听电话拨打和接听
             Log.e("moneyReceiver", "onReceive: "+action );
@@ -580,16 +572,12 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 
     @Override
     public boolean isPlayingMusic() {
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying()){
-            return true;
-        }
-        return false;
+        return mMediaPlayer != null && mMediaPlayer.isPlaying();
     }
 
     /**
      * 计算好现在要开始播放的时间，并且将后台的正在播放的时间修改了
      * @param time time 在PopupWindow里进行计算
-     * @return
      */
     @Override
     public void changePlayingTime(int time) {
@@ -599,7 +587,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     }
 
     @Override
-    public void cancelNotification(boolean exit) {
+    public void cancelNotification() {
         if (mNotificationManager != null) {
             mNotificationManager.cancel(1);
         }

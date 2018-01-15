@@ -50,22 +50,21 @@ import java.util.Random;
 public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickListener,
         MusicSongListPopupWindow.IMusicSongPopToPlayPop {
 
-    TextView tvMusicName;
-    TextView tvMusicPlayer;
-    TextView tvCurrentTime;
-    TextView tvTotalTime;
-    SeekBar musicSeekBar;
-    ImageView ivPlayType;
-    ImageView ivLast;
-    ImageView ivPlayOrPause;
-    ImageView ivNext;
-    ImageView ivPlayList;
-    RelativeLayout rootLayout;
+    private TextView tvMusicName;
+    private TextView tvMusicPlayer;
+    private TextView tvCurrentTime;
+    private TextView tvTotalTime;
+    private SeekBar musicSeekBar;
+    private ImageView ivPlayType;
+    private ImageView ivLast;
+    private ImageView ivPlayOrPause;
+    private ImageView ivNext;
+    private ImageView ivPlayList;
+    private RelativeLayout rootLayout;
     private ImageView mBackDiscImg;     //disc背景
     private Context mContext;   //上下文
 
     private MusicData mMusicData;
-    private long mPlayingMusicId;   //当前播放的音乐id
 
 //    private DiscView mDisc;     //转盘
 
@@ -76,9 +75,9 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
     private boolean isPlaying = false;  //正在播放
     private boolean isSliding = false;    //在滑动
     private MusicSongListPopupWindow mMusicSongListPopupWindow;  //歌单popup
-    private BroadcastReceiver mReceiver;
     private PlayMusicDiscAdapter mAdapter;   //viewpager的adapter
 
+    @SuppressLint("InflateParams")
     public PlayMusicPopupWindow(Context context) {
         this(context, LayoutInflater.from(context)
                         .inflate(R.layout.activity_play, null),
@@ -86,7 +85,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
                 ViewGroup.LayoutParams.MATCH_PARENT, true);
     }
 
-    public PlayMusicPopupWindow(Context context, View contentView, int width, int height, boolean focusable) {
+    private PlayMusicPopupWindow(Context context, View contentView, int width, int height, boolean focusable) {
         super(contentView, width, height, focusable);
         mRootView = contentView;
         setContentView(context, contentView);
@@ -94,7 +93,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
     }
 
     private void setBroadCastReceiver(){
-        mReceiver = new ServiceReceiver();//----注册广播
+        BroadcastReceiver mReceiver = new ServiceReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST);
         mContext.registerReceiver(mReceiver, intentFilter);
@@ -175,7 +174,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         super.showAtLocation(parent, gravity, x, y);
     }
 
-    BaseActivity.IBaseActivityToPopup mIBaseActivityToPopup = new BaseActivity.IBaseActivityToPopup() {
+    private BaseActivity.IBaseActivityToPopup mIBaseActivityToPopup = new BaseActivity.IBaseActivityToPopup() {
         @Override
         public void refreshPopupBgAndDisc(int position) {
             if (isShowing()){
@@ -193,19 +192,19 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
      * 绑定控件
      */
     private void findViews() {
-        tvMusicName = (TextView) mRootView.findViewById(R.id.tv_music_name);
-        tvMusicPlayer = (TextView) mRootView.findViewById(R.id.tv_music_player);
-        mViewPager = (ViewPager) mRootView.findViewById(R.id.dis_viewpager);
-        tvCurrentTime = (TextView)mRootView.findViewById(R.id.tvCurrentTime);
-        tvTotalTime = (TextView)mRootView.findViewById(R.id.tvTotalTime);
-        musicSeekBar = (SeekBar)mRootView.findViewById(R.id.musicSeekBar);
-        ivPlayType = (ImageView)mRootView.findViewById(R.id.iv_play_type);
-        ivLast = (ImageView)mRootView.findViewById(R.id.ivLast);
-        ivPlayOrPause = (ImageView)mRootView.findViewById(R.id.ivPlayOrPause);
-        ivNext = (ImageView)mRootView.findViewById(R.id.ivNext);
-        ivPlayList = (ImageView)mRootView.findViewById(R.id.iv_play_list);
-        rootLayout = (RelativeLayout)mRootView.findViewById(R.id.rootLayout);
-        mBackDiscImg = (ImageView) mRootView.findViewById(R.id.iv_background);
+        tvMusicName = mRootView.findViewById(R.id.tv_music_name);
+        tvMusicPlayer = mRootView.findViewById(R.id.tv_music_player);
+        mViewPager = mRootView.findViewById(R.id.dis_viewpager);
+        tvCurrentTime = mRootView.findViewById(R.id.tvCurrentTime);
+        tvTotalTime = mRootView.findViewById(R.id.tvTotalTime);
+        musicSeekBar = mRootView.findViewById(R.id.musicSeekBar);
+        ivPlayType = mRootView.findViewById(R.id.iv_play_type);
+        ivLast = mRootView.findViewById(R.id.ivLast);
+        ivPlayOrPause = mRootView.findViewById(R.id.ivPlayOrPause);
+        ivNext = mRootView.findViewById(R.id.ivNext);
+        ivPlayList = mRootView.findViewById(R.id.iv_play_list);
+        rootLayout = mRootView.findViewById(R.id.rootLayout);
+        mBackDiscImg = mRootView.findViewById(R.id.iv_background);
     }
 
     private void setListener(){
@@ -395,13 +394,14 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
     /**
      * Handler，用于接收消息，转换为主线程
      */
+    @SuppressLint("HandlerLeak")
     private class MyHandler extends Handler {
 
         private WeakReference<PlayMusicPopupWindow> popupWindowWeakReference;
         private ImageView imageView;
 
-        public MyHandler(PlayMusicPopupWindow popupWindow) {
-            popupWindowWeakReference = new WeakReference<PlayMusicPopupWindow>(popupWindow);
+        MyHandler(PlayMusicPopupWindow popupWindow) {
+            popupWindowWeakReference = new WeakReference<>(popupWindow);
         }
 
         @Override
@@ -443,22 +443,26 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             //记录当前位置，相同则一直执行，不同则关闭此线程
             //只有在切换音乐时关闭此线程，其它操作只需暂停旋转
             Message message;
-            while (true){
-                try {
-                    Thread.sleep(20);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                if (isShowing() && isPlaying && !isSliding){
-                    View view = mViewPager.findViewWithTag(mViewPager.getCurrentItem());
-                    if (view != null){
-                        ImageView imageView = view.findViewById(mViewPager.getCurrentItem());
-                        message = myHandler.obtainMessage();
-                        message.what = StaticFinalUtil.HANDLER_SHOW_DISC_ROTATION;
-                        message.obj = imageView;
-                        message.sendToTarget();
+            try {
+                while (true) {
+                    try {
+                        Thread.sleep(20);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (isShowing() && isPlaying && !isSliding) {
+                        View view = mViewPager.findViewWithTag(mViewPager.getCurrentItem());
+                        if (view != null) {
+                            ImageView imageView = view.findViewById(mViewPager.getCurrentItem());
+                            message = myHandler.obtainMessage();
+                            message.what = StaticFinalUtil.HANDLER_SHOW_DISC_ROTATION;
+                            message.obj = imageView;
+                            message.sendToTarget();
+                        }
                     }
                 }
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }
     }
@@ -478,7 +482,6 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         mViewPager.setAdapter(mAdapter);
         final boolean[] isSlide = {false};
         final int[] nowPosition = new int[1];    //记录当前位置
-        final Message[] message = new Message[1];    //消息，去旋转imageview
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -525,7 +528,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
 
         private List<String> mAlbumPicPath;
 
-        public PlayMusicDiscAdapter(List<String> albumPicPath) {
+        PlayMusicDiscAdapter(List<String> albumPicPath) {
 //            super();
             mAlbumPicPath = albumPicPath;
         }
@@ -542,12 +545,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
 
         @Override
         public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-            ((ViewPager)container).removeView((View) object);
-        }
-
-        public void setPicPathList(List<String> albumPicPath){
-            mAlbumPicPath = albumPicPath;
-            notifyDataSetChanged();
+            container.removeView((View) object);
         }
 
         ImageView imageViewFront;
@@ -555,29 +553,14 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         @NonNull
         @Override
         public Object instantiateItem(@NonNull ViewGroup container, int position) {
-            View rootView = LayoutInflater.from(mContext).inflate(R.layout.layout_disc, null);
-            imageViewFront = (ImageView)rootView.findViewById(R.id.ivDisc);
+            @SuppressLint("InflateParams") View rootView = LayoutInflater.from(mContext).inflate(R.layout.layout_disc, null);
+            imageViewFront = rootView.findViewById(R.id.ivDisc);
             imageViewFront.setImageDrawable(getDiscDrawable(mAlbumPicPath.get(position)));
             imageViewFront.setId(position);
             container.addView(rootView);
             return rootView;
         }
 
-        @SuppressLint("HandlerLeak")
-        Handler handler = new Handler(){
-
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                switch (msg.what){
-                    case 0:
-                        imageViewFront.setImageDrawable((LayerDrawable)msg.obj);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
     }
 
     /**
@@ -653,17 +636,14 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         int discSize = (int) (mScreenWidth * DisplayUtil.SCALE_DISC_SIZE);
         Bitmap bitmapDisc = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mContext.getResources(), R
                 .drawable.ic_disc_blackground), discSize, discSize, false);
-        RoundedBitmapDrawable roundDiscDrawable = RoundedBitmapDrawableFactory.create
+        return RoundedBitmapDrawableFactory.create
                 (mContext.getResources(), bitmapDisc);
-        return roundDiscDrawable;
     }
 
     private void initView() {
         mBackDiscImg.setImageDrawable(getDiscBlackgroundDrawable());
-        int marginTop = (int) (DisplayUtil.SCALE_DISC_MARGIN_TOP * mScreenHeight);
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mBackDiscImg
                 .getLayoutParams();
-        layoutParams.setMargins(0, 0, 0, 0);
         mBackDiscImg.setLayoutParams(layoutParams);
 
         mRootView.findViewById(R.id.iv_back).setOnClickListener(new View.OnClickListener() {
@@ -673,9 +653,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             }
         });
 
-        /**
-         * 初始化播放状态
-         */
+        //初始化播放状态
         if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_LIST){
             ivPlayType.setImageResource(R.drawable.play_icn_loop_prs);
         }else if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_SINGLE){
@@ -695,14 +673,14 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
 
     private Handler myHandler;
 
-    Runnable runnable = new Runnable() {
+    private Runnable runnable = new Runnable() {
         @Override
         public void run() {
             if (mMusicData == null) {
                 return;
             }
             //拿到初始图
-            Bitmap initBitmap = null;
+            Bitmap initBitmap;
             //                initBitmap = Glide.with(mContext)
 //                        .load(mMusicData.getMusicAlbumPicPath())
 //                        .asBitmap().error(R.drawable.login_bg_night).centerCrop().into(540, 960).get();
@@ -731,7 +709,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         if (BaseActivity.mServiceDataTrans == null) {
             return;
         }
-        mPlayingMusicId = BaseActivity.mServiceDataTrans.getPlayingMusicId();
+        long mPlayingMusicId = BaseActivity.mServiceDataTrans.getPlayingMusicId();
         mMusicData = ((MainActivity) mContext).getDataFromPid(mPlayingMusicId);
     }
 
@@ -777,8 +755,8 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         }
         int minute = time / 1000 / 60;
         int second = time / 1000 - minute * 60;
-        String min = "";
-        String sec = "";
+        String min;
+        String sec;
         if (minute < 10) {
             min = String.valueOf("0" + minute);
         } else {
