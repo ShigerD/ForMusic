@@ -272,16 +272,20 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
                 break;
             case R.id.ivPlayOrPause:
                 //播放或者暂停
-                if (BaseActivity.mServiceDataTrans.isPlayingMusic()) {
-                    //暂停
-                    ivPlayOrPause.setImageResource(R.drawable.ic_pause);
-                    isPlaying = false;
-                } else {
-                    //播放
-                    ivPlayOrPause.setImageResource(R.drawable.ic_play);
-                    isPlaying = true;
+                try {
+                    if (BaseActivity.mServiceDataTrans.isPlayingMusic()) {
+                        //暂停
+                        ivPlayOrPause.setImageResource(R.drawable.ic_pause);
+                        isPlaying = false;
+                    } else {
+                        //播放
+                        ivPlayOrPause.setImageResource(R.drawable.ic_play);
+                        isPlaying = true;
+                    }
+                    BaseActivity.mServiceDataTrans.playOrPause();
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
-                BaseActivity.mServiceDataTrans.playOrPause();
                 break;
             case R.id.ivNext:
                 //下一曲，根据播放模式变化
