@@ -267,6 +267,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
                     setPlayActivityBg();
                 }catch (Exception e){
                     e.printStackTrace();
+                    //test
                 }
                 break;
             case R.id.ivPlayOrPause:
