@@ -62,9 +62,99 @@ circleImageView：圆形ImageView
 1. 播放页面：由之前的Activity改为PopupWindow实现，提高了加载效率，中间的转盘使用ViewPager加ImageView，音乐在播放且PopupWindow在显示时，转动ImageView
 1. 播放音乐：使用Service在后台播放
 1. 音乐播放次数统计排序：当前播放音乐总时长占当前音乐总时长的2/3，则代表音乐播放了一次，计数加1，下次打开App时按照音乐播放次数进行排序显示
+1. 数据交互：        
+- Activity与Service之间数据交互：    
+全部采用接口调用        
+Activity中代码：
+```
+     /**
+     * Activity和Service传递数据
+     */
+    public interface IServiceDataTrans{
+        void initServiceData(ArrayList<Long> musicId);  //初始化Service的数据，音乐路径
+        void playMusicFromClick(int position);              //用户点击播放，传入position
+        void playOrPause();                                 //播放或暂停
+        void replaceBackStageMusicList(ArrayList<Long> musicInfoList, int position);//修改后台播放列表，传入musicId,当前播放顺序
+        int getMusicPlayTimeStamp();                        //获取播放进度，返回毫秒
+        long getPlayingMusicId();           //获取当前播放的音乐id，查询数据，便于显示
+        int getPlayPosition();              //获取播放位置position
+        boolean isPlayingMusic();           //获取音乐播放状态，播放或者暂停
+        void changePlayingTime(int time);    //计算好现在要开始播放的时间，并且将后台的正在播放的时间修改了
+        void cancelNotification();      //关闭状态栏
+    }
 
+    /**
+     * 初始化activity时启动服务，服务可能因为内存回收而自动关闭
+     */
+    public void startPlayMusicService(){
+        Intent intent = new Intent(BaseActivity.this, PlayMusicService.class);
+        bindService(intent, mServiceConnection,  Context.BIND_AUTO_CREATE);
+    }
 
+    /**
+     * 后台播放音乐Service，使用bindService启动，方便传输数据，startService不方便传输数据
+     * 当Service
+     */
+    public ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            //使用MyBinder类获取PlayMusicService对象，
+            PlayMusicService.MyBinder myBinder = (PlayMusicService.MyBinder)service;
+            mServiceDataTrans = myBinder.getService();
+            //设置Service对Activity的监听回调
+            myBinder.setIServiceDataToActivity(mServiceDataToActivity);
 
+            Log.i(TAG, "onServiceConnected: initServiceData");
+            //初始化Service的数据，使用接口回调
+            try {
+                initServiceData();
+            }catch (NullPointerException e){
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG, "onServiceConnected: transData33");
+        }
+    };
+```        
+Service中代码：    
+```
+    /**
+     * 将Service的数据传给Activity
+     */
+    public interface IServiceDataToActivity {
+        String getMusicFilePath(long pid);   //获取音乐文件路径
+        void showLyricAtActivity(long pid);  //展示歌词,通过pid查询到文件路径，再解析歌词文件
+        MusicData getPlayMusicData(long pid);   //获取MusicData,展示通知栏时需要获取专辑图片,音乐名和专辑名
+        int getPositionFromDataOnPid(long pid);  //根据pid查询歌曲在歌单中的位置，第一次进入app时需要用pid查询到mPosition
+        void refreshPlayPauseAnimation(boolean play);   //更新主页面的播放暂停动画
+        void sendCompleteMsgToRefreshPop(int position);     //歌曲播放完成，向Activity发送通知，更新PopupWindow
+        void calculateThisMusicIsAddCount(long playtime, long pid, int position);    //用于计数排序
+        void exitApp();
+    }
+
+    // IBinder是远程对象的基本接口，是为高性能而设计的轻量级远程调用机制的核心部分。但它不仅用于远程
+    // 调用，也用于进程内调用。这个接口定义了与远程对象交互的协议。
+    // 不要直接实现这个接口，而应该从Binder派生。
+    // Binder类已实现了IBinder接口
+    public class MyBinder extends Binder {
+
+        /** * 获取Service的方法 * @return 返回PlayerService */
+        public PlayMusicService getService(){
+            return PlayMusicService.this;
+        }
+
+        /**
+         * 传递Activity的context,绑定监听对象
+         * @param serviceDataToActivity serviceDataToActivity
+         */
+        public void setIServiceDataToActivity(IServiceDataToActivity serviceDataToActivity){
+            mServiceDataToActivity = serviceDataToActivity;
+        }
+    }
+```
 
 
 
