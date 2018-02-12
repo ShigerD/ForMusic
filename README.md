@@ -62,9 +62,11 @@ circleImageView：圆形ImageView
 1. 播放页面：由之前的Activity改为PopupWindow实现，提高了加载效率，中间的转盘使用ViewPager加ImageView，音乐在播放且PopupWindow在显示时，转动ImageView
 1. 播放音乐：使用Service在后台播放
 1. 音乐播放次数统计排序：当前播放音乐总时长占当前音乐总时长的2/3，则代表音乐播放了一次，计数加1，下次打开App时按照音乐播放次数进行排序显示
-1. 数据交互：        
+1. 数据交互：
 - Activity与Service之间数据交互：    
-全部采用接口调用        
+全部采用接口调用，bindService时传入ServiceConnection接口的实例对象，当成功绑定Service时，回调ServiceConnection接口中的onServiceConnected()，传入参数中有IBinder，即为PlayMusicService中onBind方法返回的IBinder对象。接着调用MyBinder类中的getService()获取PlayMusicService实例对象，因为PlayMusicService实现了IServiceDataTrans接口，所以后面可以通过mServiceDataTrans调用接口IServiceDataTrans中的方法。    
+继续使用myBinder.setIServiceDataToActivity(mServiceDataToActivity); 传入IServiceDataToActivity接口在Activity中的实例对象mServiceDataToActivity，之后PlayMusicService可通过类中的IServiceDataToActivity接口对象mServiceDataToActivity调用在Activity中实现了本接口的方法，从而实现数据传递。
+
 Activity中代码：
 ```
      /**
@@ -154,8 +156,13 @@ Service中代码：
             mServiceDataToActivity = serviceDataToActivity;
         }
     }
-```
-
+```    
+- Fragment与Activity之间：    
+1、Fragment中可以通过getActivity()获取到Activity的实例之后强转成MainActivity，调用MainActivity中的方法    
+2、Activity中之前创建Fragment时已经获取到了几个Fragment的实例化对象，可以直接用对象调用Fragment中的方法或者每个Fragment实现同一个一个接口，因为Activity有这些Fragment的实例化对象，所以可以直接强转为这个接口，再调用接口中的方法，我这里使用的是第二种    
+       
+- Fragment与Fragment之间：    
+通过Activity中转
 
 
 
