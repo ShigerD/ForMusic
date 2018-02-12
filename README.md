@@ -165,7 +165,7 @@ Service中代码：
 通过Activity中转
 
 ### 下载    
-酷安应用市场：[点我下载](http://https://www.coolapk.com/apk/com.example.ningyuwen.music)
+酷安应用市场：[点我下载](https://www.coolapk.com/apk/com.example.ningyuwen.music)
 
 
 
