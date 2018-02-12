@@ -3,12 +3,10 @@
 这是一款支持Android系统的本地音乐播放器
 
 ### 界面
-<img src="https://gitee.com/uploads/images/2018/0212/142529_a8150762_1193276.png" width = "160" height = "200" alt="主页面" align=center />
-
-![主页面](https://gitee.com/uploads/images/2018/0212/142529_a8150762_1193276.png "0115_6-171651-o_1c3sdfpgi1rhpo0d195b3nb3m716-uid-1181704@1080x1920.png")
-![播放页面](https://gitee.com/uploads/images/2018/0212/143127_1cfe49b0_1193276.png "0115_4-171651-o_1c3sdglbeicuibdf8g9qe12fs1c-uid-1181704@1080x1920.png")
-![歌单页面](https://gitee.com/uploads/images/2018/0212/142929_0057ceea_1193276.png "0115_14-171651-o_1c3sdgsj916kf14v61mc9kh01a8d1o-uid-1181704@1080x1920.png")
-![主题皮肤页面](https://gitee.com/uploads/images/2018/0212/142824_60828147_1193276.png "0115_5-171651-o_1c3sdgptk1e368ve1qfl18k731i-uid-1181704@1080x1920.png")
+<img src="https://gitee.com/uploads/images/2018/0212/142529_a8150762_1193276.png" width = "450" height = "800" alt="主页面" align=center />
+<img src="https://gitee.com/uploads/images/2018/0212/143127_1cfe49b0_1193276.png" width = "450" height = "800" alt="播放页面" align=center />
+<img src="https://gitee.com/uploads/images/2018/0212/142929_0057ceea_1193276.png" width = "450" height = "800" alt="歌单页面" align=center />
+<img src="https://gitee.com/uploads/images/2018/0212/142824_60828147_1193276.png" width = "450" height = "800" alt="主题皮肤页面" align=center />
 
 ### 第三方库
 Bugly：用于统计闪退、ANR异常情况，以及更新软件
