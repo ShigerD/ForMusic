@@ -159,12 +159,13 @@ Service中代码：
 ```    
 - Fragment与Activity之间：    
 1、Fragment中可以通过getActivity()获取到Activity的实例之后强转成MainActivity，调用MainActivity中的方法    
-2、Activity中之前创建Fragment时已经获取到了几个Fragment的实例化对象，可以直接用对象调用Fragment中的方法或者每个Fragment实现同一个一个接口，因为Activity有这些Fragment的实例化对象，所以可以直接强转为这个接口，再调用接口中的方法，我这里使用的是第二种    
+2、Activity中之前创建Fragment时已经获取到了几个Fragment的实例化对象，可以直接用对象调用Fragment中的方法或者每个Fragment实现同一个接口，因为Activity有这些Fragment的实例化对象，所以可以直接强转为这个接口，再调用接口中的方法，我这里使用的是第二种    
        
 - Fragment与Fragment之间：    
 通过Activity中转
 
-
+### 下载    
+酷安应用市场：[点我下载](http://https://www.coolapk.com/apk/com.example.ningyuwen.music)
 
 
 
