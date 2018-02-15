@@ -60,31 +60,35 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.i(TAG, "onCompletion: " + mediaPlayer.getCurrentPosition() + " "
-                        + mMediaPlayer.getCurrentPosition() + " " + mServiceDataToActivity
-                        .getPlayMusicData(mMusicIds.get(mPosition)).getMusicTime());
-                if (mediaPlayer.getCurrentPosition() < mServiceDataToActivity.getPlayMusicData(
-                        mMusicIds.get(mPosition)).getMusicTime()-5000){
-                    return;
-                }
-                //播放完成
-                calculateThisMusicIsAddCount(mPosition);
-                mPlayMusicStartTime = System.currentTimeMillis();
+                try {
+                    Log.i(TAG, "onCompletion: " + mediaPlayer.getCurrentPosition() + " "
+                            + mMediaPlayer.getCurrentPosition() + " " + mServiceDataToActivity
+                            .getPlayMusicData(mMusicIds.get(mPosition)).getMusicTime());
+                    if (mediaPlayer.getCurrentPosition() < mServiceDataToActivity.getPlayMusicData(
+                            mMusicIds.get(mPosition)).getMusicTime() - 5000) {
+                        return;
+                    }
+                    //播放完成
+                    calculateThisMusicIsAddCount(mPosition);
+                    mPlayMusicStartTime = System.currentTimeMillis();
 
-                //随机播放还是单曲播放，列表循环的区别主要体现在播放完成时的下一曲 和 手动切换歌曲
-                if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_LIST){
-                    //列表循环
-                    mPosition = (mPosition + 1) % mMusicIds.size();
-                }else if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_RANDOM){
-                    //随机播放
-                    mPosition = new Random().nextInt(mMusicIds.size()) % (mMusicIds.size() + 1);
-                }
+                    //随机播放还是单曲播放，列表循环的区别主要体现在播放完成时的下一曲 和 手动切换歌曲
+                    if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_LIST) {
+                        //列表循环
+                        mPosition = (mPosition + 1) % mMusicIds.size();
+                    } else if (StaticFinalUtil.SERVICE_PLAY_TYPE_NOW == StaticFinalUtil.SERVICE_PLAY_TYPE_RANDOM) {
+                        //随机播放
+                        mPosition = new Random().nextInt(mMusicIds.size()) % (mMusicIds.size() + 1);
+                    }
 
-                refreshNotification();  //通知栏
-                playMusic(0);
-                //这一首音乐播放完成，开始播放下一曲，刷新MainActivity或者PlayActivity
-                //这里用来刷新PopupWindow的信息,改为time为0,则发送消息过去
-                mServiceDataToActivity.sendCompleteMsgToRefreshPop(mPosition);
+                    refreshNotification();  //通知栏
+                    playMusic(0);
+                    //这一首音乐播放完成，开始播放下一曲，刷新MainActivity或者PlayActivity
+                    //这里用来刷新PopupWindow的信息,改为time为0,则发送消息过去
+                    mServiceDataToActivity.sendCompleteMsgToRefreshPop(mPosition);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         });
         handler.sendEmptyMessage(1);

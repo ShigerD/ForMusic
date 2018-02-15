@@ -48,7 +48,7 @@ import java.util.Random;
  */
 
 public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickListener,
-        MusicSongListPopupWindow.IMusicSongPopToPlayPop {
+        MusicSongListDialogFragment.IMusicSongPopToPlayPop {
 
     private TextView tvMusicName;
     private TextView tvMusicPlayer;
@@ -74,7 +74,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
     private boolean shouldPauseChangeProgress = false;
     private boolean isPlaying = false;  //正在播放
     private boolean isSliding = false;    //在滑动
-    private MusicSongListPopupWindow mMusicSongListPopupWindow;  //歌单popup
+    private MusicSongListDialogFragment mMusicSongListDialogFragment;  //歌单popup
     private PlayMusicDiscAdapter mAdapter;   //viewpager的adapter
 
     @SuppressLint("InflateParams")
@@ -330,11 +330,10 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
             case R.id.iv_play_list:
                 //显示当前歌单
                 //再弹出一个popupwindow
-                if (mMusicSongListPopupWindow == null){
+                if (mMusicSongListDialogFragment == null){
                     initMusicSongListPop();
                 }
-                mMusicSongListPopupWindow.showAtLocation(((MainActivity)mContext).findViewById(R.id.iv_main_activity_bg),
-                        Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
+                mMusicSongListDialogFragment.show(((MainActivity)mContext).getSupportFragmentManager(), null);
                 break;
             default:
                 break;
@@ -345,13 +344,8 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
      * 初始化歌单popup
      */
     private void initMusicSongListPop() {
-        mMusicSongListPopupWindow = new MusicSongListPopupWindow(mContext);
-        mMusicSongListPopupWindow.setTouchable(true);
-        mMusicSongListPopupWindow.setPopupWindowListener(this);
-        mMusicSongListPopupWindow.setFocusable(true); //该值为false时，点击弹窗框外面window不会消失，即使设置了背景也无效，只能由dismiss()关闭
-        mMusicSongListPopupWindow.setOutsideTouchable(true); //只有该值设置为true时，外层点击才有效
-        mMusicSongListPopupWindow.update();
-        mMusicSongListPopupWindow.setBackgroundDrawable(new BitmapDrawable());//只有设置背景之后在focsable为true时点击弹出框外面才会消失，
+        mMusicSongListDialogFragment = new MusicSongListDialogFragment();
+        mMusicSongListDialogFragment.setPopupWindowListener(this);
     }
 
     /**
@@ -575,7 +569,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         Bitmap bitmapDisc = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mContext.getResources(), R
                 .drawable.ic_disc), discSize, discSize, false);
 
-        Bitmap bitmapMusicPic = getMusicPicBitmap(musicPicSize,musicPicRes, false);
+        Bitmap bitmapMusicPic = getMusicPicBitmap(musicPicSize, musicPicRes, false);
         BitmapDrawable discDrawable = new BitmapDrawable(bitmapDisc);
         RoundedBitmapDrawable roundMusicDrawable = RoundedBitmapDrawableFactory.create
                 (mContext.getResources(), bitmapMusicPic);
@@ -612,7 +606,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         }
         options.inJustDecodeBounds = true;
 
-        BitmapFactory.decodeFile(musicPicRes, options);
+//        BitmapFactory.decodeFile(musicPicRes, options);
 
 //            BitmapFactory.decodeResource(mContext.getResources(),R.drawable.play_plybar_bg,options);
         int imageWidth = options.outWidth;
@@ -686,6 +680,9 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
 //                        .load(mMusicData.getMusicAlbumPicPath())
 //                        .asBitmap().error(R.drawable.login_bg_night).centerCrop().into(540, 960).get();
             initBitmap = getMusicPicBitmap(200, mMusicData.getMusicAlbumPicPath(), true);
+            if (initBitmap == null){
+                return;
+            }
             //处理得到模糊效果的图
             int scaleRatio = 10;
             int blurRadius = 16;

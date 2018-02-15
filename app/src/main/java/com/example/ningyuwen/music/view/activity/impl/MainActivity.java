@@ -1108,7 +1108,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(mServiceConnection);
+        if (isBound) {
+            unbindService(mServiceConnection);
+            isBound = false;
+        }
         unregisterReceiver(mReceiver);
         MusicApplication.getDiscSingleThreadPool().shutdownNow();
         MusicApplication.getFixedThreadPool().shutdownNow();
@@ -1145,7 +1148,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         super.onNewIntent(intent);
         if (StaticFinalUtil.RECEIVER_CLOSE_APP.equals(intent.getAction())){
             //关闭App
-            mServiceDataTrans.cancelNotification();
+            if (mServiceDataTrans != null) {
+                mServiceDataTrans.cancelNotification();
+            }
             finish();
             System.exit(0);
         }

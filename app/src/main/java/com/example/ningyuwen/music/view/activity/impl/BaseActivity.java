@@ -57,6 +57,7 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
     public static boolean mShouldChangePlayingBg = false;
     private IBaseActivityToPopup mIBaseActivityToPopup;
     public static int MUSIC_LIST_PLAY_NOW = StaticFinalUtil.MUSIC_LIST_PLAY_ALL_MUSIC;   //初始化播放歌单为所有音乐
+    protected boolean isBound = false;  //用于判断Service是否已经绑定，在未绑定时解除绑定会出现异常
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -270,7 +271,7 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
      */
     public void startPlayMusicService(){
         Intent intent = new Intent(BaseActivity.this, PlayMusicService.class);
-        bindService(intent, mServiceConnection,  Context.BIND_AUTO_CREATE);
+        isBound = bindService(intent, mServiceConnection,  Context.BIND_AUTO_CREATE);
     }
 
     /**

@@ -394,23 +394,27 @@ public class BasePresenter<V extends BaseActivity> implements IBasePresenter {
                     JSONObject jsonObject = (JSONObject) JSON.parse(string);
                     JSONArray songs = jsonObject.getJSONArray("songs");
 
-                    //音乐名
-                    String musicName = ((JSONObject)songs.get(0)).getString("name");
-                    Log.i(TAG, "onResponse: musicName  " + musicName);
+                    try {
+                        //音乐名
+                        String musicName = ((JSONObject)songs.get(0)).getString("name");
+                        Log.i(TAG, "onResponse: musicName  " + musicName);
 
-                    //音乐专辑图片URL,在播放页面可以使用Glide直接加载
-                    JSONObject albumObj = ((JSONObject)songs.get(0)).getJSONObject("album");
-                    String musicPic = albumObj.getString("picUrl");
-                    Log.i(TAG, "onResponse: " + musicPic);
+                        //音乐专辑图片URL,在播放页面可以使用Glide直接加载
+                        JSONObject albumObj = ((JSONObject)songs.get(0)).getJSONObject("album");
+                        String musicPic = albumObj.getString("picUrl");
+                        Log.i(TAG, "onResponse: " + musicPic);
 
-                    JSONArray artistsObj = ((JSONObject)songs.get(0)).getJSONArray("artists");
-                    String musicPlayer = ((JSONObject)artistsObj.get(0)).getString("name");
-                    Log.i(TAG, "onResponse: " + musicPlayer);
+                        JSONArray artistsObj = ((JSONObject)songs.get(0)).getJSONArray("artists");
+                        String musicPlayer = ((JSONObject)artistsObj.get(0)).getString("name");
+                        Log.i(TAG, "onResponse: " + musicPlayer);
 
-                    //根据音乐名在数据库中查询，再将musicPic存储到数据库
-                    //在数据库中查询音乐名和音乐人对应的歌曲名
-                    addLrcPathAndMusicPicToDB(musicName, musicPlayer, musicPic, filePath,
-                            "netease");
+                        //根据音乐名在数据库中查询，再将musicPic存储到数据库
+                        //在数据库中查询音乐名和音乐人对应的歌曲名
+                        addLrcPathAndMusicPicToDB(musicName, musicPlayer, musicPic, filePath,
+                                "netease");
+                    }catch (Exception e){
+
+                    }
                 }
             });
         } catch (Exception e) {
