@@ -498,12 +498,12 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
                             myHandler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
+                                    //下一曲，根据播放模式变化
+                                    BaseActivity.mServiceDataTrans.playMusicFromClick(mViewPager.getCurrentItem());
                                     //修改背景图片
                                     initData();
                                     initUi(true);
                                     setPlayActivityBg();
-                                    //下一曲，根据播放模式变化
-                                    BaseActivity.mServiceDataTrans.playMusicFromClick(mViewPager.getCurrentItem());
                                 }
                             }, 150);
                         }
@@ -664,7 +664,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         MusicApplication.getFixedThreadPool().execute(runnable);
     }
 
-    private Handler myHandler;
+    private MyHandler myHandler;
 
     private Runnable runnable = new Runnable() {
         @Override
@@ -690,11 +690,11 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
                     false);
             initBitmap = FastBlurUtil.doBlur(initBitmap, blurRadius, false);
 
+            //为避免卡顿，延时2s
             Message message = myHandler.obtainMessage();
             message.what = 0;
             message.obj = initBitmap;
-            message.sendToTarget();
-
+            myHandler.sendMessageDelayed(message, 1000);
         }
     };
 

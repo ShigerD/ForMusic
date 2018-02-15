@@ -531,7 +531,8 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             mPlayMusicStartTime = System.currentTimeMillis();
             playMusic(mCurrentTime);
             //通知MainActivity更新播放暂停动画
-            mServiceDataToActivity.refreshPlayPauseAnimation(true);
+            //playMusic()方法中在最后显示歌词时会刷新动画状态，所以此处不再更新
+//            mServiceDataToActivity.refreshPlayPauseAnimation(true);
         }
     }
 

@@ -273,7 +273,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mMyHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                refreshPlayPauseView(true);
+                if (!mPlayPauseView.isPlaying()) {
+                    refreshPlayPauseView(true);
+                }
                 mTvMusicName.setText(musicBasicInfo.getMusicName());   // 显示音乐名
             }
         }, 400);
@@ -458,7 +460,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     public void playMusicOnBackstage(int position){
         //不使用广播，使用接口回调
         mServiceDataTrans.playMusicFromClick(position);
-        refreshPlayPauseView(true);
+//        refreshPlayPauseView(true);
     }
 
     private void findView() {
@@ -586,7 +588,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
             @Override
             public void play() {
-                refreshPlayPauseView(true);
+//                refreshPlayPauseView(true);
                 if (mServiceDataTrans == null){
                     return;
                 }
@@ -596,7 +598,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
             @Override
             public void pause() {
-                refreshPlayPauseView(false);
+//                refreshPlayPauseView(false);
                 if (mServiceDataTrans == null){
                     return;
                 }
