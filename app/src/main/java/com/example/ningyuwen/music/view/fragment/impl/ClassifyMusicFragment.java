@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -141,8 +142,12 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
                     //向Service传递数据
                     ((MainActivity)mContext).initServiceData();
                     ((MainActivity)mContext).playMusicOnBackstage(childPosition);
-                    mContext.sendBroadcast(new Intent().setAction(
+                    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+                    localBroadcastManager.sendBroadcast(new Intent().setAction(
                             StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST).putExtra("position",childPosition));
+
+//                    mContext.sendBroadcast(new Intent().setAction(
+//                            StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST).putExtra("position",childPosition));
 
 
 //                    ArrayList<Long> musicId = new ArrayList<>();

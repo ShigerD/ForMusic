@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -170,7 +171,10 @@ public class MyLoveMusicFragment extends Fragment implements IMyLoveMusicFragmen
             ((MainActivity)mContext).playMusicOnBackstage(position);
 //            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
             //刷新播放页面
-            mContext.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+            localBroadcastManager.sendBroadcast(new Intent().setAction(
+                    StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+//            mContext.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
         }
 
 

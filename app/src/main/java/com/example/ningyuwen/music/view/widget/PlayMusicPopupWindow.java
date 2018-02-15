@@ -13,6 +13,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.PagerAdapter;
@@ -76,6 +77,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
     private boolean isSliding = false;    //在滑动
     private MusicSongListDialogFragment mMusicSongListDialogFragment;  //歌单popup
     private PlayMusicDiscAdapter mAdapter;   //viewpager的adapter
+    private LocalBroadcastManager localBroadcastManager;    //本地广播，提升效率
 
     @SuppressLint("InflateParams")
     public PlayMusicPopupWindow(Context context) {
@@ -92,32 +94,22 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
         initPopupWindow();
     }
 
-    private void setBroadCastReceiver(){
-        BroadcastReceiver mReceiver = new ServiceReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST);
-        mContext.registerReceiver(mReceiver, intentFilter);
-    }
-
-    class ServiceReceiver extends BroadcastReceiver{
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST.equals(action)){
-                //更换了歌单
-                if (mAdapter != null){
-                    mViewPager.removeAllViews();
-                    setDiscData();
+    /**
+     * 之前是广播接收，但是广播接收器在PopupWindow注册，不便于解绑，所以改到了MainActivity中，并且使用本地广播，
+     * 只在应用内传播，提高效率
+     * @param clickPosition 点击位置
+     */
+    public void refreshMusicList(int clickPosition) {
+        if (mAdapter != null){
+            mViewPager.removeAllViews();
+            setDiscData();
 
 //                    List<String> picPathList = new ArrayList<>();
 //                    for (int i = 0;i < BaseActivity.mMusicDatas.size();i++){
 //                        picPathList.add(BaseActivity.mMusicDatas.get(i).getMusicAlbumPicPath());
 //                    }
 //                    mAdapter.setPicPathList(picPathList);
-                    mViewPager.setCurrentItem(intent.getIntExtra("position",0));
-                }
-            }
+            mViewPager.setCurrentItem(clickPosition);
         }
     }
 
@@ -129,7 +121,7 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
     }
 
     private void initPopupWindow() {
-        setBroadCastReceiver();
+//        setBroadCastReceiver();
         findViews();
         initView();
         setListener();
@@ -502,12 +494,18 @@ public class PlayMusicPopupWindow extends PopupWindow implements View.OnClickLis
 //                        isSlide[0] = true;
                         if (isSlide[0] && nowPosition[0] != mViewPager.getCurrentItem()){
                             isSlide[0] = false;
-                            //下一曲，根据播放模式变化
-                            BaseActivity.mServiceDataTrans.playMusicFromClick(mViewPager.getCurrentItem());
-                            //修改背景图片
-                            initData();
-                            initUi(true);
-                            setPlayActivityBg();
+                            //此处delay 150ms，避免主线程在短时间内处理太多事情，导致的卡顿
+                            myHandler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    //修改背景图片
+                                    initData();
+                                    initUi(true);
+                                    setPlayActivityBg();
+                                    //下一曲，根据播放模式变化
+                                    BaseActivity.mServiceDataTrans.playMusicFromClick(mViewPager.getCurrentItem());
+                                }
+                            }, 150);
                         }
                         break;
                     default:

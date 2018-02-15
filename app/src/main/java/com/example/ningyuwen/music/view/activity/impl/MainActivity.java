@@ -1,6 +1,7 @@
 package com.example.ningyuwen.music.view.activity.impl;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -24,6 +25,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -67,6 +69,7 @@ import com.example.ningyuwen.music.view.widget.PlayMusicPopupWindow;
 import com.example.ningyuwen.music.view.widget.SearchMusicPopWindow;
 import com.freedom.lauzy.playpauseviewlib.PlayPauseView;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +108,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private EditText mSearchEdt;
     private TextView mTextTitle;
     private static MusicProgressDialog mMusicProgressDialog;
+//    private LocalBroadcastManager localBroadcastManager;    //本地广播
+    private static MyHandler mMyHandler;    //Handler使用弱引用，避免内存泄露
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -114,7 +119,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         setContentView(R.layout.activity_main);
         setStatusBarTransparent();
 
-//        mMyHandler = new MyHandler(MainActivity.this);
+        mMyHandler = new MyHandler(MainActivity.this);
         //绑定控件和设置监听
         findView();
         setMainActivityBg();
@@ -157,7 +162,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             }else {
                 //fragment更新数据
 //                sendBroadCastForString("AllMusicRefresh");
-                Message message = handler.obtainMessage();
+                Message message = mMyHandler.obtainMessage();
                 message.what = StaticFinalUtil.HANDLER_REFRESH_MUSIC;
                 message.sendToTarget();
                 startPlayMusicService();
@@ -257,15 +262,30 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mIvBg.setImageBitmap(initBitmap);
     }
 
+    /**
+     * 显示歌词方法，在子线程中执行的
+     * @param pid
+     */
     @Override
     public void showLyricOnActivity(long pid) {
-        refreshPlayPauseView(true);
-        MusicBasicInfo musicBasicInfo = mPresenter.getMusicDataUsePid(pid);
-        mTvMusicName.setText(musicBasicInfo.getMusicName());   // 显示音乐名
+        final MusicBasicInfo musicBasicInfo = mPresenter.getMusicDataUsePid(pid);
         String lyric = mPresenter.getLyricFromDBUsePid(musicBasicInfo);   //获取歌词
+        mMyHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                refreshPlayPauseView(true);
+                mTvMusicName.setText(musicBasicInfo.getMusicName());   // 显示音乐名
+            }
+        }, 400);
+
         Log.i(TAG, "showLyricAtActivity: " + lyric);
         if ("".equals(lyric)){
-            mTvMusicLyric.setText("暂无歌词");
+            mMyHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mTvMusicLyric.setText("暂无歌词");
+                }
+            },  500);
             MusicApplication.getSingleThreadPool().shutdownNow();
             return;
         }
@@ -350,7 +370,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     public static class LyricRunnable implements Runnable{
         private static LyricRunnable mLyricRunnable;
 
-        static LyricRunnable getInstance(){
+        private static LyricRunnable getInstance(){
             if (mLyricRunnable == null){
                 mLyricRunnable = new LyricRunnable();
             }
@@ -360,7 +380,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         @Override
         public void run() {
             Log.i("ningtest", "run: ningtest");
-            Message msg = handler.obtainMessage();
+            Message msg = mMyHandler.obtainMessage();
             msg.arg1 = 0;
             msg.what = StaticFinalUtil.HANDLER_ACTIVITY_LYRIC;
             msg.sendToTarget();
@@ -373,7 +393,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                         if (nowTime > mTimeAndLyric.get(i).first && nowTime < mTimeAndLyric.get(i + 1).first) {
                             //发送msg更新歌词
 //                            handler.obtainMessage(StaticFinalUtil.HANDLER_ACTIVITY_LYRIC, i, 0);
-                            msg = handler.obtainMessage();
+                            msg = mMyHandler.obtainMessage();
                             msg.arg1 = i;
                             msg.what = StaticFinalUtil.HANDLER_ACTIVITY_LYRIC;
                             msg.sendToTarget();
@@ -392,12 +412,22 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     }
 
     /**
-     * handler
+     * Handler使用弱引用，避免内存泄露
      */
-    @SuppressLint("HandlerLeak")
-    static Handler handler = new Handler(){
+    private static class MyHandler extends Handler{
+
+        private WeakReference<MainActivity> mainActivityWeakReference;
+
+        public MyHandler(MainActivity mainActivity) {
+            mainActivityWeakReference = new WeakReference<MainActivity>(mainActivity);
+        }
+
         @Override
         public void handleMessage(Message message) {
+            super.handleMessage(message);
+            if (mainActivityWeakReference.get() == null){
+                return;
+            }
             switch (message.what){
                 case StaticFinalUtil.HANDLER_ACTIVITY_LYRIC:
                     //显示歌词
@@ -419,7 +449,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
             }
         }
-    };
+    }
 
     /**
      * 用户点击了音乐，需要在后台播放
@@ -515,7 +545,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             @Override
             public void onClick(View v) {
                 //关闭app
-                sendBroadcast(new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
+                LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
             }
         });
         findViewById(R.id.tv_close_app_time).setOnClickListener(new View.OnClickListener() {
@@ -693,7 +723,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                 playMusicOnBackstage(mMusicDatas.size() - 1);
 //                mServiceDataTrans.playMusicFromClick(mMusicDatas.size() - 1);
                 //发送广播刷新播放页面
-                sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent().setAction(
+                        StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+//                sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
             }
         }else {
             //切换歌单
@@ -711,7 +743,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 //            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
             playMusicOnBackstage(position);
             //刷新播放页面
-            sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+            localBroadcastManager.sendBroadcast(new Intent().setAction(
+                    StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+//            sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
         }
     }
 
@@ -764,7 +799,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
                             try {
                                 Thread.sleep(num[alert_finish] * 1000);
                                 //关闭app
-                                sendBroadcast(new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
+                                LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -826,7 +861,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
     @Override
     public void showMusicInfoAtActivity(int what) {
-        Message message = handler.obtainMessage();
+        Message message = mMyHandler.obtainMessage();
         message.what = what;
         message.sendToTarget();
     }
@@ -1050,7 +1085,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
      */
     @Override
     public void sendBroadCastForString(String string) {
-        sendBroadcast(new Intent(string));
+        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(new Intent(string));
     }
 
     /**
@@ -1112,7 +1147,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             unbindService(mServiceConnection);
             isBound = false;
         }
-        unregisterReceiver(mReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
         MusicApplication.getDiscSingleThreadPool().shutdownNow();
         MusicApplication.getFixedThreadPool().shutdownNow();
         MusicApplication.getSingleThreadPool().shutdownNow();
@@ -1126,7 +1161,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mReceiver = new GetReceiverFromOther();//----注册广播
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(StaticFinalUtil.RECEIVER_CLOSE_APP);
-        registerReceiver(mReceiver, intentFilter);
+        intentFilter.addAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, intentFilter);
     }
 
     /**
@@ -1139,6 +1175,11 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             if (StaticFinalUtil.RECEIVER_CLOSE_APP.equals(intent.getAction())){
                 //重新启动MainActivity,MainActivity设为SingleTask,然后关闭App
                 startActivity(new Intent(getApplicationContext(), MainActivity.class).setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
+            }else if (StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST.equals(intent.getAction())){
+                //更换了歌单,通知播放页面的PopupWindow更新
+                if (mPlayMusicPopupWindow != null) {
+                    mPlayMusicPopupWindow.refreshMusicList(intent.getIntExtra("position", 0));
+                }
             }
         }
     }

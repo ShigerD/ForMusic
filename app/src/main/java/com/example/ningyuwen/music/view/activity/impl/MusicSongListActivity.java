@@ -6,6 +6,7 @@ import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -117,7 +118,10 @@ public class MusicSongListActivity extends BaseActivity<MusicSongListPresenter> 
                 initServiceData();
                 BaseActivity.mServiceDataTrans.playMusicFromClick(0);
                 //刷新播放页面
-                sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+                LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(MusicSongListActivity.this);
+                localBroadcastManager.sendBroadcast(new Intent().setAction(
+                        StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+//                sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
             }
         });
     }
@@ -182,7 +186,9 @@ public class MusicSongListActivity extends BaseActivity<MusicSongListPresenter> 
             //播放
             BaseActivity.mServiceDataTrans.playMusicFromClick(BaseActivity.mMusicDatas.size() - 1);
             //发送广播刷新播放页面
-            sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+            localBroadcastManager.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+//            sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
         }
 //
 //        //修改BaseActivity中的mMusicDatas数据

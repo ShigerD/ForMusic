@@ -70,7 +70,7 @@ public class MusicApplication extends Application {
     }
 
     /**
-     * 获取线程池实例
+     * 获取线程池实例,三个线程
      * @return ExecutorService
      */
     public static ExecutorService getFixedThreadPool(){

@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -145,7 +146,9 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
 //            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
             ((MainActivity)mContext).playMusicOnBackstage(position);
             //刷新播放页面
-            mContext.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+            localBroadcastManager.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+//            mContext.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
         }
 
 
@@ -191,14 +194,14 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
                     mAllMusicDatas.get(position).getpId(), false);
             intent.putExtra("status", "delete");
             intent.putExtra("pid", mAllMusicDatas.get(position).getpId());
-            mContext.sendBroadcast(intent);
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
         }else {
             //之前不喜愛，在我喜愛的頁面添加
             ((MainActivity)mContext).setIsLoveToDB(
                     mAllMusicDatas.get(position).getpId(), true);
             intent.putExtra("status", "add");
             intent.putExtra("pid", mAllMusicDatas.get(position).getpId());
-            mContext.sendBroadcast(intent);
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
         }
     }
 

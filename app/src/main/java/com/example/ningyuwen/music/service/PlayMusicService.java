@@ -19,6 +19,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
@@ -339,6 +340,9 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 //            }
 //        });
 
+        if (mServiceDataToActivity == null){
+            return;
+        }
         MusicData musicData = mServiceDataToActivity.getPlayMusicData(mMusicIds.get(mPosition));
         if (musicData == null){
             return;
@@ -410,42 +414,47 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      * 播放音乐
      * @param currentTime 当前时间
      */
-    private void playMusic(int currentTime) {
-        if (mPlayMusicStartTime == 0){
-            mPlayMusicStartTime = System.currentTimeMillis();
-        }
+    private void playMusic(final int currentTime) {
+        MusicApplication.getFixedThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                if (mPlayMusicStartTime == 0){
+                    mPlayMusicStartTime = System.currentTimeMillis();
+                }
 
-        //存储记录，方便下一次进入的开始播放次序
-        long id = mMusicIds.get(mPosition);
-        getSharedPreferences("notes", MODE_PRIVATE).edit()
-                .putLong("lastTimePlayPid", id)
-                .putString("lastPlayMusicName", nowPlayMusicName)
-                .putString("lastPlayMusicAlbum", nowPlayMusicAlbum)
-                .putString("lastPlayMusicPicPath", nowPlayAlbumPic).apply();
+                //存储记录，方便下一次进入的开始播放次序
+                long id = mMusicIds.get(mPosition);
+                getSharedPreferences("notes", MODE_PRIVATE).edit()
+                        .putLong("lastTimePlayPid", id)
+                        .putString("lastPlayMusicName", nowPlayMusicName)
+                        .putString("lastPlayMusicAlbum", nowPlayMusicAlbum)
+                        .putString("lastPlayMusicPicPath", nowPlayAlbumPic).apply();
 
-        //这里是个问题，第一次进入app，获取不到mPosition，需要根据pid查询得到mPosition
-        if (pid != 0) {
-            mPosition = mServiceDataToActivity.getPositionFromDataOnPid(pid);
+                //这里是个问题，第一次进入app，获取不到mPosition，需要根据pid查询得到mPosition
+                if (pid != 0) {
+                    mPosition = mServiceDataToActivity.getPositionFromDataOnPid(pid);
 //            i = mPosition;
-            if (mPosition == -1){
-                mPosition = 0;
-            }
-            pid = 0;
-        }
-        try {
-            mMediaPlayer.reset();// 把各项参数恢复到初始状态
-            mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(mMusicIds.get(mPosition)));
-            mMediaPlayer.prepare(); // 进行缓冲
+                    if (mPosition == -1){
+                        mPosition = 0;
+                    }
+                    pid = 0;
+                }
+                try {
+                    mMediaPlayer.reset();// 把各项参数恢复到初始状态
+                    mMediaPlayer.setDataSource(mServiceDataToActivity.getMusicFilePath(mMusicIds.get(mPosition)));
+                    mMediaPlayer.prepare(); // 进行缓冲
 //                mMediaPlayer.setOnPreparedListener(new PreparedListener(currentTime));// 注册一个监听器
-            mMediaPlayer.start();
-            mMediaPlayer.seekTo(currentTime);
+                    mMediaPlayer.start();
+                    mMediaPlayer.seekTo(currentTime);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-        //在playMusic之后再读取歌词文件，因为所有播放音乐的最后一步都是在这里实现的，所以只用写一份代码
-        mServiceDataToActivity.showLyricAtActivity(mMusicIds.get(mPosition));
+                //在playMusic之后再读取歌词文件，因为所有播放音乐的最后一步都是在这里实现的，所以只用写一份代码
+                mServiceDataToActivity.showLyricAtActivity(mMusicIds.get(mPosition));
+            }
+        });
     }
 
     /**
@@ -468,7 +477,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      */
     @Override
     public void playMusicFromClick(int position) {
-        //点击切割
+        //点击切换歌曲
         calculateThisMusicIsAddCount(mPosition);    //mPosition为之前的一首音乐
         mPlayMusicStartTime = System.currentTimeMillis();
 
