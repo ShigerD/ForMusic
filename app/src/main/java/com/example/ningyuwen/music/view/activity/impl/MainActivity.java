@@ -83,13 +83,13 @@ import java.util.Objects;
 public class MainActivity extends BaseActivity<MainPresenter> implements
         View.OnClickListener , IMainActivity {
 
-//    public static List<MusicData> mMusicDatas;
+    //    public static List<MusicData> mMusicDatas;
     private DrawerLayout mDrawerMenu;
     private ViewPager mMainViewPager;
     private static ArrayList<Fragment> mFragments;
     private ImageView mIvBg;
     private TabLayout mTabLayout;
-//    public static final String NOTIFICATION_CHANNEL_ID = "4655";
+    //    public static final String NOTIFICATION_CHANNEL_ID = "4655";
     private List<Map<String, Object>> List = new ArrayList<>(); ;
     private int alert_finish = -1;
 
@@ -108,7 +108,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
     private EditText mSearchEdt;
     private TextView mTextTitle;
     private static MusicProgressDialog mMusicProgressDialog;
-//    private LocalBroadcastManager localBroadcastManager;    //本地广播
+    //    private LocalBroadcastManager localBroadcastManager;    //本地广播
     private static MyHandler mMyHandler;    //Handler使用弱引用，避免内存泄露
 
 

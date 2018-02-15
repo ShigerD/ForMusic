@@ -27,6 +27,8 @@
             android:layout_height="28dp"
             android:textSize="16sp"
             android:gravity="bottom"
+            android:singleLine="true"
+            android:ellipsize="marquee"
             android:textColor="@color/white"
             android:layout_toEndOf="@id/iv_back"/>
 
@@ -37,6 +39,8 @@
             android:textSize="14sp"
             android:textColor="#C1C1C1"
             android:gravity="top"
+            android:singleLine="true"
+            android:ellipsize="marquee"
             android:layout_below="@id/tv_music_name"
             android:layout_toEndOf="@id/iv_back"/>
 

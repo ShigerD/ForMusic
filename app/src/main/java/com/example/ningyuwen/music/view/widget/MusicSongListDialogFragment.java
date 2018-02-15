@@ -61,10 +61,7 @@ public class MusicSongListDialogFragment extends BottomSheetDialogFragment imple
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        Log.i("ning13", "onCreateView: " + 1);
-        View view = inflater.inflate(R.layout.layout_music_popup_window, container);
-//        BottomSheetBehavior.from(view).setPeekHeight(STATE_COLLAPSED);
-        return view;
+        return inflater.inflate(R.layout.layout_music_popup_window, container);
     }
 
     @Override
