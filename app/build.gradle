@@ -8,8 +8,8 @@ android {
         applicationId "com.example.ningyuwen.music"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 2
-        versionName "ForMusic-1.1"
+        versionCode 3
+        versionName "ForMusic-1.1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             // 设置支持的SO库架构
@@ -30,7 +30,7 @@ android {
 }
 
 greendao {
-    schemaVersion 1
+    schemaVersion 3
     daoPackage 'greendao.gen'
     targetGenDir 'src/main/java'
 }

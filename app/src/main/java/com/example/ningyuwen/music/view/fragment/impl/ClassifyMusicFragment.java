@@ -82,14 +82,16 @@ public class ClassifyMusicFragment extends Fragment implements IClassifyMusicFra
         };
 
         IntentFilter filter = new IntentFilter();
-        mContext.registerReceiver(receiver, filter);
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(receiver, filter);
+//        mContext.registerReceiver(receiver, filter);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         if (receiver != null) {
-            mContext.unregisterReceiver(receiver);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(receiver);
+//            mContext.unregisterReceiver(receiver);
         }
     }
 

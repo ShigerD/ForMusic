@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -96,14 +97,16 @@ public class CustomizeMusicFragment extends Fragment implements ICustomizeMusicF
         };
 
         IntentFilter filter = new IntentFilter();
-        mContext.registerReceiver(receiver, filter);
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(receiver, filter);
+//        mContext.registerReceiver(receiver, filter);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         if (receiver != null) {
-            mContext.unregisterReceiver(receiver);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(receiver);
+//            mContext.unregisterReceiver(receiver);
         }
     }
 

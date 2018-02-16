@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -370,7 +371,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         intentFilter.addAction(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_NEXT);
         intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         intentFilter.addAction("android.intent.action.HEADSET_PLUG");
-        registerReceiver(mReceiver, intentFilter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, intentFilter);
     }
 
     /**
@@ -418,10 +419,14 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         MusicApplication.getFixedThreadPool().execute(new Runnable() {
             @Override
             public void run() {
+                if (mMusicIds == null || mMusicIds.size() == 0){
+                    Log.i(TAG, "run: null");
+                    return;
+                }
+
                 if (mPlayMusicStartTime == 0){
                     mPlayMusicStartTime = System.currentTimeMillis();
                 }
-
                 //存储记录，方便下一次进入的开始播放次序
                 long id = mMusicIds.get(mPosition);
                 getSharedPreferences("notes", MODE_PRIVATE).edit()
@@ -626,7 +631,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
             mMediaPlayer.release();
-            unregisterReceiver(mReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
             mMediaPlayer = null;
         }
 //        mNotificationManager.cancel(1);

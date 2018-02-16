@@ -96,7 +96,8 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
         };
 
         IntentFilter filter = new IntentFilter();
-        mContext.registerReceiver(receiver, filter);
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(receiver, filter);
+//        mContext.registerReceiver(receiver, filter);
     }
 
     private void showMusicInfo() {
@@ -111,7 +112,8 @@ public class AllMusicFragment extends Fragment implements AllMusicInfoAdapter.Ad
     public void onDestroy() {
         super.onDestroy();
         if (receiver != null) {
-            mContext.unregisterReceiver(receiver);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(receiver);
+//            mContext.unregisterReceiver(receiver);
         }
     }
 
