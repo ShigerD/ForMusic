@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -26,8 +27,11 @@ import com.example.ningyuwen.music.model.entity.music.MusicData;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Random;
+
+import timber.log.Timber;
 
 /**
  * 后台服务，用于播放音乐
@@ -40,7 +44,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     private ArrayList<Long> mMusicIds;
     private BroadcastReceiver mReceiver;
     private int mCurrentTime;        //当前播放进度
-    private int mPosition;
+    private int mPosition;           //当前播放位置
     private MyBinder myBinder = new MyBinder();             //MyBinder获取PlayMusicService
     private IServiceDataToActivity mServiceDataToActivity;  //接口，负责将数据传给Activity
     private NotificationCompat.Builder mNotificationBuilder;     //builder,用于通知栏数据准备
@@ -53,12 +57,14 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     //记录一首音乐开始播放的时间，用于统计计数排序，当切换音乐时，用当前时间减去开始播放时间，如果时间大于音乐总长的2/3,则
     //计数加1。，下一次打开app时，在allmusicFragment按照播放次数排序
     private long mPlayMusicStartTime = 0;        //初始化为0
+    private MyHandler myHandler;        //Handler
 
     @Override
     public void onCreate() {
         super.onCreate();
         mMediaPlayer = new MediaPlayer();
         mMusicIds = new ArrayList<>();
+        myHandler = new MyHandler(PlayMusicService.this);
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
@@ -93,7 +99,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 }
             }
         });
-        handler.sendEmptyMessage(1);
+        myHandler.sendEmptyMessage(1);
 
         setBroadCastReceiver();
         //接听电话监听
@@ -374,20 +380,30 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, intentFilter);
     }
 
+
     /**
      * handler用来接收消息，来发送广播更新播放时间
      */
     @SuppressLint("HandlerLeak")
-    private Handler handler = new Handler() {
+    private class MyHandler extends Handler{
+        private WeakReference<PlayMusicService> serviceWeakReference;
+
+        public MyHandler(PlayMusicService service) {
+            super();
+            serviceWeakReference = new WeakReference<>(service);
+        }
 
         @Override
-        public void handleMessage(android.os.Message msg) {
+        public void handleMessage(Message msg) {
             super.handleMessage(msg);
+            if (serviceWeakReference.get() == null){
+                return;
+            }
             // 1 为每一秒发送过来更新播放时间等数据
             if (msg.what == 1) {
                 if(mMediaPlayer != null) {
                     mCurrentTime = mMediaPlayer.getCurrentPosition(); // 获取当前音乐播放的位置
-                    handler.sendEmptyMessageDelayed(1, 1000);
+                    myHandler.sendEmptyMessageDelayed(1, 1000);
                 }
 
             }else if (msg.what == StaticFinalUtil.HANDLER_SHOW_CUSTOM){
@@ -395,7 +411,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 showCustomView((boolean)msg.obj);
             }
         }
-    };
+    }
 
     /**
      * 将Service的数据传给Activity
@@ -408,7 +424,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         void refreshPlayPauseAnimation(boolean play);   //更新主页面的播放暂停动画
         void sendCompleteMsgToRefreshPop(int position);     //歌曲播放完成，向Activity发送通知，更新PopupWindow
         void calculateThisMusicIsAddCount(long playtime, long pid, int position);    //用于计数排序
-        void exitApp();
+        void exitApp();             //推出app
     }
 
     /**
@@ -420,7 +436,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             @Override
             public void run() {
                 if (mMusicIds == null || mMusicIds.size() == 0){
-                    Log.i(TAG, "run: null");
+                    Timber.i("run: null");
                     return;
                 }
 
