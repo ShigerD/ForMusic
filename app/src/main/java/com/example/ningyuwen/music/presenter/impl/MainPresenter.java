@@ -14,7 +14,6 @@ import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-import greendao.gen.MusicBasicInfoDao;
 import greendao.gen.SongListInfoDao;
 
 /**
@@ -159,9 +158,11 @@ public class MainPresenter extends BasePresenter<MainActivity>
         return super.getMusicBasicInfoFromDB();
     }
 
-    public List<MusicBasicInfo> searchMusic(String musicInfo){
-        List<MusicBasicInfo> basicInfo = mDaoSession.getMusicBasicInfoDao().queryBuilder().where(MusicBasicInfoDao.Properties.
-                MusicName.like("%"+musicInfo+"%")).list();
+    public List<MusicBasicInfo> searchMusic(){
+//        List<MusicBasicInfo> basicInfo = mDaoSession.getMusicBasicInfoDao().queryBuilder().where(MusicBasicInfoDao.Properties.
+//                MusicName.like("%"+musicInfo+"%")).list();
+        List<MusicBasicInfo> basicInfo = (List<MusicBasicInfo>) mDaoSession.getMusicBasicInfoDao().queryBuilder().list();
+        Log.e("Musicinfo", "searchMusic: "+basicInfo);
         if(basicInfo == null || basicInfo.size() == 0){
             return new ArrayList<>();
         }

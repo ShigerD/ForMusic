@@ -50,5 +50,9 @@
         <item name="android:layout_height">wrap_content</item>
         <!--<item name="android:thumb">@drawable/ic_seekbar_thumb</item>-->
     </style>
+    
+    <style name="AutoCompleteTvTheme">
+        <item name="android:background">@null</item>
+    </style>
 
 </resources>

@@ -44,7 +44,8 @@
                 android:gravity="center_vertical"
                 android:layout_toRightOf="@id/iv_bar_slide"
                 android:layout_centerVertical="true"
-                tools:ignore="RtlHardcoded" />
+                tools:ignore="RtlHardcoded"
+                android:visibility="gone"/>
 
 
             <ImageView
@@ -56,8 +57,8 @@
                 android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true" />
 
-            <EditText
-                android:id="@+id/search_edt"
+            <AutoCompleteTextView
+                android:id="@+id/search_auto"
                 android:layout_toEndOf="@id/iv_bar_slide"
                 android:layout_width="match_parent"
                 android:layout_marginStart="5dp"
@@ -65,6 +66,11 @@
                 android:layout_marginEnd="42dp"
                 android:visibility="gone"
                 android:singleLine="true"
+                android:background="@null"
+                android:completionThreshold="1"
+                android:dropDownSelector="@color/interacy_gra"
+                android:popupTheme="@style/AutoCompleteTvTheme"
+                android:textColor="@color/white_text"
                 />
 
         </RelativeLayout>

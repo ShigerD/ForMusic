@@ -1,7 +1,6 @@
 package com.example.ningyuwen.music.view.activity.impl;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -29,21 +28,18 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.EditText;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -66,7 +62,6 @@ import com.example.ningyuwen.music.view.fragment.impl.CustomizeMusicFragment;
 import com.example.ningyuwen.music.view.fragment.impl.MyLoveMusicFragment;
 import com.example.ningyuwen.music.view.widget.MusicProgressDialog;
 import com.example.ningyuwen.music.view.widget.PlayMusicPopupWindow;
-import com.example.ningyuwen.music.view.widget.SearchMusicPopWindow;
 import com.freedom.lauzy.playpauseviewlib.PlayPauseView;
 
 import java.lang.ref.WeakReference;
@@ -105,7 +100,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
     private ImageView mbtn_Search;
     private LinearLayout left;    //左边layout侧滑栏
-    private EditText mSearchEdt;
+    private AutoCompleteTextView mSearchMusic;//搜索音乐框
+    private List<MusicBasicInfo> mMusiclist;
     private TextView mTextTitle;
     private static MusicProgressDialog mMusicProgressDialog;
     //    private LocalBroadcastManager localBroadcastManager;    //本地广播
@@ -313,8 +309,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         long getPlayingMusicId();           //获取当前播放的音乐id，查询数据，便于显示
         int getPlayPosition();              //获取播放位置position
         boolean isPlayingMusic();           //获取音乐播放状态，播放或者暂停
-        void changePlayingTime(int time);   //计算好现在要开始播放的时间，并且将后台的正在播放的时间修改了
-        void cancelNotification();          //关闭状态栏
+        void changePlayingTime(int time);    //计算好现在要开始播放的时间，并且将后台的正在播放的时间修改了
+        void cancelNotification();      //关闭状态栏
     }
 
 //    /**
@@ -509,10 +505,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mIvBg = findViewById(R.id.iv_main_activity_bg);
         mTabLayout = findViewById(R.id.tab_layout);
         mPlayPauseView = findViewById(R.id.iv_music_pic);
-
+        mSearchMusic = findViewById(R.id.search_auto);
         mMainCardView = findViewById(R.id.cv_show_state_lyric);
         mbtn_Search = findViewById(R.id.iv_bar_search);
-        mSearchEdt = findViewById(R.id.search_edt);
         //mSearch.setBackground();设置背景色
         mTextTitle = findViewById(R.id.tv_bar_prompt);
 
@@ -534,7 +529,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             }
         });
     }
-    boolean isclick = false;//监听搜索框
+    boolean isclick = false;//监听搜索框false未打开
 
     private void setListener() {
         findViewById(R.id.iv_bar_slide).setOnClickListener(new View.OnClickListener() {
@@ -607,95 +602,44 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             }
         });
 
+        mSearchMusic.setDropDownBackgroundResource(R.color.interacy_gra);
+
         mbtn_Search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ;
+
                 Log.e(TAG, "onClick: "+isclick);
-                if(isclick){
-                    mSearchEdt.setVisibility(View.GONE);
-                    mbtn_Search.setVisibility(View.VISIBLE);
-                    mTextTitle.setVisibility(View.VISIBLE);
-                    mbtn_Search.setBackgroundResource(R.drawable.ic_searchp);
-                    isclick = false;
-                }else {
-                    mSearchEdt.setVisibility(View.VISIBLE);
-                    mSearchEdt.setFocusable(true);
-                    mSearchEdt.requestFocus();
-                    mSearchEdt.setFocusableInTouchMode(true);
+                InputMethodManager inputMethodManager = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                if(!isclick){
+//                    mTextTitle.setVisibility(View.VISIBLE);
+                    mSearchMusic.setVisibility(View.VISIBLE);
+                    mSearchMusic.requestFocus();
+                    //显示软件盘
+                    inputMethodManager.showSoftInput(mSearchMusic,0);
                     mbtn_Search.setBackgroundResource(R.drawable.ic_close_app);
-                    mTextTitle.setVisibility(View.GONE);
                     isclick = true;
-                }
-            }
-        });
-
-        @SuppressLint("InflateParams") View contentView = LayoutInflater.from(MainActivity.this).inflate(R.layout.layout_popsearch,null);
-        ListView mSearchList = contentView.findViewById(R.id.search_list);
-        final SearchMusicPopWindow musicResult = new SearchMusicPopWindow(MainActivity.this,contentView,
-                900,400,true);
-        musicResult.setFocusable(true);
-        musicResult.setTouchable(true);
-        musicResult.setBackgroundDrawable(new BitmapDrawable());
-        musicResult.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-        final java.util.List[] searchResult = new List[]{new ArrayList<>()};
-        final SearchResultAdapter adapter = new SearchResultAdapter(searchResult[0],MainActivity.this);
-        mSearchList.setAdapter(adapter);
-
-        mSearchEdt.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                Log.e(TAG, "beforeTextChanged: "+s);
-                mSearchEdt.requestFocus();
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Log.e(TAG, "onTextChanged: "+s);
-                searchResult[0] = new ArrayList<>();
-                searchResult[0] =mPresenter.searchMusic(String.valueOf(s));
-//                List<MusicBasicInfo> searchResult=mPresenter.searchMusic(String.valueOf(s));
-//                if(searchResult!=null&&searchResult.size()!=0){
-//                    View contentView = LayoutInflater.from(MainActivity.this).inflate(R.layout.layout_popsearch,null);
-//                    SearchMusicPopWindow musicResult = new SearchMusicPopWindow(MainActivity.this,contentView,
-//                    900,400,true);
-//                    SearchResultAdapter adapter = new SearchResultAdapter(searchResult);
-//                    mSearchList.setAdapter(adapter);
-//                    musicResult.showAsDropDown(mSearchEdt);
-//                }
-
-                //不为空串
-                if (!"".equals(s.toString())) {
-                    searchResult[0] = new ArrayList<>();
-                    searchResult[0] = mPresenter.searchMusic(String.valueOf(s));
                 }else {
-                    if (searchResult[0] != null){
-                        searchResult[0].clear();
-                    }
+                    mbtn_Search.setBackgroundResource(R.drawable.ic_searchp);
+                    mSearchMusic.setText("");
+                    mSearchMusic.setVisibility(View.GONE);
+//                    mTextTitle.setVisibility(View.GONE);
+                    //软件盘自动关闭
+                    inputMethodManager.hideSoftInputFromWindow(mSearchMusic.getWindowToken(),0);
+                    isclick = false;
                 }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                Log.e(TAG, "afterTextChanged: "+s);
-                Log.e(TAG, "searchResult: "+ searchResult[0]);
-                if(s!=null && !"".equals(s.toString())) {
-                    if (searchResult[0] != null && searchResult[0].size() != 0) {
-                        adapter.setListData(searchResult[0]);
-                        Log.e(TAG, "adapter " + adapter);
-                        musicResult.showAsDropDown(mSearchEdt);
-//                        mSearchList = contentView.findViewById(R.id.search_list);
-//                        mSearchList.setAdapter(adapter);
-                    }
-                }
-                mSearchEdt.requestFocus();
-
             }
         });
 
-
+        mMusiclist = mPresenter.searchMusic();
+        SearchResultAdapter adapter = new SearchResultAdapter(mMusiclist,this);
+        mSearchMusic.setAdapter(adapter);
+        mSearchMusic.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //这里可以直接让他播放歌曲
+            }
+        });
 
     }
 
