@@ -130,7 +130,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mMusicProgressDialog = new MusicProgressDialog(this);
         mMusicProgressDialog.show();
         MusicApplication.getFixedThreadPool().execute(runnable);
-
 //        sendNotification();
         setBroadCastReceiver();
     }

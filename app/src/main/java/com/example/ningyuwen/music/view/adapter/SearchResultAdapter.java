@@ -8,22 +8,22 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicBasicInfo;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/**
+/**搜索适配adapter
  * Created by money on 18-1-13.
  */
 
 public class SearchResultAdapter extends BaseAdapter implements Filterable{
     private List<MusicBasicInfo> mMusiclist;
-    private List<Object> mResultlist;
+    private List<MusicBasicInfo> mResultlist;
     private LayoutInflater inflater;
     private long ClickPid;
 
@@ -33,20 +33,8 @@ public class SearchResultAdapter extends BaseAdapter implements Filterable{
     }
     @Override
     public int getCount() {
-        return mMusiclist.size();
+        return mResultlist.size();
     }
-
-//    public void setListData(List<MusicBasicInfo> list){
-//        this.list = list;
-//        notifyDataSetChanged();
-//    }
-//
-//    public List<MusicBasicInfo> getListData(){
-//        if (list != null){
-//            return list;
-//        }
-//        return new ArrayList<>();
-//    }
 
     @Override
     public Object getItem(int position) {
@@ -67,10 +55,9 @@ public class SearchResultAdapter extends BaseAdapter implements Filterable{
     String TAG = "adapter";
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        Log.e(TAG, "list"+mMusiclist );
-        Log.e(TAG, "resultListIngetView"+mResultlist );
-        if(mMusiclist.size()!=0&&mMusiclist!=null) {
-            ViewHolder hoder = null;
+
+        if(mResultlist.size()!=0&&mResultlist!=null) {
+            ViewHolder hoder ;
             if (convertView == null) {
                 hoder = new ViewHolder();
 
@@ -83,8 +70,8 @@ public class SearchResultAdapter extends BaseAdapter implements Filterable{
                 hoder = (ViewHolder) convertView.getTag();
             }
 
-            hoder.searchMusicName.setText(mMusiclist.get(position).getMusicName());
-            hoder.searchMusicPlayer.setText(mMusiclist.get(position).getMusicPlayer());
+            hoder.searchMusicName.setText(mResultlist.get(position).getMusicName());
+            hoder.searchMusicPlayer.setText(mResultlist.get(position).getMusicPlayer());
 
             final ViewHolder finalHoder = hoder;
             convertView.setOnClickListener(new View.OnClickListener() {
@@ -109,15 +96,17 @@ public class SearchResultAdapter extends BaseAdapter implements Filterable{
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults results = new FilterResults();
-                List<MusicBasicInfo> resultlist = null;
+                List<MusicBasicInfo> resultlist = new ArrayList<MusicBasicInfo>();
                 if(mMusiclist!=null&& mMusiclist.size()!=0){
+                    String str = constraint.toString();
                     for(int i = 0;i<mMusiclist.size();i++){
-                        if(mMusiclist.get(i).getMusicPlayer().contains(constraint)||mMusiclist.get(i).getMusicName().contains(constraint)){
+                        if(mMusiclist.get(i).getMusicPlayer().contains(str)||
+                                mMusiclist.get(i).getMusicName().contains(str)){
+
                             resultlist.add(mMusiclist.get(i));
                         }
                     }
                     results.values = resultlist;
-                    Log.e(TAG, "resultListIn"+resultlist );
                     results.count = resultlist.size();
                 }
 
@@ -126,22 +115,20 @@ public class SearchResultAdapter extends BaseAdapter implements Filterable{
 //在ui线程总调用，以在用户界面发布过滤结果
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
-                Log.e(TAG, "resultList!!InFilterpre"+mResultlist );
-                Log.e(TAG, "resultsInFilter"+results );
-                if(results!=null &&results.count!=0) {
-                    mResultlist.add((MusicBasicInfo) results.values);
-                }
-                Log.e(TAG, "resultList!!InFilterend"+mResultlist );
-                notifyDataSetChanged();
+                if(results.values!=null &&results.count!=0) {
+                    mResultlist = (List<MusicBasicInfo>) results.values;
+                    notifyDataSetChanged();
+                }else notifyDataSetInvalidated();
+
+
             }
         };
         return filter;
     }
 
-    public final class ViewHolder{
-        public TextView searchMusicName;
-        public TextView searchMusicPlayer;
-        public RelativeLayout relativeLayout;
+    private final class ViewHolder{
+        private TextView searchMusicName;
+        private TextView searchMusicPlayer;
     }
 
 }

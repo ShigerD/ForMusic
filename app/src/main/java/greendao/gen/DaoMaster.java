@@ -21,16 +21,16 @@ public class DaoMaster extends AbstractDaoMaster {
 
     /** Creates underlying database table using DAOs. */
     public static void createAllTables(Database db, boolean ifNotExists) {
-        SongListInfoDao.createTable(db, ifNotExists);
-        MusicBasicInfoDao.createTable(db, ifNotExists);
         MusicRecordInfoDao.createTable(db, ifNotExists);
+        MusicBasicInfoDao.createTable(db, ifNotExists);
+        SongListInfoDao.createTable(db, ifNotExists);
     }
 
     /** Drops underlying database table using DAOs. */
     public static void dropAllTables(Database db, boolean ifExists) {
-        SongListInfoDao.dropTable(db, ifExists);
-        MusicBasicInfoDao.dropTable(db, ifExists);
         MusicRecordInfoDao.dropTable(db, ifExists);
+        MusicBasicInfoDao.dropTable(db, ifExists);
+        SongListInfoDao.dropTable(db, ifExists);
     }
 
     /**
@@ -49,9 +49,9 @@ public class DaoMaster extends AbstractDaoMaster {
 
     public DaoMaster(Database db) {
         super(db, SCHEMA_VERSION);
-        registerDaoClass(SongListInfoDao.class);
-        registerDaoClass(MusicBasicInfoDao.class);
         registerDaoClass(MusicRecordInfoDao.class);
+        registerDaoClass(MusicBasicInfoDao.class);
+        registerDaoClass(SongListInfoDao.class);
     }
 
     public DaoSession newSession() {
