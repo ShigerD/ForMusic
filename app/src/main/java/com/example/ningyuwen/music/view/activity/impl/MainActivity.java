@@ -512,21 +512,21 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
 
 
 
-        findViewById(R.id.iv_bar_search).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MusicApplication.getFixedThreadPool().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        //重新导入音乐数据，查看权限并扫描SD卡
-                        getReadPermissionAndGetInfoFromSD();
-                        //发广播，更新四个fragment里面的数据
-//                        sendBroadcast(new Intent("RefreshMusicData"));
-
-                    }
-                });
-            }
-        });
+//        findViewById(R.id.iv_bar_search).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                MusicApplication.getFixedThreadPool().execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        //重新导入音乐数据，查看权限并扫描SD卡
+//                        getReadPermissionAndGetInfoFromSD();
+//                        //发广播，更新四个fragment里面的数据
+////                        sendBroadcast(new Intent("RefreshMusicData"));
+//
+//                    }
+//                });
+//            }
+//        });
     }
     boolean isclick = false;//监听搜索框false未打开
 
@@ -601,7 +601,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
             }
         });
 
-        mSearchMusic.setDropDownBackgroundResource(R.color.interacy_gra);
+//        mSearchMusic.setDropDownBackgroundResource(R.color.interacy_gra);
 
         mbtn_Search.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -633,12 +633,42 @@ public class MainActivity extends BaseActivity<MainPresenter> implements
         mMusiclist = mPresenter.searchMusic();
         SearchResultAdapter adapter = new SearchResultAdapter(mMusiclist,this);
         mSearchMusic.setAdapter(adapter);
-        mSearchMusic.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //这里可以直接让他播放歌曲
-            }
-        });
+//        mSearchMusic.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                //这里可以直接让他播放歌曲
+//                //搜索到的音乐，播放时需要切换歌单
+//                if (BaseActivity.MUSIC_LIST_PLAY_NOW == StaticFinalUtil.MUSIC_LIST_PLAY_SEARCH_MUSIC){
+//                    //当前歌单是搜索的音乐，则不切换
+//                    showToast(mSearchMusic, "音乐名： "
+//                            + mMusiclist.get(position).getMusicName());
+//                    playMusicOnBackstage(position);
+//                }else {
+//                    //切换歌单
+//                    BaseActivity.MUSIC_LIST_PLAY_NOW = StaticFinalUtil.MUSIC_LIST_PLAY_MYLOVE;  //切换到我喜爱的歌单
+//                    if (mMyLoveMusicDatas.size() == 0){
+//                        return;
+//                    }
+//                    ((MainActivity)mContext).showToast(mRvMyLoveMusic, "开始播放歌单：《我喜爱的音乐》");
+//                    //修改BaseActivity中的mMusicDatas数据
+//                    if (BaseActivity.mMusicDatas == null){
+//                        BaseActivity.mMusicDatas = new ArrayList<>();
+//                    }
+//                    BaseActivity.mMusicDatas.clear();
+//                    //this.mMusicDatas已经是本歌单的数据了
+//                    BaseActivity.mMusicDatas.addAll(mMyLoveMusicDatas);
+//                    //向Service传递数据
+//                    ((MainActivity)mContext).initServiceData();
+//                    ((MainActivity)mContext).playMusicOnBackstage(position);
+////            BaseActivity.mServiceDataTrans.playMusicFromClick(position);
+//                    //刷新播放页面
+//                    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+//                    localBroadcastManager.sendBroadcast(new Intent().setAction(
+//                            StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+////            mContext.sendBroadcast(new Intent().setAction(StaticFinalUtil.SERVICE_RECEIVE_REFRESH_MUSICLIST));
+//                }
+//            }
+//        });
 
     }
 

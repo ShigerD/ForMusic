@@ -17,20 +17,22 @@ import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-/**搜索适配adapter
+/**
+ * 搜索适配adapter
  * Created by money on 18-1-13.
  */
 
-public class SearchResultAdapter extends BaseAdapter implements Filterable{
+public class SearchResultAdapter extends BaseAdapter implements Filterable {
     private List<MusicBasicInfo> mMusiclist;
     private List<MusicBasicInfo> mResultlist;
     private LayoutInflater inflater;
     private long ClickPid;
 
-    public SearchResultAdapter(List<MusicBasicInfo> list, Context context){
+    public SearchResultAdapter(List<MusicBasicInfo> list, Context context) {
         this.mMusiclist = list;
         this.inflater = LayoutInflater.from(context);
     }
+
     @Override
     public int getCount() {
         return mResultlist.size();
@@ -45,19 +47,22 @@ public class SearchResultAdapter extends BaseAdapter implements Filterable{
     public long getItemId(int position) {
         return 0;
     }
-/*
-获取被点击音乐的pid;
- */
+
+    /**
+     * 获取被点击音乐的pid
+     * @return long
+     */
     public long getClickPid() {
         return ClickPid;
     }
 
     String TAG = "adapter";
+
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
 
-        if(mResultlist.size()!=0&&mResultlist!=null) {
-            ViewHolder hoder ;
+        if (mResultlist.size() != 0 && mResultlist != null) {
+            ViewHolder hoder;
             if (convertView == null) {
                 hoder = new ViewHolder();
 
@@ -81,7 +86,7 @@ public class SearchResultAdapter extends BaseAdapter implements Filterable{
 //                    ((MainActivity)v.getContext()).showToast(finalHoder.searchMusicName, String.valueOf(position));
 
                     //点击其中一首音乐
-                    ((MainActivity)v.getContext()).changeMusicListFromSearch(position, mMusiclist);
+                    ((MainActivity) v.getContext()).changeMusicListFromSearch(position, mResultlist);
 
                 }
             });
@@ -97,11 +102,11 @@ public class SearchResultAdapter extends BaseAdapter implements Filterable{
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults results = new FilterResults();
                 List<MusicBasicInfo> resultlist = new ArrayList<MusicBasicInfo>();
-                if(mMusiclist!=null&& mMusiclist.size()!=0){
+                if (mMusiclist != null && mMusiclist.size() != 0) {
                     String str = constraint.toString();
-                    for(int i = 0;i<mMusiclist.size();i++){
-                        if(mMusiclist.get(i).getMusicPlayer().contains(str)||
-                                mMusiclist.get(i).getMusicName().contains(str)){
+                    for (int i = 0; i < mMusiclist.size(); i++) {
+                        if (mMusiclist.get(i).getMusicPlayer().contains(str) ||
+                                mMusiclist.get(i).getMusicName().contains(str)) {
 
                             resultlist.add(mMusiclist.get(i));
                         }
@@ -112,13 +117,14 @@ public class SearchResultAdapter extends BaseAdapter implements Filterable{
 
                 return results;
             }
-//在ui线程总调用，以在用户界面发布过滤结果
+
+            //在ui线程总调用，以在用户界面发布过滤结果
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
-                if(results.values!=null &&results.count!=0) {
+                if (results.values != null && results.count != 0) {
                     mResultlist = (List<MusicBasicInfo>) results.values;
                     notifyDataSetChanged();
-                }else notifyDataSetInvalidated();
+                } else notifyDataSetInvalidated();
 
 
             }
@@ -126,7 +132,7 @@ public class SearchResultAdapter extends BaseAdapter implements Filterable{
         return filter;
     }
 
-    private final class ViewHolder{
+    private final class ViewHolder {
         private TextView searchMusicName;
         private TextView searchMusicPlayer;
     }

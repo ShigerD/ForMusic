@@ -47,7 +47,6 @@
                 tools:ignore="RtlHardcoded"
                 android:visibility="gone"/>
 
-
             <ImageView
                 android:id="@+id/iv_bar_search"
                 android:layout_width="24dp"
@@ -69,9 +68,7 @@
                 android:background="@null"
                 android:completionThreshold="1"
                 android:dropDownSelector="@color/interacy_gra"
-                android:popupTheme="@style/AutoCompleteTvTheme"
-                android:textColor="@color/white_text"
-                />
+                android:textColor="@color/white_text" />
 
         </RelativeLayout>
 

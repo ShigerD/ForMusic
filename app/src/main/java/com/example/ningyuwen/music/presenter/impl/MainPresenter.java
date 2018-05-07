@@ -161,7 +161,7 @@ public class MainPresenter extends BasePresenter<MainActivity>
     public List<MusicBasicInfo> searchMusic(){
 //        List<MusicBasicInfo> basicInfo = mDaoSession.getMusicBasicInfoDao().queryBuilder().where(MusicBasicInfoDao.Properties.
 //                MusicName.like("%"+musicInfo+"%")).list();
-        List<MusicBasicInfo> basicInfo = (List<MusicBasicInfo>) mDaoSession.getMusicBasicInfoDao().queryBuilder().list();
+        List<MusicBasicInfo> basicInfo = mDaoSession.getMusicBasicInfoDao().queryBuilder().list();
         Log.e("Musicinfo", "searchMusic: "+basicInfo);
         if(basicInfo == null || basicInfo.size() == 0){
             return new ArrayList<>();
