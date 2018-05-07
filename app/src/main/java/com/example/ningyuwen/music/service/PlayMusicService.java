@@ -1,6 +1,7 @@
 package com.example.ningyuwen.music.service;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -12,10 +13,12 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -24,6 +27,7 @@ import android.widget.RemoteViews;
 import com.example.ningyuwen.music.MusicApplication;
 import com.example.ningyuwen.music.R;
 import com.example.ningyuwen.music.model.entity.music.MusicData;
+import com.example.ningyuwen.music.util.NotificationUtils;
 import com.example.ningyuwen.music.util.StaticFinalUtil;
 import com.example.ningyuwen.music.view.activity.impl.MainActivity;
 
@@ -47,13 +51,11 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     private int mPosition;           //当前播放位置
     private MyBinder myBinder = new MyBinder();             //MyBinder获取PlayMusicService
     private IServiceDataToActivity mServiceDataToActivity;  //接口，负责将数据传给Activity
-    private NotificationCompat.Builder mNotificationBuilder;     //builder,用于通知栏数据准备
-    private NotificationManager mNotificationManager;               //管理通知
     private String nowPlayMusicName;    //当前播放的音乐名
     private String nowPlayMusicAlbum;           //当前播放的专辑名
     private String nowPlayAlbumPic;             //专辑图片
     private long pid = 0;                           //此pid用于临时记录，第一次进入app时，数据未完全加载，但是有上一次播放结束时的pid
-                                                //本次进入暂时 mPosition=0,当开始播放时，判断pid是否不为0,不为0,则说明需要找到真正的mPosition
+    //本次进入暂时 mPosition=0,当开始播放时，判断pid是否不为0,不为0,则说明需要找到真正的mPosition
     //记录一首音乐开始播放的时间，用于统计计数排序，当切换音乐时，用当前时间减去开始播放时间，如果时间大于音乐总长的2/3,则
     //计数加1。，下一次打开app时，在allmusicFragment按照播放次数排序
     private long mPlayMusicStartTime = 0;        //初始化为0
@@ -94,7 +96,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                     //这一首音乐播放完成，开始播放下一曲，刷新MainActivity或者PlayActivity
                     //这里用来刷新PopupWindow的信息,改为time为0,则发送消息过去
                     mServiceDataToActivity.sendCompleteMsgToRefreshPop(mPosition);
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -106,10 +108,10 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 
         pid = getSharedPreferences("notes", MODE_PRIVATE).getLong("lastTimePlayPid", 0);
 
-        nowPlayMusicName = getSharedPreferences("notes", MODE_PRIVATE).getString("lastPlayMusicName","");
-        nowPlayMusicAlbum = getSharedPreferences("notes", MODE_PRIVATE).getString("lastPlayMusicAlbum","");
-        nowPlayAlbumPic = getSharedPreferences("notes", MODE_PRIVATE).getString("lastPlayMusicPicPath","");
-        StaticFinalUtil.SERVICE_PLAY_TYPE_NOW = getSharedPreferences("notes",MODE_PRIVATE).getInt("playType", StaticFinalUtil.SERVICE_PLAY_TYPE_LIST);
+        nowPlayMusicName = getSharedPreferences("notes", MODE_PRIVATE).getString("lastPlayMusicName", "");
+        nowPlayMusicAlbum = getSharedPreferences("notes", MODE_PRIVATE).getString("lastPlayMusicAlbum", "");
+        nowPlayAlbumPic = getSharedPreferences("notes", MODE_PRIVATE).getString("lastPlayMusicPicPath", "");
+        StaticFinalUtil.SERVICE_PLAY_TYPE_NOW = getSharedPreferences("notes", MODE_PRIVATE).getInt("playType", StaticFinalUtil.SERVICE_PLAY_TYPE_LIST);
 
         showCustomView(false);
     }
@@ -117,20 +119,25 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     /**
      * 在切歌时判断此音乐是否需要计数加1
      * 用现在的时间减去开始时间，播放总时间是否大于音乐总长度的 2/3来判定
+     *
      * @param position 刚刚播放的那首音乐
      */
-    private void calculateThisMusicIsAddCount(int position){
+    private void calculateThisMusicIsAddCount(int position) {
         try {
             mServiceDataToActivity.calculateThisMusicIsAddCount((System.currentTimeMillis() - mPlayMusicStartTime),
                     mMusicIds.get(position), position);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * 发送到通知栏的remoteView
+     *
+     * @param isPlay 播放或者暂停的状态
+     */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void showCustomView(boolean isPlay) {
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
         RemoteViews remoteViews = new RemoteViews(getPackageName(),
                 R.layout.layout_music_notification);
 
@@ -139,15 +146,15 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             if (!"".equals(nowPlayAlbumPic)) {
                 remoteViews.setImageViewUri(R.id.iv_music_pic, Uri.parse(nowPlayAlbumPic));   //专辑图
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             remoteViews.setImageViewResource(R.id.iv_music_pic, R.mipmap.ic_play_album);   //专辑图
         }
         remoteViews.setTextViewText(R.id.album_name, nowPlayMusicAlbum);    //专辑名
-        if (isPlay){
+        if (isPlay) {
             //播放
             remoteViews.setImageViewResource(R.id.ic_notification_play_music, R.mipmap.ic_notification_play_music);
-        }else {
+        } else {
             //暂停
             remoteViews.setImageViewResource(R.id.ic_notification_play_music, R.mipmap.ic_notification_pause_music);
         }
@@ -172,26 +179,21 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         Intent mainIntent = new Intent(this, MainActivity.class);
         PendingIntent mainPendingIntent = PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        mNotificationBuilder = new NotificationCompat.Builder(this);
-        mNotificationBuilder.setContent(remoteViews).setSmallIcon(R.mipmap.ic_launcher)
-                .setOngoing(true)
-                .setTicker("music is playing")
-                .setContentIntent(mainPendingIntent);
-
-        assert mNotificationManager != null;
-        mNotificationManager.notify(1, mNotificationBuilder.build());
+        //显示notification
+        NotificationUtils.getInstance(this).sendNotification(remoteViews, mainPendingIntent);
     }
 
     /**
      * 监控在声音焦点监听器
+     *
      * @param focusChange 表示音频获取焦点的状态
      */
     @Override
     public void onAudioFocusChange(int focusChange) {
-        Log.e("moneychange", "onAudioFocusChange: "+focusChange  );
-        switch (focusChange){
+        Log.e("moneychange", "onAudioFocusChange: " + focusChange);
+        switch (focusChange) {
             case AudioManager.AUDIOFOCUS_GAIN://已经获得了音频焦点
-                Log.e("moneychange1", "onAudioFocusChange: "+focusChange  );
+                Log.e("moneychange1", "onAudioFocusChange: " + focusChange);
                 if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
                     showCustomView(true);
                     mPlayMusicStartTime = System.currentTimeMillis();
@@ -201,10 +203,10 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS://已经失去音频焦点很长时间
-                Log.e("moneychange2", "onAudioFocusChange: "+focusChange  );
+                Log.e("moneychange2", "onAudioFocusChange: " + focusChange);
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT://暂时失去，很快会重新获得，可保持资源，可能很快会重新获得(电话拨打和接听)
-                Log.e("moneychange3", "onAudioFocusChange: "+focusChange  );
+                Log.e("moneychange3", "onAudioFocusChange: " + focusChange);
                 if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
                     mMediaPlayer.pause();
                     showCustomView(false);
@@ -213,7 +215,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK://暂时失去，但是可以小声播放（短信）
-                Log.e("moneychange4", "onAudioFocusChange: "+focusChange  );
+                Log.e("moneychange4", "onAudioFocusChange: " + focusChange);
                 mMediaPlayer.setVolume(0.1f, 0.1f);
                 break;
 
@@ -231,6 +233,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 = "com.example.notification.ServiceReceiver.play";//----通知栏播放按钮
         public static final String NOTIFICATION_ITEM_BUTTON_NEXT
                 = "com.example.notification.ServiceReceiver.next";//----通知栏下一首按钮
+
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -262,7 +265,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                     break;
                 case NOTIFICATION_ITEM_BUTTON_CLOSE:
                     //关闭进程
-                    mNotificationManager.cancel(1);
+                    NotificationUtils.getInstance(PlayMusicService.this).deleteNotification();
                     stopSelf();
                     mServiceDataToActivity.exitApp();
 //                sendBroadcast(new Intent().setAction(StaticFinalUtil.RECEIVER_CLOSE_APP));
@@ -270,12 +273,12 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                     break;
             }
             //监听电话拨打和接听
-            Log.e("moneyReceiver", "onReceive: "+action );
-            if(action.equals(Intent.ACTION_NEW_OUTGOING_CALL)||action.equals(Service.TELEPHONY_SERVICE)){
+            Log.e("moneyReceiver", "onReceive: " + action);
+            if (action.equals(Intent.ACTION_NEW_OUTGOING_CALL) || action.equals(Service.TELEPHONY_SERVICE)) {
                 playOrPause();
             }
             //监听拔掉耳机
-            if(action.equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)){
+            if (action.equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
                 if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
                     mMediaPlayer.pause();
                     showCustomView(false);
@@ -284,10 +287,10 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 }
             }
             //接收耳机插拔广播
-            if ("android.intent.action.HEADSET_PLUG".equals(action)){
+            if ("android.intent.action.HEADSET_PLUG".equals(action)) {
                 //
-                if (intent.hasExtra("state")){
-                    if (intent.getIntExtra("state", 0) == 0){
+                if (intent.hasExtra("state")) {
+                    if (intent.getIntExtra("state", 0) == 0) {
 //                        Toast.makeText(context, "headset not connected", Toast.LENGTH_SHORT).show();
                         try {
                             if (mMediaPlayer != null) {
@@ -299,11 +302,10 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                                     mServiceDataToActivity.refreshPlayPauseAnimation(false);
                                 }
                             }
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    }
-                    else if (intent.getIntExtra("state", 0) == 1){
+                    } else if (intent.getIntExtra("state", 0) == 1) {
 //                        Toast.makeText(context, "headset connected", Toast.LENGTH_SHORT).show();
                         try {
                             if (mMediaPlayer != null) {
@@ -316,7 +318,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                                     mServiceDataToActivity.refreshPlayPauseAnimation(true);
                                 }
                             }
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
@@ -328,7 +330,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     /**
      * 更新通知栏，用于在用户点击音乐列表之后的播放 和 点击通知栏的播放
      */
-    private void refreshNotification(){
+    private void refreshNotification() {
 //        MusicApplication.getFixedThreadPool().execute(new Runnable() {
 //            @Override
 //            public void run() {
@@ -347,11 +349,11 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 //            }
 //        });
 
-        if (mServiceDataToActivity == null){
+        if (mServiceDataToActivity == null) {
             return;
         }
         MusicData musicData = mServiceDataToActivity.getPlayMusicData(mMusicIds.get(mPosition));
-        if (musicData == null){
+        if (musicData == null) {
             return;
         }
         nowPlayMusicName = musicData.getMusicName();
@@ -377,7 +379,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         intentFilter.addAction(ServiceReceiver.NOTIFICATION_ITEM_BUTTON_NEXT);
         intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         intentFilter.addAction("android.intent.action.HEADSET_PLUG");
-        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, intentFilter);
+        registerReceiver(mReceiver, intentFilter);
     }
 
 
@@ -385,7 +387,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      * handler用来接收消息，来发送广播更新播放时间
      */
     @SuppressLint("HandlerLeak")
-    private class MyHandler extends Handler{
+    private class MyHandler extends Handler {
         private WeakReference<PlayMusicService> serviceWeakReference;
 
         public MyHandler(PlayMusicService service) {
@@ -396,19 +398,19 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if (serviceWeakReference.get() == null){
+            if (serviceWeakReference.get() == null) {
                 return;
             }
             // 1 为每一秒发送过来更新播放时间等数据
             if (msg.what == 1) {
-                if(mMediaPlayer != null) {
+                if (mMediaPlayer != null) {
                     mCurrentTime = mMediaPlayer.getCurrentPosition(); // 获取当前音乐播放的位置
                     myHandler.sendEmptyMessageDelayed(1, 1000);
                 }
 
-            }else if (msg.what == StaticFinalUtil.HANDLER_SHOW_CUSTOM){
+            } else if (msg.what == StaticFinalUtil.HANDLER_SHOW_CUSTOM) {
                 //显示通知栏
-                showCustomView((boolean)msg.obj);
+                showCustomView((boolean) msg.obj);
             }
         }
     }
@@ -418,29 +420,37 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      */
     public interface IServiceDataToActivity {
         String getMusicFilePath(long pid);   //获取音乐文件路径
+
         void showLyricAtActivity(long pid);  //展示歌词,通过pid查询到文件路径，再解析歌词文件
+
         MusicData getPlayMusicData(long pid);   //获取MusicData,展示通知栏时需要获取专辑图片,音乐名和专辑名
+
         int getPositionFromDataOnPid(long pid);  //根据pid查询歌曲在歌单中的位置，第一次进入app时需要用pid查询到mPosition
+
         void refreshPlayPauseAnimation(boolean play);   //更新主页面的播放暂停动画
+
         void sendCompleteMsgToRefreshPop(int position);     //歌曲播放完成，向Activity发送通知，更新PopupWindow
+
         void calculateThisMusicIsAddCount(long playtime, long pid, int position);    //用于计数排序
+
         void exitApp();             //推出app
     }
 
     /**
      * 播放音乐
+     *
      * @param currentTime 当前时间
      */
     private void playMusic(final int currentTime) {
         MusicApplication.getFixedThreadPool().execute(new Runnable() {
             @Override
             public void run() {
-                if (mMusicIds == null || mMusicIds.size() == 0){
+                if (mMusicIds == null || mMusicIds.size() == 0) {
                     Timber.i("run: null");
                     return;
                 }
 
-                if (mPlayMusicStartTime == 0){
+                if (mPlayMusicStartTime == 0) {
                     mPlayMusicStartTime = System.currentTimeMillis();
                 }
                 //存储记录，方便下一次进入的开始播放次序
@@ -455,7 +465,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
                 if (pid != 0) {
                     mPosition = mServiceDataToActivity.getPositionFromDataOnPid(pid);
 //            i = mPosition;
-                    if (mPosition == -1){
+                    if (mPosition == -1) {
                         mPosition = 0;
                     }
                     pid = 0;
@@ -494,6 +504,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
      * 用户点击播放，传入position
      * 2018.01.13记录，因为音乐播放计数需求，还好所有音乐在播放之前都会调用此方法，
      * 所以在这个方法中判断是否切歌
+     *
      * @param position i
      */
     @Override
@@ -502,10 +513,10 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         calculateThisMusicIsAddCount(mPosition);    //mPosition为之前的一首音乐
         mPlayMusicStartTime = System.currentTimeMillis();
 
-        if (position < 0){
-            position = mMusicIds.size()-1;
+        if (position < 0) {
+            position = mMusicIds.size() - 1;
         }
-        if (position == mMusicIds.size()){
+        if (position == mMusicIds.size()) {
             position = 0;
         }
         mPosition = position;
@@ -517,9 +528,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     }
 
     /**
-     *
      * 实现一个OnPrepareLister接口,当音乐准备好的时候开始播放
-     *
      */
     private final class PreparedListener implements MediaPlayer.OnPreparedListener {
         private int currentTime;
@@ -547,7 +556,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
             showCustomView(false);
             //通知MainActivity更新播放暂停动画
             mServiceDataToActivity.refreshPlayPauseAnimation(false);
-        }else {
+        } else {
             showCustomView(true);
             mPlayMusicStartTime = System.currentTimeMillis();
             playMusic(mCurrentTime);
@@ -559,8 +568,9 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 
     /**
      * 修改后台播放列表，传入musicId,当前播放顺序
+     *
      * @param musicInfoList musicInfoList 存储musicId
-     * @param position 播放第几个
+     * @param position      播放第几个
      */
     @Override
     public void replaceBackStageMusicList(ArrayList<Long> musicInfoList, int position) {
@@ -568,7 +578,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 //        calculateThisMusicIsAddCount(mPosition);
         mPlayMusicStartTime = System.currentTimeMillis();
 
-        if (mMusicIds == null){
+        if (mMusicIds == null) {
             mMusicIds = new ArrayList<>();
         }
         mMusicIds.clear();
@@ -580,6 +590,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 
     /**
      * 获取播放进度，返回毫秒
+     *
      * @return int
      */
     @Override
@@ -589,6 +600,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 
     /**
      * 获取当前播放的音乐id，查询数据，便于显示
+     *
      * @return pid
      */
     @Override
@@ -598,6 +610,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 
     /**
      * 获取播放位置position
+     *
      * @return position
      */
     @Override
@@ -612,6 +625,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 
     /**
      * 计算好现在要开始播放的时间，并且将后台的正在播放的时间修改了
+     *
      * @param time time 在PopupWindow里进行计算
      */
     @Override
@@ -623,14 +637,13 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
 
     @Override
     public void cancelNotification() {
-        if (mNotificationManager != null) {
-            mNotificationManager.cancel(1);
-        }
+        NotificationUtils.getInstance(PlayMusicService.this).deleteNotification();
     }
 
     /**
      * 返回MyBinder对象，在MainActivity中使用bindService之后监听连接成功可以获取IBinder对象，转为MyBinder类型，
      * 再获取PlayMusicService实例，赋值给 ServiceDataTrans
+     *
      * @param intent intent
      * @return 返回MyBinder对象
      */
@@ -647,7 +660,7 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
             mMediaPlayer.release();
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
+            unregisterReceiver(mReceiver);
             mMediaPlayer = null;
         }
 //        mNotificationManager.cancel(1);
@@ -660,20 +673,22 @@ public class PlayMusicService extends Service implements MainActivity.IServiceDa
     // Binder类已实现了IBinder接口
     public class MyBinder extends Binder {
 
-        /** * 获取Service的方法 * @return 返回PlayerService */
-        public PlayMusicService getService(){
+        /**
+         * 获取Service的方法 * @return 返回PlayerService
+         */
+        public PlayMusicService getService() {
             return PlayMusicService.this;
         }
 
         /**
          * 传递Activity的context,绑定监听对象
+         *
          * @param serviceDataToActivity serviceDataToActivity
          */
-        public void setIServiceDataToActivity(IServiceDataToActivity serviceDataToActivity){
+        public void setIServiceDataToActivity(IServiceDataToActivity serviceDataToActivity) {
             mServiceDataToActivity = serviceDataToActivity;
         }
     }
-
 
 
 }

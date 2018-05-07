@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'org.greenrobot.greendao'     //GreenDao
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.example.ningyuwen.music"
@@ -26,6 +26,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -69,7 +73,7 @@ dependencies {
     //播放、暂停
     compile 'com.github.Lauzy:PlayPauseView:1.0.4'
     //剪切
-//    compile 'com.theartofdev.edmodo:android-image-cropper:2.6.0'
+    //    compile 'com.theartofdev.edmodo:android-image-cropper:2.6.0'
     //极光
     compile 'cn.jiguang.sdk:janalytics:1.1.1'
     // 此处以JAnalytics 1.1.1 版本为例。
